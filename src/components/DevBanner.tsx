@@ -10,6 +10,9 @@ const links = [
 ];
 
 export function DevBanner() {
+  // 本番では表示しない
+  if (process.env.NODE_ENV === "production") return null;
+
   const pathname = usePathname();
 
   return (

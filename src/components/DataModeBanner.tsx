@@ -1,6 +1,9 @@
 import type { DataSource } from "@/lib/types";
 
 export function DataModeBanner({ source }: { source: DataSource }) {
+  // 本番では表示しない
+  if (process.env.NODE_ENV === "production") return null;
+
   if (source === "dmm") {
     return (
       <div className="data-mode-banner data-mode-live">

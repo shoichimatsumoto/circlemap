@@ -54,17 +54,6 @@ export async function getWork(id: string): Promise<{
   relatedWorks: Work[];
   source: DataSource;
 }> {
-  const mockWork = DEMO_WORKS.find((w) => w.id === id);
-  if (mockWork) {
-    return {
-      work: mockWork,
-      relatedWorks: DEMO_WORKS.filter(
-        (w) => w.circleId === mockWork.circleId && w.id !== mockWork.id
-      ).slice(0, 3),
-      source: "mock",
-    };
-  }
-
   if (hasDmmCredentials()) {
     try {
       const json = await fetchItemByContentId(id);
@@ -78,6 +67,17 @@ export async function getWork(id: string): Promise<{
     } catch (error) {
       console.error("[CircleMap] DMM work fetch failed:", error);
     }
+  }
+
+  const mockWork = DEMO_WORKS.find((w) => w.id === id);
+  if (mockWork) {
+    return {
+      work: mockWork,
+      relatedWorks: DEMO_WORKS.filter(
+        (w) => w.circleId === mockWork.circleId && w.id !== mockWork.id
+      ).slice(0, 3),
+      source: "mock",
+    };
   }
 
   return { work: null, relatedWorks: [], source: "mock" };
@@ -102,19 +102,22 @@ export async function getCirclePage(circleId = "demo"): Promise<{
 
   if (hasDmmCredentials()) {
     try {
-      const [voice, manga, cg, game] = await Promise.all([
+      const results = await Promise.allSettled([
+        fetchDoujinMangaItems(40, 1),
         fetchDoujinVoiceItems(20, 1),
-        fetchDoujinMangaItems(20, 1),
         fetchDoujinCgItems(20, 1),
         fetchDoujinGameItems(10, 1),
       ]);
 
-      const allWorks = sortByDateDesc([
-        ...parseResponse(voice),
-        ...parseResponse(manga),
-        ...parseResponse(cg),
-        ...parseResponse(game),
-      ]);
+      const allWorks = sortByDateDesc(
+        results.flatMap((result) =>
+          result.status === "fulfilled" ? parseResponse(result.value) : []
+        )
+      );
+
+      if (allWorks.length === 0) {
+        throw new Error("No works from DMM API");
+      }
 
       const grouped = new Map<string, Work[]>();
       for (const work of allWorks) {
@@ -125,12 +128,13 @@ export async function getCirclePage(circleId = "demo"): Promise<{
 
       const targetWorks =
         grouped.get(circleId) ??
-        grouped.values().next().value ??
+        [...grouped.entries()].sort((a, b) => b[1].length - a[1].length)[0]?.[1] ??
         [];
 
+      const resolvedCircleId = targetWorks[0]?.circleId ?? circleId;
       const circle =
-        buildCircleFromWorks(circleId, targetWorks) ??
-        buildCircleFromWorks(targetWorks[0]?.circleId ?? "demo", targetWorks);
+        buildCircleFromWorks(resolvedCircleId, targetWorks) ??
+        buildCircleFromWorks("demo", targetWorks);
 
       if (circle && targetWorks.length > 0) {
         return {

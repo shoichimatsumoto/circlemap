@@ -5,7 +5,6 @@ type NavKey = "home" | "circle" | "work";
 const links: { href: string; label: string; key: NavKey }[] = [
   { href: "/", label: "Home", key: "home" },
   { href: "/circle", label: "サークル", key: "circle" },
-  { href: "/work/voice-001", label: "作品例", key: "work" },
 ];
 
 export function SiteHeader({ active }: { active?: NavKey }) {

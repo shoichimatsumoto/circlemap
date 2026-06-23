@@ -3,12 +3,20 @@ import { PageShell } from "@/components/PageShell";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { WorkCard } from "@/components/WorkCard";
 import { getLatestWorks } from "@/lib/data";
+import { buildCircleFromWorks } from "@/lib/dmm-transform";
 import { DEMO_CIRCLE } from "@/lib/mock-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const { works: latestWorks, source } = await getLatestWorks(8);
+  const featuredCircle =
+    source === "dmm" && latestWorks.length > 0
+      ? buildCircleFromWorks(
+          latestWorks[0].circleId,
+          latestWorks.filter((w) => w.circleId === latestWorks[0].circleId)
+        ) ?? DEMO_CIRCLE
+      : DEMO_CIRCLE;
 
   return (
     <PageShell active="home">
@@ -35,7 +43,7 @@ export default async function HomePage() {
                 href={`/work/${latestWorks[0]?.id ?? "voice-001"}`}
                 className="btn btn-secondary btn-lg"
               >
-                作品詳細を見る
+                最新作品を見る
               </Link>
             </div>
           </div>
@@ -91,16 +99,27 @@ export default async function HomePage() {
 
         <section className="home-section">
           <div className="section-head">
-            <h2>サークル例</h2>
+            <h2>注目サークル</h2>
           </div>
           <div className="circle-list">
-            <Link href="/circle" className="circle-list-item">
-              <div className="circle-avatar sm">{DEMO_CIRCLE.initial}</div>
+            <Link
+              href={`/circle?id=${featuredCircle.id}`}
+              className="circle-list-item"
+            >
+              <div className="circle-avatar sm">{featuredCircle.initial}</div>
               <div>
-                <strong>{DEMO_CIRCLE.name}</strong>
-                <p>デモ用サークルページ</p>
+                <strong>{featuredCircle.name}</strong>
+                <p>
+                  {source === "dmm"
+                    ? "作品を横断して一覧"
+                    : "デモ用サークルページ"}
+                </p>
               </div>
-              <span className="pill">サンプル</span>
+              {source === "dmm" ? (
+                <span className="pill">サークル</span>
+              ) : (
+                <span className="pill">サンプル</span>
+              )}
             </Link>
           </div>
         </section>
