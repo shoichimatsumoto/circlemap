@@ -1,4 +1,5 @@
 import type { DmmSearchParams } from "@/lib/dmm-types";
+import type { MediaType } from "@/lib/types";
 
 const BASE = "https://api.dmm.com/affiliate/v3";
 
@@ -45,7 +46,9 @@ export async function searchDmmItems(params: DmmSearchParams) {
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`DMM API error: ${res.status} ${res.statusText} - ${body.slice(0, 200)}`);
+    throw new Error(
+      `DMM API error: ${res.status} ${res.statusText} - ${body.slice(0, 200)}`
+    );
   }
 
   return res.json();
@@ -59,24 +62,23 @@ export async function fetchItemByContentId(cid: string) {
   });
 }
 
-export async function fetchDoujinVoiceItems(hits = 20, offset = 1) {
-  // 同人音声（FloorList準拠: service=doujin, floor=voice）
-  return searchDmmItems({
-    site: "FANZA",
-    service: "doujin",
-    floor: "voice",
-    hits,
-    offset,
-    sort: "date",
-  });
-}
-
 export async function fetchDoujinMangaItems(hits = 20, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
     service: "doujin",
     floor: "digital_doujin",
-    hits,
+    hits: Math.min(hits * 4, 100),
+    offset,
+    sort: "date",
+  });
+}
+
+export async function fetchDoujinVoiceItems(hits = 20, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    hits: Math.min(hits * 6, 100),
     offset,
     sort: "date",
   });
@@ -86,8 +88,8 @@ export async function fetchDoujinCgItems(hits = 20, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
     service: "doujin",
-    floor: "digital_cg",
-    hits,
+    floor: "digital_doujin",
+    hits: Math.min(hits * 6, 100),
     offset,
     sort: "date",
   });
@@ -96,7 +98,7 @@ export async function fetchDoujinCgItems(hits = 20, offset = 1) {
 export async function fetchDoujinGameItems(hits = 20, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
-    service: "doujin",
+    service: "pcgame",
     floor: "digital_pcgame",
     hits,
     offset,
@@ -104,12 +106,60 @@ export async function fetchDoujinGameItems(hits = 20, offset = 1) {
   });
 }
 
-export async function searchByKeyword(keyword: string, hits = 20) {
+export async function fetchItemsByMaker(makerId: string, hits = 12) {
   return searchDmmItems({
     site: "FANZA",
     service: "doujin",
-    keyword,
+    floor: "digital_doujin",
+    article: "maker",
+    article_id: makerId,
     hits,
-    sort: "rank",
+    sort: "date",
   });
 }
+
+export async function searchByKeyword(keyword: string, hits = 24) {
+  const [doujin, games] = await Promise.allSettled([
+    searchDmmItems({
+      site: "FANZA",
+      service: "doujin",
+      floor: "digital_doujin",
+      keyword,
+      hits,
+      sort: "rank",
+    }),
+    searchDmmItems({
+      site: "FANZA",
+      service: "pcgame",
+      floor: "digital_pcgame",
+      keyword,
+      hits: Math.min(hits, 12),
+      sort: "rank",
+    }),
+  ]);
+
+  const items = [
+    ...(doujin.status === "fulfilled" ? doujin.value?.result?.items ?? [] : []),
+    ...(games.status === "fulfilled" ? games.value?.result?.items ?? [] : []),
+  ];
+
+  return {
+    result: {
+      status: 200,
+      result_count: items.length,
+      total_count: items.length,
+      first_position: 1,
+      items,
+    },
+  };
+}
+
+export const MEDIA_FETCHERS: Record<
+  MediaType,
+  (hits: number, offset: number) => ReturnType<typeof searchDmmItems>
+> = {
+  manga: fetchDoujinMangaItems,
+  voice: fetchDoujinVoiceItems,
+  cg: fetchDoujinCgItems,
+  game: fetchDoujinGameItems,
+};

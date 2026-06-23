@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { SearchForm } from "@/components/SearchForm";
 
-type NavKey = "home" | "circle" | "work";
+type NavKey = "home" | "circle" | "work" | "search";
 
 const links: { href: string; label: string; key: NavKey }[] = [
   { href: "/", label: "Home", key: "home" },
@@ -12,6 +13,9 @@ export function SiteHeader({ active }: { active?: NavKey }) {
     <header className="site-header">
       <div className="container header-inner">
         <Link href="/" className="logo">
+          <span className="logo-mark" aria-hidden>
+            ◎
+          </span>
           CircleMap
         </Link>
         <nav className="nav-main">
@@ -25,9 +29,7 @@ export function SiteHeader({ active }: { active?: NavKey }) {
             </Link>
           ))}
         </nav>
-        <div className="search-box">
-          <input type="search" placeholder="サークル・作品を検索" />
-        </div>
+        <SearchForm />
       </div>
     </header>
   );

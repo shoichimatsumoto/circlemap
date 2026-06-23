@@ -6,7 +6,7 @@ export function PageShell({
   active,
 }: {
   children: React.ReactNode;
-  active?: "home" | "circle" | "work";
+  active?: "home" | "circle" | "work" | "search";
 }) {
   return (
     <>

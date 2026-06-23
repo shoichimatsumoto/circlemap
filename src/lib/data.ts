@@ -4,19 +4,24 @@ import {
   fetchDoujinMangaItems,
   fetchDoujinVoiceItems,
   fetchItemByContentId,
+  fetchItemsByMaker,
   hasDmmCredentials,
+  MEDIA_FETCHERS,
+  searchByKeyword,
 } from "@/lib/dmm";
 import type { DmmItemListResponse } from "@/lib/dmm-types";
 import {
   buildCircleFromWorks,
+  dedupeWorks,
   dmmItemsToWorks,
+  filterWorksByMedia,
 } from "@/lib/dmm-transform";
 import {
   DEMO_CIRCLE,
   DEMO_WORKS,
   FEATURED_WORK,
 } from "@/lib/mock-data";
-import type { Circle, DataSource, Work } from "@/lib/types";
+import type { Circle, DataSource, MediaType, Work } from "@/lib/types";
 
 function parseResponse(json: unknown): Work[] {
   const data = json as DmmItemListResponse;
@@ -34,9 +39,10 @@ export async function getLatestWorks(limit = 8): Promise<{
 }> {
   if (hasDmmCredentials()) {
     try {
-      // まず同人（漫画）フロアで取得。他フロアは順次追加。
       const manga = await fetchDoujinMangaItems(Math.max(limit * 3, 24), 1);
-      const works = sortByDateDesc(parseResponse(manga)).slice(0, limit);
+      const works = sortByDateDesc(
+        filterWorksByMedia(parseResponse(manga), "manga")
+      ).slice(0, limit);
 
       if (works.length > 0) {
         return { works, source: "dmm" };
@@ -47,6 +53,66 @@ export async function getLatestWorks(limit = 8): Promise<{
   }
 
   return { works: DEMO_WORKS.slice(0, limit), source: "mock" };
+}
+
+export async function getWorksByMedia(
+  mediaType: MediaType,
+  limit = 24
+): Promise<{ works: Work[]; source: DataSource }> {
+  if (hasDmmCredentials()) {
+    try {
+      const json = await MEDIA_FETCHERS[mediaType](limit, 1);
+      const works = sortByDateDesc(
+        filterWorksByMedia(parseResponse(json), mediaType)
+      ).slice(0, limit);
+
+      if (works.length > 0) {
+        return { works, source: "dmm" };
+      }
+    } catch (error) {
+      console.error(`[CircleMap] DMM ${mediaType} fetch failed:`, error);
+    }
+  }
+
+  const mock = DEMO_WORKS.filter((w) => w.mediaType === mediaType).slice(
+    0,
+    limit
+  );
+  return { works: mock.length > 0 ? mock : DEMO_WORKS.slice(0, limit), source: "mock" };
+}
+
+export async function searchWorks(
+  keyword: string,
+  limit = 24
+): Promise<{ works: Work[]; source: DataSource }> {
+  const trimmed = keyword.trim();
+  if (!trimmed) {
+    return { works: [], source: "mock" };
+  }
+
+  if (hasDmmCredentials()) {
+    try {
+      const json = await searchByKeyword(trimmed, limit);
+      const works = dedupeWorks(sortByDateDesc(parseResponse(json))).slice(
+        0,
+        limit
+      );
+
+      if (works.length > 0) {
+        return { works, source: "dmm" };
+      }
+    } catch (error) {
+      console.error("[CircleMap] DMM search failed:", error);
+    }
+  }
+
+  const lower = trimmed.toLowerCase();
+  const mock = DEMO_WORKS.filter(
+    (w) =>
+      w.title.toLowerCase().includes(lower) ||
+      w.circleName.toLowerCase().includes(lower)
+  );
+  return { works: mock, source: "mock" };
 }
 
 export async function getWork(id: string): Promise<{
@@ -61,8 +127,39 @@ export async function getWork(id: string): Promise<{
       const work = works[0] ?? null;
 
       if (work) {
-        const related = works.slice(1, 4);
-        return { work, relatedWorks: related, source: "dmm" };
+        let related: Work[] = [];
+
+        if (/^\d+$/.test(work.circleId)) {
+          try {
+            const [makerItems, gameItems] = await Promise.allSettled([
+              fetchItemsByMaker(work.circleId, 12),
+              fetchDoujinGameItems(12, 1),
+            ]);
+
+            const makerWorks =
+              makerItems.status === "fulfilled"
+                ? parseResponse(makerItems.value)
+                : [];
+            const gameWorks =
+              gameItems.status === "fulfilled"
+                ? parseResponse(gameItems.value).filter(
+                    (w) => w.circleId === work.circleId
+                  )
+                : [];
+
+            related = dedupeWorks(
+              sortByDateDesc([...makerWorks, ...gameWorks])
+            ).filter((w) => w.id !== work.id);
+          } catch {
+            related = [];
+          }
+        }
+
+        return {
+          work,
+          relatedWorks: related.slice(0, 6),
+          source: "dmm",
+        };
       }
     } catch (error) {
       console.error("[CircleMap] DMM work fetch failed:", error);
@@ -102,16 +199,50 @@ export async function getCirclePage(circleId = "demo"): Promise<{
 
   if (hasDmmCredentials()) {
     try {
+      if (/^\d+$/.test(circleId)) {
+        const [makerItems, gameItems] = await Promise.allSettled([
+          fetchItemsByMaker(circleId, 40),
+          fetchDoujinGameItems(40, 1),
+        ]);
+
+        const allWorks = dedupeWorks(
+          sortByDateDesc([
+            ...(makerItems.status === "fulfilled"
+              ? parseResponse(makerItems.value)
+              : []),
+            ...(gameItems.status === "fulfilled"
+              ? parseResponse(gameItems.value).filter(
+                  (w) => w.circleId === circleId
+                )
+              : []),
+          ])
+        );
+
+        if (allWorks.length > 0) {
+          const circle = buildCircleFromWorks(circleId, allWorks);
+          if (circle) {
+            return {
+              circle,
+              works: allWorks,
+              featured: allWorks[0],
+              source: "dmm",
+            };
+          }
+        }
+      }
+
       const results = await Promise.allSettled([
         fetchDoujinMangaItems(40, 1),
-        fetchDoujinVoiceItems(20, 1),
-        fetchDoujinCgItems(20, 1),
-        fetchDoujinGameItems(10, 1),
+        fetchDoujinVoiceItems(40, 1),
+        fetchDoujinCgItems(40, 1),
+        fetchDoujinGameItems(20, 1),
       ]);
 
-      const allWorks = sortByDateDesc(
-        results.flatMap((result) =>
-          result.status === "fulfilled" ? parseResponse(result.value) : []
+      const allWorks = dedupeWorks(
+        sortByDateDesc(
+          results.flatMap((result) =>
+            result.status === "fulfilled" ? parseResponse(result.value) : []
+          )
         )
       );
 
