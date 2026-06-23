@@ -76,46 +76,66 @@ export async function getPopularWorks(limit = 12): Promise<{
   return { works: DEMO_WORKS.slice(0, limit), source: "mock" };
 }
 
-export async function getPopularCircles(limit = 8): Promise<{
+function collectCirclesFromWorks(works: Work[], limit: number): Circle[] {
+  const grouped = new Map<string, Work[]>();
+  for (const work of works) {
+    const list = grouped.get(work.circleId) ?? [];
+    list.push(work);
+    grouped.set(work.circleId, list);
+  }
+
+  return [...grouped.entries()]
+    .sort((a, b) => {
+      if (b[1].length !== a[1].length) {
+        return b[1].length - a[1].length;
+      }
+      return b[1][0].date.localeCompare(a[1][0].date);
+    })
+    .slice(0, limit)
+    .map(([id, circleWorks]) => buildCircleFromWorks(id, circleWorks))
+    .filter((circle): circle is Circle => circle !== null);
+}
+
+async function fetchWorksForCircleDiscovery(): Promise<Work[]> {
+  const results = await Promise.allSettled([
+    fetchPopularDoujinItems(100, 1),
+    fetchPopularDoujinItems(100, 101),
+    fetchDoujinMangaItems(100, 1),
+    fetchDoujinMangaItems(100, 101),
+  ]);
+
+  return dedupeWorks(
+    results.flatMap((result) =>
+      result.status === "fulfilled" ? parseResponse(result.value) : []
+    )
+  );
+}
+
+export async function getDiscoverableCircles(limit = 50): Promise<{
   circles: Circle[];
   source: DataSource;
 }> {
   if (hasDmmCredentials()) {
     try {
-      const json = await fetchPopularDoujinItems(80, 1);
-      const works = parseResponse(json);
-
-      if (works.length === 0) {
-        throw new Error("No popular works");
-      }
-
-      const grouped = new Map<string, Work[]>();
-      for (const work of works) {
-        const list = grouped.get(work.circleId) ?? [];
-        list.push(work);
-        grouped.set(work.circleId, list);
-      }
-
-      const circles = [...grouped.entries()]
-        .sort((a, b) => {
-          if (b[1].length !== a[1].length) {
-            return b[1].length - a[1].length;
-          }
-          return b[1][0].date.localeCompare(a[1][0].date);
-        })
-        .slice(0, limit)
-        .map(([id, circleWorks]) => buildCircleFromWorks(id, circleWorks))
-        .filter((circle): circle is Circle => circle !== null);
+      const works = await fetchWorksForCircleDiscovery();
+      const circles = collectCirclesFromWorks(works, limit);
 
       if (circles.length > 0) {
         return { circles, source: "dmm" };
       }
     } catch (error) {
-      console.error("[CircleMap] DMM popular circles failed:", error);
+      console.error("[CircleMap] DMM discover circles failed:", error);
     }
   }
 
   return { circles: [DEMO_CIRCLE], source: "mock" };
+}
+
+export async function getPopularCircles(limit = 8): Promise<{
+  circles: Circle[];
+  source: DataSource;
+}> {
+  return getDiscoverableCircles(limit);
 }
 
 export async function getWorksByMedia(

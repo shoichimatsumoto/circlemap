@@ -20,7 +20,7 @@ export default async function HomePage() {
   ] = await Promise.all([
     getPopularWorks(12),
     getLatestWorks(12),
-    getPopularCircles(8),
+    getPopularCircles(12),
   ]);
 
   const source =

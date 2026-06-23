@@ -2,12 +2,12 @@ import Link from "next/link";
 import { CircleCard } from "@/components/CircleCard";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { PageShell } from "@/components/PageShell";
-import { getPopularCircles } from "@/lib/data";
+import { getDiscoverableCircles } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function CirclesPage() {
-  const { circles, source } = await getPopularCircles(20);
+  const { circles, source } = await getDiscoverableCircles(60);
 
   return (
     <PageShell active="circles">
