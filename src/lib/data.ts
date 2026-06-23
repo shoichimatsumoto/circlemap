@@ -5,6 +5,7 @@ import {
   fetchDoujinVoiceItems,
   fetchItemByContentId,
   fetchItemsByMaker,
+  fetchPopularDoujinItems,
   hasDmmCredentials,
   MEDIA_FETCHERS,
   searchByKeyword,
@@ -53,6 +54,68 @@ export async function getLatestWorks(limit = 8): Promise<{
   }
 
   return { works: DEMO_WORKS.slice(0, limit), source: "mock" };
+}
+
+export async function getPopularWorks(limit = 12): Promise<{
+  works: Work[];
+  source: DataSource;
+}> {
+  if (hasDmmCredentials()) {
+    try {
+      const json = await fetchPopularDoujinItems(Math.max(limit * 2, 24), 1);
+      const works = dedupeWorks(parseResponse(json)).slice(0, limit);
+
+      if (works.length > 0) {
+        return { works, source: "dmm" };
+      }
+    } catch (error) {
+      console.error("[CircleMap] DMM popular fetch failed:", error);
+    }
+  }
+
+  return { works: DEMO_WORKS.slice(0, limit), source: "mock" };
+}
+
+export async function getPopularCircles(limit = 8): Promise<{
+  circles: Circle[];
+  source: DataSource;
+}> {
+  if (hasDmmCredentials()) {
+    try {
+      const json = await fetchPopularDoujinItems(80, 1);
+      const works = parseResponse(json);
+
+      if (works.length === 0) {
+        throw new Error("No popular works");
+      }
+
+      const grouped = new Map<string, Work[]>();
+      for (const work of works) {
+        const list = grouped.get(work.circleId) ?? [];
+        list.push(work);
+        grouped.set(work.circleId, list);
+      }
+
+      const circles = [...grouped.entries()]
+        .sort((a, b) => {
+          if (b[1].length !== a[1].length) {
+            return b[1].length - a[1].length;
+          }
+          return b[1][0].date.localeCompare(a[1][0].date);
+        })
+        .slice(0, limit)
+        .map(([id, circleWorks]) => buildCircleFromWorks(id, circleWorks))
+        .filter((circle): circle is Circle => circle !== null);
+
+      if (circles.length > 0) {
+        return { circles, source: "dmm" };
+      }
+    } catch (error) {
+      console.error("[CircleMap] DMM popular circles failed:", error);
+    }
+  }
+
+  return { circles: [DEMO_CIRCLE], source: "mock" };
 }
 
 export async function getWorksByMedia(

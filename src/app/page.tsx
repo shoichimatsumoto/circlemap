@@ -1,140 +1,76 @@
 import Link from "next/link";
-import { PageShell } from "@/components/PageShell";
+import { CategoryChips } from "@/components/CategoryChips";
+import { CircleCard } from "@/components/CircleCard";
 import { DataModeBanner } from "@/components/DataModeBanner";
+import { PageShell } from "@/components/PageShell";
 import { WorkCard } from "@/components/WorkCard";
-import { getLatestWorks } from "@/lib/data";
-import { buildCircleFromWorks } from "@/lib/dmm-transform";
-import { DEMO_CIRCLE } from "@/lib/mock-data";
-import { MEDIA_LABELS, MEDIA_NAMES, type MediaType } from "@/lib/types";
+import {
+  getLatestWorks,
+  getPopularCircles,
+  getPopularWorks,
+} from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
-const mediaEntries: {
-  type: MediaType;
-  label: string;
-  desc: string;
-}[] = [
-  { type: "manga", label: "漫画", desc: "同人漫画" },
-  { type: "cg", label: "CG集", desc: "イラスト・CG" },
-  { type: "voice", label: "音声", desc: "ボイス作品" },
-  { type: "game", label: "ゲーム", desc: "同人ゲーム" },
-];
-
 export default async function HomePage() {
-  const { works: latestWorks, source } = await getLatestWorks(8);
-  const featuredCircle =
-    source === "dmm" && latestWorks.length > 0
-      ? buildCircleFromWorks(
-          latestWorks[0].circleId,
-          latestWorks.filter((w) => w.circleId === latestWorks[0].circleId)
-        ) ?? DEMO_CIRCLE
-      : DEMO_CIRCLE;
+  const [
+    { works: popularWorks, source: popularSource },
+    { works: latestWorks, source: latestSource },
+    { circles: popularCircles, source: circleSource },
+  ] = await Promise.all([
+    getPopularWorks(12),
+    getLatestWorks(12),
+    getPopularCircles(8),
+  ]);
+
+  const source =
+    popularSource === "dmm" || latestSource === "dmm" || circleSource === "dmm"
+      ? "dmm"
+      : "mock";
 
   return (
     <PageShell active="home">
       <DataModeBanner source={source} />
-      <section className="home-hero">
-        <div className="container home-hero-inner">
-          <div className="home-hero-text">
-            <p className="eyebrow">FANZA同人 × サークル軸</p>
-            <h1>
-              推しサークルの作品を、
-              <br />
-              全媒体まとめて探す。
-            </h1>
-            <p className="home-hero-desc">
-              漫画・CG・音声・ゲームをサークルページで横断。
-              コレクターが「次に何を買うか」がすぐわかるサイトです。
-            </p>
-            <div className="home-hero-actions">
-              <Link href="/circle" className="btn btn-primary btn-lg">
-                サークルを探す
-              </Link>
-              <Link
-                href={`/work/${latestWorks[0]?.id ?? "voice-001"}`}
-                className="btn btn-secondary btn-lg"
-              >
-                最新作品を見る
-              </Link>
-            </div>
-          </div>
-          <div className="home-hero-visual">
-            <div className="hero-preview-grid">
-              {latestWorks.slice(0, 3).map((work, index) => (
-                <Link
-                  key={work.id}
-                  href={`/work/${work.id}`}
-                  className={`hero-preview-card hero-preview-${index + 1}`}
-                >
-                  {work.thumbnailUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={work.thumbnailUrl} alt="" />
-                  ) : (
-                    <div className={`hero-preview-fallback ${work.mediaType}`}>
-                      {MEDIA_LABELS[work.mediaType]}
-                    </div>
-                  )}
-                  <span className="hero-preview-badge">
-                    {MEDIA_NAMES[work.mediaType]}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className="feed-wrap">
+        <CategoryChips activeHref="/" />
 
-      <div className="container">
-        <section className="home-section">
-          <h2>媒体から探す</h2>
-          <div className="media-entry-grid">
-            {mediaEntries.map((item) => (
-              <Link
-                key={item.type}
-                href={`/media/${item.type}`}
-                className={`media-entry media-entry-${item.type}`}
-              >
-                <span className="media-entry-icon">
-                  {MEDIA_LABELS[item.type]}
-                </span>
-                <strong>{item.label}</strong>
-                <small>{item.desc}</small>
-              </Link>
+        <section className="feed-section">
+          <div className="feed-section-head">
+            <h2>人気作品</h2>
+            <span className="feed-section-sub">FANZA人気順</span>
+          </div>
+          <div className="yt-grid">
+            {popularWorks.map((work) => (
+              <WorkCard key={`popular-${work.id}`} work={work} />
             ))}
           </div>
         </section>
 
-        <section className="home-section">
-          <div className="section-head">
+        <section className="feed-section">
+          <div className="feed-section-head">
+            <h2>人気サークル</h2>
+            <Link href="/circles" className="link-more">
+              ランキングを見る →
+            </Link>
+          </div>
+          <div className="yt-channel-grid">
+            {popularCircles.map((circle, index) => (
+              <CircleCard key={circle.id} circle={circle} rank={index + 1} />
+            ))}
+          </div>
+        </section>
+
+        <section className="feed-section">
+          <div className="feed-section-head">
             <h2>新着作品</h2>
-            <span className="section-sub">同人漫画 · 発売日の新しい順</span>
             <Link href="/media/manga" className="link-more">
               もっと見る →
             </Link>
           </div>
-          <div className="works-grid">
+          <div className="yt-grid">
             {latestWorks.map((work) => (
-              <WorkCard key={work.id} work={work} />
+              <WorkCard key={`latest-${work.id}`} work={work} />
             ))}
-          </div>
-        </section>
-
-        <section className="home-section">
-          <div className="section-head">
-            <h2>注目サークル</h2>
-          </div>
-          <div className="circle-list">
-            <Link
-              href={`/circle?id=${featuredCircle.id}`}
-              className="circle-list-item"
-            >
-              <div className="circle-avatar sm">{featuredCircle.initial}</div>
-              <div>
-                <strong>{featuredCircle.name}</strong>
-                <p>作品を横断して一覧</p>
-              </div>
-              <span className="pill">サークル</span>
-            </Link>
           </div>
         </section>
       </div>

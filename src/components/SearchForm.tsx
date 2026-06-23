@@ -15,7 +15,7 @@ export function SearchForm({ defaultValue = "" }: { defaultValue?: string }) {
   }
 
   return (
-    <form className="search-form" onSubmit={handleSubmit}>
+    <form className="search-form yt-search" onSubmit={handleSubmit}>
       <input
         type="search"
         value={query}
@@ -23,8 +23,8 @@ export function SearchForm({ defaultValue = "" }: { defaultValue?: string }) {
         placeholder="サークル・作品を検索"
         aria-label="サークル・作品を検索"
       />
-      <button type="submit" className="search-submit">
-        検索
+      <button type="submit" className="search-submit" aria-label="検索">
+        🔍
       </button>
     </form>
   );

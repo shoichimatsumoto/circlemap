@@ -1,35 +1,22 @@
 import Link from "next/link";
 import { SearchForm } from "@/components/SearchForm";
 
-type NavKey = "home" | "circle" | "work" | "search";
-
-const links: { href: string; label: string; key: NavKey }[] = [
-  { href: "/", label: "Home", key: "home" },
-  { href: "/circle", label: "サークル", key: "circle" },
-];
-
-export function SiteHeader({ active }: { active?: NavKey }) {
+export function SiteHeader() {
   return (
-    <header className="site-header">
-      <div className="container header-inner">
-        <Link href="/" className="logo">
-          <span className="logo-mark" aria-hidden>
-            ◎
-          </span>
-          CircleMap
-        </Link>
-        <nav className="nav-main">
-          {links.map((link) => (
-            <Link
-              key={link.key}
-              href={link.href}
-              className={active === link.key ? "active" : undefined}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <SearchForm />
+    <header className="site-header yt-header">
+      <div className="header-inner">
+        <div className="header-start">
+          <Link href="/" className="logo">
+            <span className="logo-mark" aria-hidden>
+              ◎
+            </span>
+            CircleMap
+          </Link>
+        </div>
+        <div className="header-center">
+          <SearchForm />
+        </div>
+        <div className="header-end" />
       </div>
     </header>
   );

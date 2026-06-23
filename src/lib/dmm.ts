@@ -73,6 +73,17 @@ export async function fetchDoujinMangaItems(hits = 20, offset = 1) {
   });
 }
 
+export async function fetchPopularDoujinItems(hits = 40, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    hits: Math.min(hits, 100),
+    offset,
+    sort: "rank",
+  });
+}
+
 export async function fetchDoujinVoiceItems(hits = 20, offset = 1) {
   return searchDmmItems({
     site: "FANZA",

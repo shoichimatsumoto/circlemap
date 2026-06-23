@@ -19,7 +19,7 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <PageShell active="search">
       <DataModeBanner source={source} />
-      <main className="container page-main">
+      <div className="feed-wrap page-main">
         <nav className="breadcrumb">
           <Link href="/">Home</Link>
           <span>/</span>
@@ -42,7 +42,7 @@ export default async function SearchPage({ searchParams }: Props) {
               「{query}」の検索結果 <strong>{works.length}件</strong>
             </p>
             {works.length > 0 ? (
-              <div className="works-grid">
+              <div className="yt-grid">
                 {works.map((work) => (
                   <WorkCard key={work.id} work={work} />
                 ))}
@@ -56,7 +56,7 @@ export default async function SearchPage({ searchParams }: Props) {
         ) : (
           <p className="empty-state">検索キーワードを入力してください。</p>
         )}
-      </main>
+      </div>
     </PageShell>
   );
 }

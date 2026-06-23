@@ -45,9 +45,9 @@ export default async function MediaPage({ params }: Props) {
   const { works, source } = await getWorksByMedia(mediaType, 24);
 
   return (
-    <PageShell>
+    <PageShell active={mediaType}>
       <DataModeBanner source={source} />
-      <main className="container page-main">
+      <div className="feed-wrap page-main">
         <nav className="breadcrumb">
           <Link href="/">Home</Link>
           <span>/</span>
@@ -63,7 +63,7 @@ export default async function MediaPage({ params }: Props) {
         </header>
 
         {works.length > 0 ? (
-          <div className="works-grid">
+          <div className="yt-grid">
             {works.map((work) => (
               <WorkCard key={work.id} work={work} />
             ))}
@@ -71,7 +71,7 @@ export default async function MediaPage({ params }: Props) {
         ) : (
           <p className="empty-state">該当する作品が見つかりませんでした。</p>
         )}
-      </main>
+      </div>
     </PageShell>
   );
 }
