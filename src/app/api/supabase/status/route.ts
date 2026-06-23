@@ -3,15 +3,21 @@ import {
   createSupabaseAnonClient,
   hasSupabasePublicConfig,
   hasSupabaseServiceConfig,
+  normalizeSupabaseUrl,
 } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const normalizedUrl = rawUrl ? normalizeSupabaseUrl(rawUrl) : "";
+
   const checks = {
-    url: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    url: Boolean(rawUrl),
     anonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     serviceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    urlHadRestSuffix: rawUrl.includes("/rest/v1"),
+    normalizedUrl,
   };
 
   if (!hasSupabasePublicConfig()) {
@@ -49,6 +55,10 @@ export async function GET() {
       ...checks,
       serviceRoleConfigured: hasSupabaseServiceConfig(),
     },
+    hint:
+      checks.urlHadRestSuffix
+        ? "URL末尾の /rest/v1/ は不要です。https://xxxx.supabase.co の形式にしてください"
+        : null,
     circlesCount: circlesResult.count ?? 0,
     worksCount: worksResult.count ?? 0,
     errors: {
