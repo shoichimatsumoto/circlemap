@@ -1,4 +1,5 @@
 import { Noto_Sans_JP } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import "./globals.css";
 import { DevBanner } from "@/components/DevBanner";
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className={notoSans.className}>
         {children}
         <DevBanner />
+        <Analytics />
       </body>
     </html>
   );

@@ -15,7 +15,7 @@ export default async function CirclePage({ searchParams }: Props) {
   const { id } = await searchParams;
 
   if (!id) {
-    const { circles, source } = await getDiscoverableCircles(80);
+    const { circles, source } = await getDiscoverableCircles(80, "name");
 
     return (
       <PageShell active="circle">
@@ -24,8 +24,8 @@ export default async function CirclePage({ searchParams }: Props) {
           <header className="page-header">
             <h1>サークル一覧</h1>
             <p className="page-desc">
-              人気・新着作品から抽出したサークルです。現在{" "}
-              <strong>{circles.length}件</strong>を表示しています。
+              人気・新着作品から抽出したサークルです（あいうえお順）。
+              現在 <strong>{circles.length}件</strong>を表示しています。
               人気順のランキングは
               <Link href="/circles"> 人気サークルページ</Link>
               でも見られます。

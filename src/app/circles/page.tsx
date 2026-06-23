@@ -7,7 +7,7 @@ import { getDiscoverableCircles } from "@/lib/data";
 export const dynamic = "force-dynamic";
 
 export default async function CirclesPage() {
-  const { circles, source } = await getDiscoverableCircles(60);
+  const { circles, source } = await getDiscoverableCircles(60, "popular");
 
   return (
     <PageShell active="circles">

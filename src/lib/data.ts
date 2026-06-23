@@ -76,7 +76,13 @@ export async function getPopularWorks(limit = 12): Promise<{
   return { works: DEMO_WORKS.slice(0, limit), source: "mock" };
 }
 
-function collectCirclesFromWorks(works: Work[], limit: number): Circle[] {
+type CircleSort = "popular" | "name";
+
+function collectCirclesFromWorks(
+  works: Work[],
+  limit: number,
+  sort: CircleSort = "popular"
+): Circle[] {
   const grouped = new Map<string, Work[]>();
   for (const work of works) {
     const list = grouped.get(work.circleId) ?? [];
@@ -84,16 +90,21 @@ function collectCirclesFromWorks(works: Work[], limit: number): Circle[] {
     grouped.set(work.circleId, list);
   }
 
-  return [...grouped.entries()]
-    .sort((a, b) => {
-      if (b[1].length !== a[1].length) {
-        return b[1].length - a[1].length;
-      }
-      return b[1][0].date.localeCompare(a[1][0].date);
-    })
-    .slice(0, limit)
+  const circles = [...grouped.entries()]
     .map(([id, circleWorks]) => buildCircleFromWorks(id, circleWorks))
     .filter((circle): circle is Circle => circle !== null);
+
+  const sorted =
+    sort === "name"
+      ? [...circles].sort((a, b) => a.name.localeCompare(b.name, "ja"))
+      : [...circles].sort((a, b) => {
+          if (b.workCount !== a.workCount) {
+            return b.workCount - a.workCount;
+          }
+          return b.latestDate.localeCompare(a.latestDate);
+        });
+
+  return sorted.slice(0, limit);
 }
 
 async function fetchWorksForCircleDiscovery(): Promise<Work[]> {
@@ -111,14 +122,17 @@ async function fetchWorksForCircleDiscovery(): Promise<Work[]> {
   );
 }
 
-export async function getDiscoverableCircles(limit = 50): Promise<{
+export async function getDiscoverableCircles(
+  limit = 50,
+  sort: CircleSort = "name"
+): Promise<{
   circles: Circle[];
   source: DataSource;
 }> {
   if (hasDmmCredentials()) {
     try {
       const works = await fetchWorksForCircleDiscovery();
-      const circles = collectCirclesFromWorks(works, limit);
+      const circles = collectCirclesFromWorks(works, limit, sort);
 
       if (circles.length > 0) {
         return { circles, source: "dmm" };
@@ -135,7 +149,7 @@ export async function getPopularCircles(limit = 8): Promise<{
   circles: Circle[];
   source: DataSource;
 }> {
-  return getDiscoverableCircles(limit);
+  return getDiscoverableCircles(limit, "popular");
 }
 
 export async function getWorksByMedia(

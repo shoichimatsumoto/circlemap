@@ -22,7 +22,10 @@ export default function PrivacyPage() {
             <p>当サイトでは、以下の情報を取得する場合があります。</p>
             <ul>
               <li>アクセスログ（IPアドレス、ブラウザ種別、アクセス日時など）</li>
-              <li>Cookieおよびアクセス解析ツールによる利用状況</li>
+              <li>
+                Vercel Web Analytics によるページ閲覧状況（Cookieを使用しない解析）
+              </li>
+              <li>アフィリエイトリンク経由のCookie</li>
             </ul>
           </section>
 
@@ -40,6 +43,7 @@ export default function PrivacyPage() {
             <p>
               当サイトはDMMアフィリエイトプログラムに参加しており、FANZAへのリンクを通じて商品情報を表示します。
               購入時の個人情報はFANZA（DMM）のプライバシーポリシーに従って処理されます。
+              アクセス解析には Vercel Inc. の Web Analytics を利用しています。
             </p>
           </section>
 
