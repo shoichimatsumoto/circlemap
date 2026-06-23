@@ -150,9 +150,9 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
               サークルページ →
             </Link>
           </div>
-          <div className="works-grid compact">
+          <div className="yt-grid">
             {relatedWorks.map((w) => (
-              <WorkCard key={w.id} work={w} compact />
+              <WorkCard key={w.id} work={w} />
             ))}
           </div>
           <p className="cross-media-note">

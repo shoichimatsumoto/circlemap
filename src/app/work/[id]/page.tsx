@@ -18,16 +18,16 @@ export default async function WorkPage({ params }: Props) {
   return (
     <PageShell active="work">
       <DataModeBanner source={source} />
-      <main className="container">
+      <div className="feed-wrap">
         <nav className="breadcrumb">
           <Link href="/">Home</Link>
           <span>/</span>
           <Link href={`/circle?id=${work.circleId}`}>{work.circleName}</Link>
           <span>/</span>
-          <span>{work.title}</span>
+          <span className="breadcrumb-current">{work.title}</span>
         </nav>
         <WorkPageClient work={work} relatedWorks={relatedWorks} />
-      </main>
+      </div>
     </PageShell>
   );
 }
