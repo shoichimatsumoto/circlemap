@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  formatPrice,
   formatWorkMeta,
   MEDIA_LABELS,
   type Work,
@@ -25,7 +26,8 @@ export function WorkCard({
         ) : null}
         <span className="media-badge">{MEDIA_LABELS[work.mediaType]}</span>
       </div>
-      <h3>{work.title}</h3>
+      <h3 className="work-card-title">{work.title}</h3>
+      <p className="work-price">{formatPrice(work.price)}</p>
       <p className="work-meta">
         {compact
           ? formatWorkMeta(work).split(" · ")[0]

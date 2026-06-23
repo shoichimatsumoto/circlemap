@@ -86,6 +86,7 @@ export default async function HomePage() {
         <section className="home-section">
           <div className="section-head">
             <h2>新着作品</h2>
+            <span className="section-sub">同人漫画 · 発売日の新しい順</span>
             <Link href="/circle" className="link-more">
               サークル一覧 →
             </Link>

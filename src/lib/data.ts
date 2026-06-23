@@ -35,7 +35,7 @@ export async function getLatestWorks(limit = 8): Promise<{
   if (hasDmmCredentials()) {
     try {
       // まず同人（漫画）フロアで取得。他フロアは順次追加。
-      const manga = await fetchDoujinMangaItems(limit, 1);
+      const manga = await fetchDoujinMangaItems(Math.max(limit * 3, 24), 1);
       const works = sortByDateDesc(parseResponse(manga)).slice(0, limit);
 
       if (works.length > 0) {

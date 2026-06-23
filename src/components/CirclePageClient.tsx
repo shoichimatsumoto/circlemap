@@ -14,14 +14,29 @@ import {
 
 type Filter = "all" | MediaType;
 
+type SortKey = "new" | "old" | "price";
+
 type Props = {
   circle: Circle;
   works: Work[];
   featured: Work;
 };
 
+function sortWorks(works: Work[], sort: SortKey): Work[] {
+  const list = [...works];
+  switch (sort) {
+    case "old":
+      return list.sort((a, b) => a.date.localeCompare(b.date));
+    case "price":
+      return list.sort((a, b) => a.price - b.price);
+    default:
+      return list.sort((a, b) => b.date.localeCompare(a.date));
+  }
+}
+
 export function CirclePageClient({ circle, works, featured }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
+  const [sort, setSort] = useState<SortKey>("new");
   const [favorite, setFavorite] = useState(false);
 
   const chips: { filter: Filter; icon: string; label: string; count: number }[] =
@@ -34,9 +49,10 @@ export function CirclePageClient({ circle, works, featured }: Props) {
     ];
 
   const filteredWorks = useMemo(() => {
-    if (filter === "all") return works;
-    return works.filter((w) => w.mediaType === filter);
-  }, [filter, works]);
+    const byMedia =
+      filter === "all" ? works : works.filter((w) => w.mediaType === filter);
+    return sortWorks(byMedia, sort);
+  }, [filter, sort, works]);
 
   return (
     <>
@@ -90,7 +106,11 @@ export function CirclePageClient({ circle, works, featured }: Props) {
       <section className="filters">
         <div className="filter-group">
           <label htmlFor="sort">並び替え</label>
-          <select id="sort" defaultValue="new">
+          <select
+            id="sort"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+          >
             <option value="new">新しい順</option>
             <option value="old">古い順</option>
             <option value="price">価格が安い順</option>
@@ -112,6 +132,14 @@ export function CirclePageClient({ circle, works, featured }: Props) {
             href={`/work/${featured.id}`}
             className={`featured-thumb ${featured.mediaType}`}
           >
+            {featured.thumbnailUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={featured.thumbnailUrl}
+                alt=""
+                className="featured-thumb-image"
+              />
+            ) : null}
             <span className="media-badge">
               {MEDIA_LABELS[featured.mediaType]}{" "}
               {MEDIA_NAMES[featured.mediaType]}
