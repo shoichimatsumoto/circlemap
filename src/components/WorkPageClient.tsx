@@ -44,6 +44,7 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
       <article className="work-detail">
         <div className="work-detail-main">
           <WorkSampleGallery
+            key={work.id}
             workId={work.id}
             title={work.title}
             thumbnailUrl={work.thumbnailUrl}

@@ -1,10 +1,35 @@
 /** DMM / FANZA 画像 URL を可能な限り大サイズ版に変換 */
 export function upgradeDmmImageUrl(url: string): string {
-  return url
+  let upgraded = url
     .replace(/([/_-])ps(\.(jpe?g|png|webp)(\?|$))/i, "$1pl$2$3")
     .replace(/([/_-])pt(\.(jpe?g|png|webp)(\?|$))/i, "$1pl$2$3")
+    .replace(/([/_-])s(\.(jpe?g|png|webp)(\?|$))/i, "$1l$2$3")
     .replace(/\/sample\/s\//gi, "/sample/l/")
-    .replace(/sample_s/gi, "sample_l");
+    .replace(/sample_s/gi, "sample_l")
+    .replace(/([?&])size=\d+/gi, "$1size=0")
+    .replace(/([?&])w=\d+/gi, "");
+
+  try {
+    const parsed = new URL(upgraded);
+    parsed.searchParams.delete("w");
+    parsed.searchParams.delete("h");
+    parsed.searchParams.delete("width");
+    parsed.searchParams.delete("height");
+    upgraded = parsed.toString();
+  } catch {
+    // keep string replacements only
+  }
+
+  return upgraded;
+}
+
+export function pickBestDmmImageUrl(
+  primary?: string,
+  fallback?: string
+): string | undefined {
+  const candidates = [primary, fallback].filter(Boolean) as string[];
+  if (candidates.length === 0) return undefined;
+  return upgradeDmmImageUrl(candidates[0]);
 }
 
 /** サムネイル帯用の軽量版（一覧表示のみ） */

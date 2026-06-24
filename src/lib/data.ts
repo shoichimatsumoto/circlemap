@@ -47,14 +47,7 @@ function sortByDateDesc(works: Work[]): Work[] {
   return [...works].sort((a, b) => b.date.localeCompare(a.date));
 }
 
-async function enrichWorkWithSampleImages(
-  work: Work,
-  id: string
-): Promise<Work> {
-  if (work.sampleImages && work.sampleImages.length > 0) {
-    return work;
-  }
-
+async function enrichWorkFromDmm(work: Work, id: string): Promise<Work> {
   if (!hasDmmCredentials()) {
     return work;
   }
@@ -62,14 +55,20 @@ async function enrichWorkWithSampleImages(
   try {
     const json = await fetchItemByContentId(id);
     const dmmWork = parseResponse(json)[0];
-    if (!dmmWork?.sampleImages?.length) {
+    if (!dmmWork) {
       return work;
     }
 
     return {
       ...work,
-      sampleImages: dmmWork.sampleImages,
-      thumbnailUrl: work.thumbnailUrl ?? dmmWork.thumbnailUrl,
+      thumbnailUrl: dmmWork.thumbnailUrl ?? work.thumbnailUrl,
+      sampleImages: dmmWork.sampleImages?.length
+        ? dmmWork.sampleImages
+        : work.sampleImages,
+      affiliateUrl: work.affiliateUrl ?? dmmWork.affiliateUrl,
+      price: work.price || dmmWork.price,
+      tags: work.tags.length > 0 ? work.tags : dmmWork.tags,
+      description: work.description ?? dmmWork.description,
     };
   } catch {
     return work;
@@ -334,7 +333,7 @@ export async function getWork(id: string): Promise<{
   try {
     const work = await dbGetWork(id);
     if (work) {
-      const enriched = await enrichWorkWithSampleImages(work, id);
+      const enriched = await enrichWorkFromDmm(work, id);
       const relatedWorks = await dbGetRelatedWorks(enriched.circleId, enriched.id, 6);
       return { work: enriched, relatedWorks, source: "supabase" };
     }

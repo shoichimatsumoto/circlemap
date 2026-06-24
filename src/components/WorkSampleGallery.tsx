@@ -23,11 +23,11 @@ export function WorkSampleGallery({
     [thumbnailUrl, sampleImages]
   );
 
-  const [active, setActive] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    setActive(0);
-  }, [workId, images.length]);
+    setActiveIndex(0);
+  }, [workId]);
 
   if (images.length === 0) {
     return (
@@ -37,7 +37,7 @@ export function WorkSampleGallery({
     );
   }
 
-  const safeActive = Math.min(Math.max(0, active), images.length - 1);
+  const safeActive = Math.min(Math.max(0, activeIndex), images.length - 1);
   const isLandscape = mediaType === "game";
 
   return (
@@ -69,7 +69,7 @@ export function WorkSampleGallery({
                 role="tab"
                 aria-selected={index === safeActive}
                 className={`work-sample-thumb${index === safeActive ? " active" : ""}${isLandscape ? " landscape" : ""}`}
-                onClick={() => setActive(index)}
+                onClick={() => setActiveIndex(index)}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

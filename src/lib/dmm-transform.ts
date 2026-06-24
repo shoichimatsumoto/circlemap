@@ -1,6 +1,6 @@
 import type { DmmItem } from "@/lib/dmm-types";
 import { buildAffiliateUrl, resolveAffiliateUrl } from "@/lib/dmm-affiliate";
-import { upgradeDmmImageUrl } from "@/lib/dmm-image";
+import { pickBestDmmImageUrl } from "@/lib/dmm-image";
 import type { Circle, MediaType, Work } from "@/lib/types";
 import { circleInitial } from "@/lib/types";
 
@@ -52,8 +52,15 @@ function slugify(name: string): string {
 export function extractSampleImages(item: DmmItem): string[] {
   const large = item.sampleImageURL?.sample_l?.image ?? [];
   const small = item.sampleImageURL?.sample_s?.image ?? [];
-  const images = large.length > 0 ? large : small;
-  return [...new Set(images.filter(Boolean).map(upgradeDmmImageUrl))];
+  const count = Math.max(large.length, small.length);
+  const images: string[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const best = pickBestDmmImageUrl(large[i], small[i]);
+    if (best) images.push(best);
+  }
+
+  return [...new Set(images)];
 }
 
 export function dmmItemToWork(item: DmmItem): Work {
@@ -61,9 +68,10 @@ export function dmmItemToWork(item: DmmItem): Work {
   const circleName = maker?.name ?? "不明なサークル";
   const circleId = maker?.id ? String(maker.id) : slugify(circleName);
   const genres = item.iteminfo?.genre?.map((g) => g.name) ?? [];
-  const thumbnailUrl = upgradeDmmImageUrl(
-    item.imageURL?.large ?? item.imageURL?.small ?? ""
-  ) || undefined;
+  const thumbnailUrl = pickBestDmmImageUrl(
+    item.imageURL?.large,
+    item.imageURL?.small
+  );
   const sampleImages = extractSampleImages(item);
 
   return {
