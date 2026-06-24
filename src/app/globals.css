@@ -235,16 +235,22 @@ body {
   font-size: 0.82rem;
 }
 
-/* YouTube card grid */
+/* YouTube card grid — PCは4列、漫画と同じ縦長カード */
 .yt-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 900px) {
   .yt-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .yt-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -290,17 +296,18 @@ body {
   border: 1px solid var(--border);
 }
 
-.yt-thumb-wrap.game,
-.yt-thumb-wrap.voice {
-  aspect-ratio: 16 / 9;
-}
-
 .yt-thumb-image,
 .yt-thumb-fallback {
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center;
+}
+
+.yt-thumb-wrap.cg .yt-thumb-image,
+.yt-thumb-wrap.game .yt-thumb-image,
+.yt-thumb-wrap.voice .yt-thumb-image {
+  object-fit: cover;
 }
 
 .yt-thumb-fallback {
