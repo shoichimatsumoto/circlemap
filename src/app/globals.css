@@ -238,8 +238,14 @@ body {
 /* YouTube card grid */
 .yt-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px 16px;
+}
+
+@media (min-width: 1100px) {
+  .yt-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
 }
 
 .infinite-sentinel {
@@ -276,18 +282,25 @@ body {
 
 .yt-thumb-wrap {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 4;
   border-radius: 12px;
   overflow: hidden;
-  background: var(--surface2);
+  background: #0a0a0a;
   margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+
+.yt-thumb-wrap.game,
+.yt-thumb-wrap.voice {
+  aspect-ratio: 16 / 9;
 }
 
 .yt-thumb-image,
 .yt-thumb-fallback {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 }
 
 .yt-thumb-fallback {
@@ -296,23 +309,76 @@ body {
   justify-content: center;
   color: #fff;
   font-weight: 700;
+  font-size: 0.9rem;
+  gap: 6px;
 }
 
-.yt-thumb-fallback.manga { background: #166534; }
-.yt-thumb-fallback.cg { background: #854d0e; }
-.yt-thumb-fallback.voice { background: #1d4ed8; }
-.yt-thumb-fallback.game { background: #9d174d; }
+.yt-thumb-fallback.manga { background: linear-gradient(160deg, #14532d, #052e16); }
+.yt-thumb-fallback.cg { background: linear-gradient(160deg, #713f12, #422006); }
+.yt-thumb-fallback.voice { background: linear-gradient(160deg, #1e3a8a, #172554); }
+.yt-thumb-fallback.game { background: linear-gradient(160deg, #831843, #500724); }
 
-.yt-media-badge {
+.yt-media-chip {
   position: absolute;
-  right: 8px;
-  bottom: 8px;
-  background: rgba(0, 0, 0, 0.78);
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: #fff;
   font-size: 0.72rem;
-  padding: 3px 6px;
-  border-radius: 4px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
+
+.yt-media-chip.manga { background: rgba(22, 101, 52, 0.92); }
+.yt-media-chip.cg { background: rgba(133, 77, 14, 0.92); }
+.yt-media-chip.voice { background: rgba(29, 78, 216, 0.92); }
+.yt-media-chip.game { background: rgba(157, 23, 77, 0.92); }
+
+.yt-media-badge {
+  display: none;
+}
+
+.yt-card-media-tag {
+  display: inline-block;
+  width: fit-content;
+  margin: 0 0 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.yt-card-media-tag.media-manga {
+  color: #86efac;
+  background: rgba(22, 101, 52, 0.2);
+}
+
+.yt-card-media-tag.media-cg {
+  color: #fcd34d;
+  background: rgba(133, 77, 14, 0.2);
+}
+
+.yt-card-media-tag.media-voice {
+  color: #93c5fd;
+  background: rgba(29, 78, 216, 0.2);
+}
+
+.yt-card-media-tag.media-game {
+  color: #f9a8d4;
+  background: rgba(157, 23, 77, 0.2);
+}
+
+.yt-card-avatar.media-manga { background: #166534; }
+.yt-card-avatar.media-cg { background: #854d0e; }
+.yt-card-avatar.media-voice { background: #1d4ed8; }
+.yt-card-avatar.media-game { background: #9d174d; }
 
 .yt-card-meta {
   display: flex;

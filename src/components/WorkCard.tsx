@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { upgradeDmmImageUrl } from "@/lib/dmm-image";
 import {
   formatPrice,
+  MEDIA_LABELS,
   MEDIA_NAMES,
   circleInitial,
   type Work,
@@ -13,14 +15,21 @@ export function WorkCard({
   work: Work;
   compact?: boolean;
 }) {
+  const thumbSrc = work.thumbnailUrl
+    ? upgradeDmmImageUrl(work.thumbnailUrl)
+    : undefined;
+
   if (compact) {
     return (
       <Link href={`/work/${work.id}`} className="work-card link-card compact">
         <div className={`work-thumb ${work.mediaType}`}>
-          {work.thumbnailUrl ? (
+          {thumbSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={work.thumbnailUrl} alt="" className="work-thumb-image" />
+            <img src={thumbSrc} alt="" className="work-thumb-image" />
           ) : null}
+          <span className={`yt-media-chip ${work.mediaType}`}>
+            {MEDIA_LABELS[work.mediaType]} {MEDIA_NAMES[work.mediaType]}
+          </span>
         </div>
         <h3 className="work-card-title">{work.title}</h3>
         <p className="work-meta">{formatPrice(work.price)}</p>
@@ -30,20 +39,33 @@ export function WorkCard({
 
   return (
     <Link href={`/work/${work.id}`} className="yt-card" data-type={work.mediaType}>
-      <div className="yt-thumb-wrap">
-        {work.thumbnailUrl ? (
+      <div className={`yt-thumb-wrap ${work.mediaType}`}>
+        {thumbSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={work.thumbnailUrl} alt="" className="yt-thumb-image" />
+          <img
+            src={thumbSrc}
+            alt=""
+            className="yt-thumb-image"
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <div className={`yt-thumb-fallback ${work.mediaType}`}>
-            {MEDIA_NAMES[work.mediaType]}
+            {MEDIA_LABELS[work.mediaType]} {MEDIA_NAMES[work.mediaType]}
           </div>
         )}
-        <span className="yt-media-badge">{MEDIA_NAMES[work.mediaType]}</span>
+        <span className={`yt-media-chip ${work.mediaType}`}>
+          {MEDIA_LABELS[work.mediaType]} {MEDIA_NAMES[work.mediaType]}
+        </span>
       </div>
       <div className="yt-card-meta">
-        <div className="yt-card-avatar">{circleInitial(work.circleName)}</div>
+        <div className={`yt-card-avatar media-${work.mediaType}`}>
+          {circleInitial(work.circleName)}
+        </div>
         <div className="yt-card-text">
+          <p className={`yt-card-media-tag media-${work.mediaType}`}>
+            {MEDIA_NAMES[work.mediaType]}
+          </p>
           <h3 className="yt-card-title">{work.title}</h3>
           <p className="yt-card-channel">{work.circleName}</p>
           <p className="yt-card-stats">
