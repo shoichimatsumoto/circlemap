@@ -1,14 +1,9 @@
 import Link from "next/link";
 import { CategoryChips } from "@/components/CategoryChips";
 import { DataModeBanner } from "@/components/DataModeBanner";
-import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
-import {
-  getLatestWorks,
-  getPopularCircles,
-  getPopularWorks,
-} from "@/lib/data";
+import { getLatestWorks, getPopularWorks } from "@/lib/data";
 import type { DataSource } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -25,18 +20,12 @@ export default async function HomePage() {
   const [
     { works: popularWorks, hasMore: popularHasMore, source: popularSource },
     { works: latestWorks, hasMore: latestHasMore, source: latestSource },
-    {
-      circles: popularCircles,
-      hasMore: circlesHasMore,
-      source: circleSource,
-    },
   ] = await Promise.all([
     getPopularWorks(HOME_PAGE_SIZE),
     getLatestWorks(HOME_PAGE_SIZE),
-    getPopularCircles(HOME_PAGE_SIZE),
   ]);
 
-  const source = resolveSource(popularSource, latestSource, circleSource);
+  const source = resolveSource(popularSource, latestSource);
 
   return (
     <PageShell active="home">
@@ -58,22 +47,12 @@ export default async function HomePage() {
           />
         </section>
 
-        <section className="feed-section">
-          <div className="feed-section-head">
-            <h2>人気サークル</h2>
-            <Link href="/circles" className="link-more">
-              ランキングを見る →
-            </Link>
-          </div>
-          <InfiniteCircleList
-            initialCircles={popularCircles}
-            sort="popular"
-            hasMore={circlesHasMore}
-            pageSize={HOME_PAGE_SIZE}
-            layout="grid"
-            showRank
-          />
-        </section>
+        <Link href="/circles" className="home-circles-cta">
+          <span className="home-circles-cta-label">★ 人気サークル</span>
+          <span className="home-circles-cta-text">
+            サークル単位で探す · ランキングを見る →
+          </span>
+        </Link>
 
         <section className="feed-section">
           <div className="feed-section-head">
