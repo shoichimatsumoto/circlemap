@@ -1,32 +1,42 @@
 import Link from "next/link";
 import { CategoryChips } from "@/components/CategoryChips";
-import { CircleCard } from "@/components/CircleCard";
 import { DataModeBanner } from "@/components/DataModeBanner";
+import { InfiniteCircleList } from "@/components/InfiniteCircleList";
+import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
-import { WorkCard } from "@/components/WorkCard";
 import {
   getLatestWorks,
   getPopularCircles,
   getPopularWorks,
 } from "@/lib/data";
+import type { DataSource } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+const HOME_PAGE_SIZE = 12;
+
+function resolveSource(...sources: DataSource[]): DataSource {
+  if (sources.includes("supabase")) return "supabase";
+  if (sources.includes("dmm")) return "dmm";
+  return "mock";
+}
+
 export default async function HomePage() {
   const [
-    { works: popularWorks, source: popularSource },
-    { works: latestWorks, source: latestSource },
-    { circles: popularCircles, source: circleSource },
+    { works: popularWorks, hasMore: popularHasMore, source: popularSource },
+    { works: latestWorks, hasMore: latestHasMore, source: latestSource },
+    {
+      circles: popularCircles,
+      hasMore: circlesHasMore,
+      source: circleSource,
+    },
   ] = await Promise.all([
-    getPopularWorks(12),
-    getLatestWorks(12),
-    getPopularCircles(12),
+    getPopularWorks(HOME_PAGE_SIZE),
+    getLatestWorks(HOME_PAGE_SIZE),
+    getPopularCircles(HOME_PAGE_SIZE),
   ]);
 
-  const source =
-    popularSource === "dmm" || latestSource === "dmm" || circleSource === "dmm"
-      ? "dmm"
-      : "mock";
+  const source = resolveSource(popularSource, latestSource, circleSource);
 
   return (
     <PageShell active="home">
@@ -39,11 +49,13 @@ export default async function HomePage() {
             <h2>人気作品</h2>
             <span className="feed-section-sub">FANZA人気順</span>
           </div>
-          <div className="yt-grid">
-            {popularWorks.map((work) => (
-              <WorkCard key={`popular-${work.id}`} work={work} />
-            ))}
-          </div>
+          <InfiniteWorkGrid
+            initialWorks={popularWorks}
+            feedType="popular"
+            hasMore={popularHasMore}
+            pageSize={HOME_PAGE_SIZE}
+            keyPrefix="popular-"
+          />
         </section>
 
         <section className="feed-section">
@@ -53,11 +65,14 @@ export default async function HomePage() {
               ランキングを見る →
             </Link>
           </div>
-          <div className="yt-channel-grid">
-            {popularCircles.map((circle, index) => (
-              <CircleCard key={circle.id} circle={circle} rank={index + 1} />
-            ))}
-          </div>
+          <InfiniteCircleList
+            initialCircles={popularCircles}
+            sort="popular"
+            hasMore={circlesHasMore}
+            pageSize={HOME_PAGE_SIZE}
+            layout="grid"
+            showRank
+          />
         </section>
 
         <section className="feed-section">
@@ -67,11 +82,13 @@ export default async function HomePage() {
               もっと見る →
             </Link>
           </div>
-          <div className="yt-grid">
-            {latestWorks.map((work) => (
-              <WorkCard key={`latest-${work.id}`} work={work} />
-            ))}
-          </div>
+          <InfiniteWorkGrid
+            initialWorks={latestWorks}
+            feedType="latest"
+            hasMore={latestHasMore}
+            pageSize={HOME_PAGE_SIZE}
+            keyPrefix="latest-"
+          />
         </section>
       </div>
     </PageShell>

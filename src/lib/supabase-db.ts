@@ -81,31 +81,40 @@ export async function dbHasData(): Promise<boolean> {
 
 export async function dbGetLatestWorks(
   limit: number,
-  mediaType: MediaType = "manga"
+  mediaType: MediaType = "manga",
+  offset = 0
 ): Promise<Work[]> {
   const supabase = getClient();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
+  const query = supabase
     .from("works")
     .select("*")
     .eq("media_type", mediaType)
-    .order("date", { ascending: false })
-    .limit(limit);
+    .order("date", { ascending: false });
+
+  const { data, error } =
+    offset > 0
+      ? await query.range(offset, offset + limit - 1)
+      : await query.limit(limit);
 
   if (error || !data) return [];
   return (data as WorkRow[]).map(rowToWork);
 }
 
-export async function dbGetPopularWorks(limit: number): Promise<Work[]> {
+export async function dbGetPopularWorks(
+  limit: number,
+  offset = 0
+): Promise<Work[]> {
   const supabase = getClient();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
-    .from("works")
-    .select("*")
-    .order("date", { ascending: false })
-    .limit(limit);
+  const query = supabase.from("works").select("*").order("date", { ascending: false });
+
+  const { data, error } =
+    offset > 0
+      ? await query.range(offset, offset + limit - 1)
+      : await query.limit(limit);
 
   if (error || !data) return [];
   return (data as WorkRow[]).map(rowToWork);
@@ -113,20 +122,24 @@ export async function dbGetPopularWorks(limit: number): Promise<Work[]> {
 
 export async function dbGetCircles(
   limit: number,
-  sort: "popular" | "name" = "popular"
+  sort: "popular" | "name" = "popular",
+  offset = 0
 ): Promise<Circle[]> {
   const supabase = getClient();
   if (!supabase) return [];
 
-  const query = supabase.from("circles").select("*");
+  const base = supabase.from("circles").select("*");
+  const ordered =
+    sort === "name"
+      ? base.order("name", { ascending: true })
+      : base
+          .order("work_count", { ascending: false })
+          .order("latest_date", { ascending: false });
 
   const { data, error } =
-    sort === "name"
-      ? await query.order("name", { ascending: true }).limit(limit)
-      : await query
-          .order("work_count", { ascending: false })
-          .order("latest_date", { ascending: false })
-          .limit(limit);
+    offset > 0
+      ? await ordered.range(offset, offset + limit - 1)
+      : await ordered.limit(limit);
 
   if (error || !data) return [];
   return (data as CircleRow[]).map(rowToCircle);
@@ -134,17 +147,22 @@ export async function dbGetCircles(
 
 export async function dbGetWorksByMedia(
   mediaType: MediaType,
-  limit: number
+  limit: number,
+  offset = 0
 ): Promise<Work[]> {
   const supabase = getClient();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
+  const query = supabase
     .from("works")
     .select("*")
     .eq("media_type", mediaType)
-    .order("date", { ascending: false })
-    .limit(limit);
+    .order("date", { ascending: false });
+
+  const { data, error } =
+    offset > 0
+      ? await query.range(offset, offset + limit - 1)
+      : await query.limit(limit);
 
   if (error || !data) return [];
   return (data as WorkRow[]).map(rowToWork);
@@ -152,7 +170,8 @@ export async function dbGetWorksByMedia(
 
 export async function dbSearchWorks(
   keyword: string,
-  limit: number
+  limit: number,
+  offset = 0
 ): Promise<Work[]> {
   const supabase = getClient();
   if (!supabase) return [];
@@ -161,12 +180,16 @@ export async function dbSearchWorks(
   if (!safe) return [];
 
   const pattern = `%${safe}%`;
-  const { data, error } = await supabase
+  const query = supabase
     .from("works")
     .select("*")
     .or(`title.ilike.${pattern},circle_name.ilike.${pattern}`)
-    .order("date", { ascending: false })
-    .limit(limit);
+    .order("date", { ascending: false });
+
+  const { data, error } =
+    offset > 0
+      ? await query.range(offset, offset + limit - 1)
+      : await query.limit(limit);
 
   if (error || !data) return [];
   return (data as WorkRow[]).map(rowToWork);

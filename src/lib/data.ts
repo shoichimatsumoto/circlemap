@@ -47,14 +47,22 @@ function sortByDateDesc(works: Work[]): Work[] {
   return [...works].sort((a, b) => b.date.localeCompare(a.date));
 }
 
-export async function getLatestWorks(limit = 8): Promise<{
+function paginate<T>(items: T[], limit: number): { items: T[]; hasMore: boolean } {
+  return { items, hasMore: items.length === limit };
+}
+
+export async function getLatestWorks(
+  limit = 8,
+  offset = 0
+): Promise<{
   works: Work[];
+  hasMore: boolean;
   source: DataSource;
 }> {
   try {
-    const dbWorks = await dbGetLatestWorks(limit, "manga");
-    if (dbWorks.length > 0) {
-      return { works: dbWorks, source: "supabase" };
+    const dbWorks = await dbGetLatestWorks(limit, "manga", offset);
+    if (dbWorks.length > 0 || offset > 0) {
+      return { ...paginate(dbWorks, limit), works: dbWorks, source: "supabase" };
     }
   } catch (error) {
     console.error("[CircleMap] Supabase fetch failed:", error);
@@ -62,30 +70,35 @@ export async function getLatestWorks(limit = 8): Promise<{
 
   if (hasDmmCredentials()) {
     try {
-      const manga = await fetchDoujinMangaItems(Math.max(limit * 3, 24), 1);
+      const manga = await fetchDoujinMangaItems(offset + limit + 12, offset + 1);
       const works = sortByDateDesc(
         filterWorksByMedia(parseResponse(manga), "manga")
       ).slice(0, limit);
 
       if (works.length > 0) {
-        return { works, source: "dmm" };
+        return { ...paginate(works, limit), works, source: "dmm" };
       }
     } catch (error) {
       console.error("[CircleMap] DMM fetch failed, using mock:", error);
     }
   }
 
-  return { works: DEMO_WORKS.slice(0, limit), source: "mock" };
+  const works = DEMO_WORKS.slice(offset, offset + limit);
+  return { ...paginate(works, limit), works, source: "mock" };
 }
 
-export async function getPopularWorks(limit = 12): Promise<{
+export async function getPopularWorks(
+  limit = 12,
+  offset = 0
+): Promise<{
   works: Work[];
+  hasMore: boolean;
   source: DataSource;
 }> {
   try {
-    const dbWorks = await dbGetPopularWorks(limit);
-    if (dbWorks.length > 0) {
-      return { works: dbWorks, source: "supabase" };
+    const dbWorks = await dbGetPopularWorks(limit, offset);
+    if (dbWorks.length > 0 || offset > 0) {
+      return { ...paginate(dbWorks, limit), works: dbWorks, source: "supabase" };
     }
   } catch (error) {
     console.error("[CircleMap] Supabase popular fetch failed:", error);
@@ -93,18 +106,19 @@ export async function getPopularWorks(limit = 12): Promise<{
 
   if (hasDmmCredentials()) {
     try {
-      const json = await fetchPopularDoujinItems(Math.max(limit * 2, 24), 1);
+      const json = await fetchPopularDoujinItems(limit, offset + 1);
       const works = dedupeWorks(parseResponse(json)).slice(0, limit);
 
       if (works.length > 0) {
-        return { works, source: "dmm" };
+        return { ...paginate(works, limit), works, source: "dmm" };
       }
     } catch (error) {
       console.error("[CircleMap] DMM popular fetch failed:", error);
     }
   }
 
-  return { works: DEMO_WORKS.slice(0, limit), source: "mock" };
+  const works = DEMO_WORKS.slice(offset, offset + limit);
+  return { ...paginate(works, limit), works, source: "mock" };
 }
 
 type CircleSort = "popular" | "name";
@@ -155,15 +169,17 @@ async function fetchWorksForCircleDiscovery(): Promise<Work[]> {
 
 export async function getDiscoverableCircles(
   limit = 50,
-  sort: CircleSort = "name"
+  sort: CircleSort = "name",
+  offset = 0
 ): Promise<{
   circles: Circle[];
+  hasMore: boolean;
   source: DataSource;
 }> {
   try {
-    const circles = await dbGetCircles(limit, sort);
-    if (circles.length > 0) {
-      return { circles, source: "supabase" };
+    const circles = await dbGetCircles(limit, sort, offset);
+    if (circles.length > 0 || offset > 0) {
+      return { ...paginate(circles, limit), circles, source: "supabase" };
     }
   } catch (error) {
     console.error("[CircleMap] Supabase discover circles failed:", error);
@@ -172,34 +188,44 @@ export async function getDiscoverableCircles(
   if (hasDmmCredentials()) {
     try {
       const works = await fetchWorksForCircleDiscovery();
-      const circles = collectCirclesFromWorks(works, limit, sort);
+      const circles = collectCirclesFromWorks(
+        works,
+        offset + limit,
+        sort
+      ).slice(offset, offset + limit);
 
       if (circles.length > 0) {
-        return { circles, source: "dmm" };
+        return { ...paginate(circles, limit), circles, source: "dmm" };
       }
     } catch (error) {
       console.error("[CircleMap] DMM discover circles failed:", error);
     }
   }
 
-  return { circles: [DEMO_CIRCLE], source: "mock" };
+  const circles = offset === 0 ? [DEMO_CIRCLE] : [];
+  return { ...paginate(circles, limit), circles, source: "mock" };
 }
 
-export async function getPopularCircles(limit = 8): Promise<{
+export async function getPopularCircles(
+  limit = 8,
+  offset = 0
+): Promise<{
   circles: Circle[];
+  hasMore: boolean;
   source: DataSource;
 }> {
-  return getDiscoverableCircles(limit, "popular");
+  return getDiscoverableCircles(limit, "popular", offset);
 }
 
 export async function getWorksByMedia(
   mediaType: MediaType,
-  limit = 24
-): Promise<{ works: Work[]; source: DataSource }> {
+  limit = 24,
+  offset = 0
+): Promise<{ works: Work[]; hasMore: boolean; source: DataSource }> {
   try {
-    const dbWorks = await dbGetWorksByMedia(mediaType, limit);
-    if (dbWorks.length > 0) {
-      return { works: dbWorks, source: "supabase" };
+    const dbWorks = await dbGetWorksByMedia(mediaType, limit, offset);
+    if (dbWorks.length > 0 || offset > 0) {
+      return { ...paginate(dbWorks, limit), works: dbWorks, source: "supabase" };
     }
   } catch (error) {
     console.error(`[CircleMap] Supabase ${mediaType} fetch failed:`, error);
@@ -207,39 +233,39 @@ export async function getWorksByMedia(
 
   if (hasDmmCredentials()) {
     try {
-      const json = await MEDIA_FETCHERS[mediaType](limit, 1);
+      const json = await MEDIA_FETCHERS[mediaType](limit, offset + 1);
       const works = sortByDateDesc(
         filterWorksByMedia(parseResponse(json), mediaType)
       ).slice(0, limit);
 
       if (works.length > 0) {
-        return { works, source: "dmm" };
+        return { ...paginate(works, limit), works, source: "dmm" };
       }
     } catch (error) {
       console.error(`[CircleMap] DMM ${mediaType} fetch failed:`, error);
     }
   }
 
-  const mock = DEMO_WORKS.filter((w) => w.mediaType === mediaType).slice(
-    0,
-    limit
-  );
-  return { works: mock.length > 0 ? mock : DEMO_WORKS.slice(0, limit), source: "mock" };
+  const filtered = DEMO_WORKS.filter((w) => w.mediaType === mediaType);
+  const pool = filtered.length > 0 ? filtered : DEMO_WORKS;
+  const works = pool.slice(offset, offset + limit);
+  return { ...paginate(works, limit), works, source: "mock" };
 }
 
 export async function searchWorks(
   keyword: string,
-  limit = 24
-): Promise<{ works: Work[]; source: DataSource }> {
+  limit = 24,
+  offset = 0
+): Promise<{ works: Work[]; hasMore: boolean; source: DataSource }> {
   const trimmed = keyword.trim();
   if (!trimmed) {
-    return { works: [], source: "mock" };
+    return { works: [], hasMore: false, source: "mock" };
   }
 
   try {
-    const dbWorks = await dbSearchWorks(trimmed, limit);
-    if (dbWorks.length > 0) {
-      return { works: dbWorks, source: "supabase" };
+    const dbWorks = await dbSearchWorks(trimmed, limit, offset);
+    if (dbWorks.length > 0 || offset > 0) {
+      return { ...paginate(dbWorks, limit), works: dbWorks, source: "supabase" };
     }
   } catch (error) {
     console.error("[CircleMap] Supabase search failed:", error);
@@ -249,12 +275,12 @@ export async function searchWorks(
     try {
       const json = await searchByKeyword(trimmed, limit);
       const works = dedupeWorks(sortByDateDesc(parseResponse(json))).slice(
-        0,
-        limit
+        offset,
+        offset + limit
       );
 
       if (works.length > 0) {
-        return { works, source: "dmm" };
+        return { ...paginate(works, limit), works, source: "dmm" };
       }
     } catch (error) {
       console.error("[CircleMap] DMM search failed:", error);
@@ -267,7 +293,8 @@ export async function searchWorks(
       w.title.toLowerCase().includes(lower) ||
       w.circleName.toLowerCase().includes(lower)
   );
-  return { works: mock, source: "mock" };
+  const works = mock.slice(offset, offset + limit);
+  return { ...paginate(works, limit), works, source: "mock" };
 }
 
 export async function getWork(id: string): Promise<{

@@ -1,20 +1,22 @@
 import Link from "next/link";
+import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { SearchForm } from "@/components/SearchForm";
-import { WorkCard } from "@/components/WorkCard";
 import { searchWorks } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 24;
 
 type Props = { searchParams: Promise<{ q?: string }> };
 
 export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
-  const { works, source } = query
-    ? await searchWorks(query, 24)
-    : { works: [], source: "mock" as const };
+  const { works, hasMore, source } = query
+    ? await searchWorks(query, PAGE_SIZE)
+    : { works: [], hasMore: false, source: "mock" as const };
 
   return (
     <PageShell active="search">
@@ -39,14 +41,23 @@ export default async function SearchPage({ searchParams }: Props) {
         {query ? (
           <>
             <p className="search-result-meta">
-              「{query}」の検索結果 <strong>{works.length}件</strong>
+              「{query}」の検索結果
+              {works.length > 0 ? (
+                <>
+                  {" "}
+                  <strong>{works.length}件以上</strong>
+                </>
+              ) : null}
             </p>
             {works.length > 0 ? (
-              <div className="yt-grid">
-                {works.map((work) => (
-                  <WorkCard key={work.id} work={work} />
-                ))}
-              </div>
+              <InfiniteWorkGrid
+                key={query}
+                initialWorks={works}
+                feedType="search"
+                hasMore={hasMore}
+                pageSize={PAGE_SIZE}
+                query={query}
+              />
             ) : (
               <p className="empty-state">
                 該当する作品が見つかりませんでした。別のキーワードをお試しください。

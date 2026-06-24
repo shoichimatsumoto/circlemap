@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
 import { DataModeBanner } from "@/components/DataModeBanner";
-import { WorkCard } from "@/components/WorkCard";
 import { getWorksByMedia } from "@/lib/data";
 import {
   MEDIA_LABELS,
@@ -11,6 +11,8 @@ import {
 } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 24;
 
 const MEDIA_META: Record<
   MediaType,
@@ -42,7 +44,10 @@ export default async function MediaPage({ params }: Props) {
 
   const mediaType = type as MediaType;
   const meta = MEDIA_META[mediaType];
-  const { works, source } = await getWorksByMedia(mediaType, 24);
+  const { works, hasMore, source } = await getWorksByMedia(
+    mediaType,
+    PAGE_SIZE
+  );
 
   return (
     <PageShell active={mediaType}>
@@ -63,11 +68,13 @@ export default async function MediaPage({ params }: Props) {
         </header>
 
         {works.length > 0 ? (
-          <div className="yt-grid">
-            {works.map((work) => (
-              <WorkCard key={work.id} work={work} />
-            ))}
-          </div>
+          <InfiniteWorkGrid
+            initialWorks={works}
+            feedType="media"
+            hasMore={hasMore}
+            pageSize={PAGE_SIZE}
+            mediaType={mediaType}
+          />
         ) : (
           <p className="empty-state">該当する作品が見つかりませんでした。</p>
         )}

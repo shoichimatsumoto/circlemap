@@ -1,13 +1,17 @@
-import Link from "next/link";
-import { CircleCard } from "@/components/CircleCard";
+import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { PageShell } from "@/components/PageShell";
 import { getDiscoverableCircles } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 24;
+
 export default async function CirclesPage() {
-  const { circles, source } = await getDiscoverableCircles(60, "popular");
+  const { circles, hasMore, source } = await getDiscoverableCircles(
+    PAGE_SIZE,
+    "popular"
+  );
 
   return (
     <PageShell active="circles">
@@ -21,11 +25,14 @@ export default async function CirclesPage() {
           </p>
         </header>
 
-        <div className="yt-channel-list">
-          {circles.map((circle, index) => (
-            <CircleCard key={circle.id} circle={circle} rank={index + 1} />
-          ))}
-        </div>
+        <InfiniteCircleList
+          initialCircles={circles}
+          sort="popular"
+          hasMore={hasMore}
+          pageSize={PAGE_SIZE}
+          layout="list"
+          showRank
+        />
       </main>
     </PageShell>
   );
