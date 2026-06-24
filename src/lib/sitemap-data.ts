@@ -1,18 +1,21 @@
-import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/site";
 import { createSupabaseAnonClient, hasSupabasePublicConfig } from "@/lib/supabase";
 import type { MediaType } from "@/lib/types";
 
 const MEDIA_TYPES: MediaType[] = ["manga", "cg", "voice", "game"];
 
-// 1時間キャッシュして Google の再取得を安定させる
-export const revalidate = 3600;
+export type SitemapEntry = {
+  url: string;
+  lastModified?: Date;
+  changeFrequency?: string;
+  priority?: number;
+};
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   const base = getSiteUrl();
   const now = new Date();
 
-  const staticPages: MetadataRoute.Sitemap = [
+  const staticPages: SitemapEntry[] = [
     { url: base, lastModified: now, changeFrequency: "daily", priority: 1 },
     {
       url: `${base}/circles`,
@@ -75,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .limit(1000),
     ]);
 
-    const workPages: MetadataRoute.Sitemap =
+    const workPages: SitemapEntry[] =
       worksResult.data?.map((work) => ({
         url: `${base}/work/${work.id}`,
         lastModified: work.updated_at ? new Date(work.updated_at) : now,
@@ -83,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
       })) ?? [];
 
-    const circlePages: MetadataRoute.Sitemap =
+    const circlePages: SitemapEntry[] =
       circlesResult.data?.map((circle) => ({
         url: `${base}/circle?id=${encodeURIComponent(circle.id)}`,
         lastModified: circle.updated_at ? new Date(circle.updated_at) : now,

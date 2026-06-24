@@ -19,20 +19,56 @@ function parseResponse(json: unknown): Work[] {
   return dmmItemsToWorks(data.result.items);
 }
 
-async function fetchWorksForSync(): Promise<Work[]> {
-  const results = await Promise.allSettled([
-    fetchPopularDoujinItems(100, 1),
-    fetchPopularDoujinItems(100, 101),
-    fetchDoujinMangaItems(100, 1),
-    fetchDoujinMangaItems(100, 101),
-    fetchDoujinGameItems(50, 1),
-  ]);
+type SyncFetchTask = () => Promise<unknown>;
 
-  return dedupeWorks(
-    results.flatMap((result) =>
-      result.status === "fulfilled" ? parseResponse(result.value) : []
-    )
-  );
+/** 1バッチあたりの並列数（DMM API・Vercel タイムアウトのバランス） */
+const BATCH_SIZE = 5;
+
+/**
+ * 同期用の DMM 取得タスク一覧。
+ * 音声・CG は同人フロアの返却データから自動判定されるため、
+ * ページを増やしてユニーク作品数を確保する。
+ */
+function buildSyncFetchTasks(): SyncFetchTask[] {
+  const tasks: SyncFetchTask[] = [];
+
+  const popularOffsets = [1, 101, 201, 301, 401];
+  for (const offset of popularOffsets) {
+    tasks.push(() => fetchPopularDoujinItems(100, offset));
+  }
+
+  const mangaOffsets = [1, 101, 201, 301, 401, 501];
+  for (const offset of mangaOffsets) {
+    tasks.push(() => fetchDoujinMangaItems(100, offset));
+  }
+
+  const gameOffsets = [1, 51, 101, 151, 201];
+  for (const offset of gameOffsets) {
+    tasks.push(() => fetchDoujinGameItems(50, offset));
+  }
+
+  return tasks;
+}
+
+async function runBatchedFetches(tasks: SyncFetchTask[]): Promise<Work[]> {
+  const allWorks: Work[] = [];
+
+  for (let i = 0; i < tasks.length; i += BATCH_SIZE) {
+    const batch = tasks.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(batch.map((task) => task()));
+
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        allWorks.push(...parseResponse(result.value));
+      }
+    }
+  }
+
+  return dedupeWorks(allWorks);
+}
+
+async function fetchWorksForSync(): Promise<Work[]> {
+  return runBatchedFetches(buildSyncFetchTasks());
 }
 
 function circleToRow(circle: Circle) {
@@ -87,6 +123,7 @@ function buildCirclesFromWorks(works: Work[]): Circle[] {
 export async function syncDmmToSupabase(): Promise<{
   worksSynced: number;
   circlesSynced: number;
+  worksFetched: number;
 }> {
   if (!hasDmmCredentials()) {
     throw new Error("DMM API キーが未設定です");
@@ -125,5 +162,6 @@ export async function syncDmmToSupabase(): Promise<{
   return {
     circlesSynced: circleRows.length,
     worksSynced: workRows.length,
+    worksFetched: works.length,
   };
 }
