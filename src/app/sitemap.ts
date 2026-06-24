@@ -5,7 +5,8 @@ import type { MediaType } from "@/lib/types";
 
 const MEDIA_TYPES: MediaType[] = ["manga", "cg", "voice", "game"];
 
-export const dynamic = "force-dynamic";
+// 1時間キャッシュして Google の再取得を安定させる
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
@@ -55,39 +56,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return staticPages;
   }
 
-  const supabase = createSupabaseAnonClient();
-  if (!supabase) {
+  try {
+    const supabase = createSupabaseAnonClient();
+    if (!supabase) {
+      return staticPages;
+    }
+
+    const [worksResult, circlesResult] = await Promise.all([
+      supabase
+        .from("works")
+        .select("id, updated_at")
+        .order("updated_at", { ascending: false })
+        .limit(2000),
+      supabase
+        .from("circles")
+        .select("id, updated_at")
+        .order("updated_at", { ascending: false })
+        .limit(1000),
+    ]);
+
+    const workPages: MetadataRoute.Sitemap =
+      worksResult.data?.map((work) => ({
+        url: `${base}/work/${work.id}`,
+        lastModified: work.updated_at ? new Date(work.updated_at) : now,
+        changeFrequency: "weekly",
+        priority: 0.6,
+      })) ?? [];
+
+    const circlePages: MetadataRoute.Sitemap =
+      circlesResult.data?.map((circle) => ({
+        url: `${base}/circle?id=${encodeURIComponent(circle.id)}`,
+        lastModified: circle.updated_at ? new Date(circle.updated_at) : now,
+        changeFrequency: "weekly",
+        priority: 0.5,
+      })) ?? [];
+
+    return [...staticPages, ...workPages, ...circlePages];
+  } catch {
     return staticPages;
   }
-
-  const [worksResult, circlesResult] = await Promise.all([
-    supabase
-      .from("works")
-      .select("id, updated_at")
-      .order("updated_at", { ascending: false })
-      .limit(2000),
-    supabase
-      .from("circles")
-      .select("id, updated_at")
-      .order("updated_at", { ascending: false })
-      .limit(1000),
-  ]);
-
-  const workPages: MetadataRoute.Sitemap =
-    worksResult.data?.map((work) => ({
-      url: `${base}/work/${work.id}`,
-      lastModified: work.updated_at ? new Date(work.updated_at) : now,
-      changeFrequency: "weekly",
-      priority: 0.6,
-    })) ?? [];
-
-  const circlePages: MetadataRoute.Sitemap =
-    circlesResult.data?.map((circle) => ({
-      url: `${base}/circle?id=${encodeURIComponent(circle.id)}`,
-      lastModified: circle.updated_at ? new Date(circle.updated_at) : now,
-      changeFrequency: "weekly",
-      priority: 0.5,
-    })) ?? [];
-
-  return [...staticPages, ...workPages, ...circlePages];
 }
