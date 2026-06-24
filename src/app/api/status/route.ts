@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDataMode, getLatestWorks } from "@/lib/data";
 
 export async function GET() {
-  const mode = getDataMode();
+  const mode = await getDataMode();
   const { works, source } = await getLatestWorks(3);
 
   return NextResponse.json({

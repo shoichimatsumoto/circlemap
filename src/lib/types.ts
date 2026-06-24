@@ -31,7 +31,7 @@ export type Circle = {
   tags: string[];
 };
 
-export type DataSource = "mock" | "dmm";
+export type DataSource = "mock" | "dmm" | "supabase";
 
 export const MEDIA_LABELS: Record<MediaType, string> = {
   manga: "📕",

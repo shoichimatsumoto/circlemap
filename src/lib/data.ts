@@ -22,6 +22,19 @@ import {
   DEMO_WORKS,
   FEATURED_WORK,
 } from "@/lib/mock-data";
+import {
+  dbGetCircle,
+  dbGetCircleWorks,
+  dbGetCircles,
+  dbGetLatestWorks,
+  dbGetPopularWorks,
+  dbGetRelatedWorks,
+  dbGetTopCircle,
+  dbGetWork,
+  dbGetWorksByMedia,
+  dbHasData,
+  dbSearchWorks,
+} from "@/lib/supabase-db";
 import type { Circle, DataSource, MediaType, Work } from "@/lib/types";
 
 function parseResponse(json: unknown): Work[] {
@@ -38,6 +51,15 @@ export async function getLatestWorks(limit = 8): Promise<{
   works: Work[];
   source: DataSource;
 }> {
+  try {
+    const dbWorks = await dbGetLatestWorks(limit, "manga");
+    if (dbWorks.length > 0) {
+      return { works: dbWorks, source: "supabase" };
+    }
+  } catch (error) {
+    console.error("[CircleMap] Supabase fetch failed:", error);
+  }
+
   if (hasDmmCredentials()) {
     try {
       const manga = await fetchDoujinMangaItems(Math.max(limit * 3, 24), 1);
@@ -60,6 +82,15 @@ export async function getPopularWorks(limit = 12): Promise<{
   works: Work[];
   source: DataSource;
 }> {
+  try {
+    const dbWorks = await dbGetPopularWorks(limit);
+    if (dbWorks.length > 0) {
+      return { works: dbWorks, source: "supabase" };
+    }
+  } catch (error) {
+    console.error("[CircleMap] Supabase popular fetch failed:", error);
+  }
+
   if (hasDmmCredentials()) {
     try {
       const json = await fetchPopularDoujinItems(Math.max(limit * 2, 24), 1);
@@ -129,6 +160,15 @@ export async function getDiscoverableCircles(
   circles: Circle[];
   source: DataSource;
 }> {
+  try {
+    const circles = await dbGetCircles(limit, sort);
+    if (circles.length > 0) {
+      return { circles, source: "supabase" };
+    }
+  } catch (error) {
+    console.error("[CircleMap] Supabase discover circles failed:", error);
+  }
+
   if (hasDmmCredentials()) {
     try {
       const works = await fetchWorksForCircleDiscovery();
@@ -156,6 +196,15 @@ export async function getWorksByMedia(
   mediaType: MediaType,
   limit = 24
 ): Promise<{ works: Work[]; source: DataSource }> {
+  try {
+    const dbWorks = await dbGetWorksByMedia(mediaType, limit);
+    if (dbWorks.length > 0) {
+      return { works: dbWorks, source: "supabase" };
+    }
+  } catch (error) {
+    console.error(`[CircleMap] Supabase ${mediaType} fetch failed:`, error);
+  }
+
   if (hasDmmCredentials()) {
     try {
       const json = await MEDIA_FETCHERS[mediaType](limit, 1);
@@ -185,6 +234,15 @@ export async function searchWorks(
   const trimmed = keyword.trim();
   if (!trimmed) {
     return { works: [], source: "mock" };
+  }
+
+  try {
+    const dbWorks = await dbSearchWorks(trimmed, limit);
+    if (dbWorks.length > 0) {
+      return { works: dbWorks, source: "supabase" };
+    }
+  } catch (error) {
+    console.error("[CircleMap] Supabase search failed:", error);
   }
 
   if (hasDmmCredentials()) {
@@ -217,6 +275,16 @@ export async function getWork(id: string): Promise<{
   relatedWorks: Work[];
   source: DataSource;
 }> {
+  try {
+    const work = await dbGetWork(id);
+    if (work) {
+      const relatedWorks = await dbGetRelatedWorks(work.circleId, work.id, 6);
+      return { work, relatedWorks, source: "supabase" };
+    }
+  } catch (error) {
+    console.error("[CircleMap] Supabase work fetch failed:", error);
+  }
+
   if (hasDmmCredentials()) {
     try {
       const json = await fetchItemByContentId(id);
@@ -283,6 +351,42 @@ export async function getCirclePage(circleId = "demo"): Promise<{
   featured: Work;
   source: DataSource;
 }> {
+  try {
+    const resolvedId =
+      circleId === "demo" || circleId === DEMO_CIRCLE.id ? null : circleId;
+
+    if (resolvedId) {
+      const [circle, works] = await Promise.all([
+        dbGetCircle(resolvedId),
+        dbGetCircleWorks(resolvedId),
+      ]);
+
+      if (circle && works.length > 0) {
+        return {
+          circle,
+          works,
+          featured: works[0],
+          source: "supabase",
+        };
+      }
+    } else {
+      const topCircle = await dbGetTopCircle();
+      if (topCircle) {
+        const works = await dbGetCircleWorks(topCircle.id);
+        if (works.length > 0) {
+          return {
+            circle: topCircle,
+            works,
+            featured: works[0],
+            source: "supabase",
+          };
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[CircleMap] Supabase circle fetch failed:", error);
+  }
+
   if (circleId === "demo" || circleId === DEMO_CIRCLE.id) {
     if (!hasDmmCredentials()) {
       return {
@@ -385,10 +489,23 @@ export async function getCirclePage(circleId = "demo"): Promise<{
   };
 }
 
-export function getDataMode(): { hasCredentials: boolean; mode: DataSource } {
+export async function getDataMode(): Promise<{
+  hasCredentials: boolean;
+  hasSupabaseData: boolean;
+  mode: DataSource;
+}> {
   const hasCredentials = hasDmmCredentials();
+  let hasSupabaseData = false;
+
+  try {
+    hasSupabaseData = await dbHasData();
+  } catch {
+    hasSupabaseData = false;
+  }
+
   return {
     hasCredentials,
-    mode: hasCredentials ? "dmm" : "mock",
+    hasSupabaseData,
+    mode: hasSupabaseData ? "supabase" : hasCredentials ? "dmm" : "mock",
   };
 }

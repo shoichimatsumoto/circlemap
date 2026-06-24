@@ -5,8 +5,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 function isAuthorized(request: Request): boolean {
-  const secret = process.env.SYNC_SECRET;
-  if (!secret) return false;
+  const syncSecret = process.env.SYNC_SECRET;
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!syncSecret && !cronSecret) return false;
 
   const url = new URL(request.url);
   const fromQuery = url.searchParams.get("secret");
@@ -14,7 +16,11 @@ function isAuthorized(request: Request): boolean {
     .get("authorization")
     ?.replace(/^Bearer\s+/i, "");
 
-  return fromQuery === secret || fromHeader === secret;
+  if (fromQuery && syncSecret && fromQuery === syncSecret) return true;
+  if (fromHeader && syncSecret && fromHeader === syncSecret) return true;
+  if (fromHeader && cronSecret && fromHeader === cronSecret) return true;
+
+  return false;
 }
 
 export async function GET(request: Request) {
