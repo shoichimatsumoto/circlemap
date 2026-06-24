@@ -1,4 +1,5 @@
 import { createSupabaseAnonClient, hasSupabasePublicConfig } from "@/lib/supabase";
+import { resolveAffiliateUrl } from "@/lib/dmm-affiliate";
 import type { Circle, MediaType, Work } from "@/lib/types";
 
 type CircleRow = {
@@ -57,7 +58,7 @@ function rowToWork(row: WorkRow): Work {
     tags: row.tags ?? [],
     circleId: row.circle_id,
     circleName: row.circle_name,
-    affiliateUrl: row.affiliate_url ?? undefined,
+    affiliateUrl: resolveAffiliateUrl(row.affiliate_url ?? undefined),
     thumbnailUrl: row.thumbnail_url ?? undefined,
     description: row.description ?? undefined,
   };

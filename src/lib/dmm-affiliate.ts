@@ -13,8 +13,13 @@ export function resolveAffiliateUrl(rawUrl?: string): string | undefined {
   try {
     const url = new URL(rawUrl);
     url.searchParams.set("af_id", linkAffiliateId);
+    if (url.searchParams.has("affiliate_id")) {
+      url.searchParams.set("affiliate_id", linkAffiliateId);
+    }
     return url.toString();
   } catch {
-    return rawUrl.replace(/af_id=[^&]+/, `af_id=${linkAffiliateId}`);
+    return rawUrl
+      .replace(/af_id=[^&]+/, `af_id=${linkAffiliateId}`)
+      .replace(/affiliate_id=[^&]+/, `affiliate_id=${linkAffiliateId}`);
   }
 }
