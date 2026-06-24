@@ -13,6 +13,7 @@ export type Work = {
   circleName: string;
   affiliateUrl?: string;
   thumbnailUrl?: string;
+  sampleImages?: string[];
   description?: string;
 };
 

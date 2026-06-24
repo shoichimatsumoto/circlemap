@@ -48,11 +48,20 @@ function slugify(name: string): string {
   );
 }
 
+export function extractSampleImages(item: DmmItem): string[] {
+  const large = item.sampleImageURL?.sample_l?.image ?? [];
+  const small = item.sampleImageURL?.sample_s?.image ?? [];
+  const images = large.length > 0 ? large : small;
+  return [...new Set(images.filter(Boolean))];
+}
+
 export function dmmItemToWork(item: DmmItem): Work {
   const maker = item.iteminfo?.maker?.[0];
   const circleName = maker?.name ?? "不明なサークル";
   const circleId = maker?.id ? String(maker.id) : slugify(circleName);
   const genres = item.iteminfo?.genre?.map((g) => g.name) ?? [];
+  const thumbnailUrl = item.imageURL?.large ?? item.imageURL?.small;
+  const sampleImages = extractSampleImages(item);
 
   return {
     id: item.content_id,
@@ -65,7 +74,8 @@ export function dmmItemToWork(item: DmmItem): Work {
     circleName,
     affiliateUrl:
       resolveAffiliateUrl(item.affiliateURL) ?? buildAffiliateUrl(item.URL),
-    thumbnailUrl: item.imageURL?.large ?? item.imageURL?.small,
+    thumbnailUrl,
+    sampleImages: sampleImages.length > 0 ? sampleImages : undefined,
     description: item.category_name,
   };
 }

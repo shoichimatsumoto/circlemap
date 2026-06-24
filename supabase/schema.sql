@@ -27,6 +27,7 @@ create table if not exists works (
   circle_name text not null,
   affiliate_url text,
   thumbnail_url text,
+  sample_images text[] not null default '{}',
   description text,
   updated_at timestamptz not null default now()
 );

@@ -28,6 +28,7 @@ type WorkRow = {
   circle_name: string;
   affiliate_url: string | null;
   thumbnail_url: string | null;
+  sample_images: string[] | null;
   description: string | null;
 };
 
@@ -60,6 +61,7 @@ function rowToWork(row: WorkRow): Work {
     circleName: row.circle_name,
     affiliateUrl: resolveAffiliateUrl(row.affiliate_url ?? undefined),
     thumbnailUrl: row.thumbnail_url ?? undefined,
+    sampleImages: row.sample_images?.length ? row.sample_images : undefined,
     description: row.description ?? undefined,
   };
 }

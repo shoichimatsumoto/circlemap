@@ -47,6 +47,35 @@ function sortByDateDesc(works: Work[]): Work[] {
   return [...works].sort((a, b) => b.date.localeCompare(a.date));
 }
 
+async function enrichWorkWithSampleImages(
+  work: Work,
+  id: string
+): Promise<Work> {
+  if (work.sampleImages && work.sampleImages.length > 0) {
+    return work;
+  }
+
+  if (!hasDmmCredentials()) {
+    return work;
+  }
+
+  try {
+    const json = await fetchItemByContentId(id);
+    const dmmWork = parseResponse(json)[0];
+    if (!dmmWork?.sampleImages?.length) {
+      return work;
+    }
+
+    return {
+      ...work,
+      sampleImages: dmmWork.sampleImages,
+      thumbnailUrl: work.thumbnailUrl ?? dmmWork.thumbnailUrl,
+    };
+  } catch {
+    return work;
+  }
+}
+
 function paginate<T>(items: T[], limit: number): { items: T[]; hasMore: boolean } {
   return { items, hasMore: items.length === limit };
 }
@@ -305,8 +334,9 @@ export async function getWork(id: string): Promise<{
   try {
     const work = await dbGetWork(id);
     if (work) {
-      const relatedWorks = await dbGetRelatedWorks(work.circleId, work.id, 6);
-      return { work, relatedWorks, source: "supabase" };
+      const enriched = await enrichWorkWithSampleImages(work, id);
+      const relatedWorks = await dbGetRelatedWorks(enriched.circleId, enriched.id, 6);
+      return { work: enriched, relatedWorks, source: "supabase" };
     }
   } catch (error) {
     console.error("[CircleMap] Supabase work fetch failed:", error);

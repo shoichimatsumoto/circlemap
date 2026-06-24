@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { WorkCard } from "@/components/WorkCard";
+import { WorkSampleGallery } from "@/components/WorkSampleGallery";
 import {
   formatPrice,
   formatWorkMeta,
@@ -42,19 +43,12 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
     <>
       <article className="work-detail">
         <div className="work-detail-main">
-          <div className={`work-detail-thumb ${work.mediaType}`}>
-            {work.thumbnailUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={work.thumbnailUrl}
-                alt=""
-                className="work-detail-image"
-              />
-            ) : null}
-            <span className="media-badge lg">
-              {MEDIA_LABELS[work.mediaType]} {MEDIA_NAMES[work.mediaType]}
-            </span>
-          </div>
+          <WorkSampleGallery
+            title={work.title}
+            thumbnailUrl={work.thumbnailUrl}
+            sampleImages={work.sampleImages}
+            mediaType={work.mediaType}
+          />
 
           <div className="work-detail-info">
             <p className="work-detail-type">

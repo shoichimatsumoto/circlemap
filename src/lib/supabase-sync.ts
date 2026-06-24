@@ -65,6 +65,7 @@ function workToRow(work: Work) {
     circle_name: work.circleName,
     affiliate_url: work.affiliateUrl ?? null,
     thumbnail_url: work.thumbnailUrl ?? null,
+    sample_images: work.sampleImages ?? [],
     description: work.description ?? null,
     updated_at: new Date().toISOString(),
   };
