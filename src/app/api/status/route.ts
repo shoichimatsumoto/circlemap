@@ -8,9 +8,7 @@ export async function GET() {
   return NextResponse.json({
     ...mode,
     source,
-    linkAffiliateConfigured: Boolean(
-      process.env.DMM_LINK_AFFILIATE_ID ?? process.env.DMM_SITE_AFFILIATE_ID
-    ),
+    linkAffiliateConfigured: Boolean(process.env.DMM_AFFILIATE_ID),
     sampleWorks: works.map((w) => ({
       id: w.id,
       title: w.title,

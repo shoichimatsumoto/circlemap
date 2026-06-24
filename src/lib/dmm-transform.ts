@@ -1,5 +1,5 @@
 import type { DmmItem } from "@/lib/dmm-types";
-import { resolveAffiliateUrl } from "@/lib/dmm-affiliate";
+import { buildAffiliateUrl, resolveAffiliateUrl } from "@/lib/dmm-affiliate";
 import type { Circle, MediaType, Work } from "@/lib/types";
 import { circleInitial } from "@/lib/types";
 
@@ -63,7 +63,8 @@ export function dmmItemToWork(item: DmmItem): Work {
     tags: genres.slice(0, 6),
     circleId,
     circleName,
-    affiliateUrl: resolveAffiliateUrl(item.affiliateURL),
+    affiliateUrl:
+      resolveAffiliateUrl(item.affiliateURL) ?? buildAffiliateUrl(item.URL),
     thumbnailUrl: item.imageURL?.large ?? item.imageURL?.small,
     description: item.category_name,
   };
