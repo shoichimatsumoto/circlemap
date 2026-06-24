@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { CirclePageClient } from "@/components/CirclePageClient";
 import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { DataModeBanner } from "@/components/DataModeBanner";
@@ -12,6 +13,28 @@ const PAGE_SIZE = 24;
 type Props = {
   searchParams: Promise<{ id?: string }>;
 };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { id } = await searchParams;
+
+  if (!id) {
+    return {
+      title: "サークル一覧",
+      description:
+        "FANZA同人のサークルをあいうえお順で一覧表示。サークル単位で作品を横断検索できます。",
+      alternates: { canonical: "/circle" },
+    };
+  }
+
+  const { circle } = await getCirclePage(id);
+  const description = `${circle.name}の同人作品一覧。漫画・CG・音声・ゲームをサークル軸で横断検索できます。`;
+
+  return {
+    title: circle.name,
+    description,
+    alternates: { canonical: `/circle?id=${encodeURIComponent(id)}` },
+  };
+}
 
 export default async function CirclePage({ searchParams }: Props) {
   const { id } = await searchParams;

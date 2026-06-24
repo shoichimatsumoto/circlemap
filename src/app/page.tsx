@@ -5,10 +5,18 @@ import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
 import { getLatestWorks, getPopularWorks } from "@/lib/data";
 import type { DataSource } from "@/lib/types";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 const HOME_PAGE_SIZE = 12;
+
+export const metadata: Metadata = {
+  title: "ホーム",
+  description:
+    "FANZA同人の人気作品・新着作品をサークル軸で探せるCircleMapのトップページ。",
+  alternates: { canonical: "/" },
+};
 
 function resolveSource(...sources: DataSource[]): DataSource {
   if (sources.includes("supabase")) return "supabase";
@@ -46,13 +54,6 @@ export default async function HomePage() {
             keyPrefix="popular-"
           />
         </section>
-
-        <Link href="/circles" className="home-circles-cta">
-          <span className="home-circles-cta-label">★ 人気サークル</span>
-          <span className="home-circles-cta-text">
-            サークル単位で探す · ランキングを見る →
-          </span>
-        </Link>
 
         <section className="feed-section">
           <div className="feed-section-head">

@@ -2,10 +2,18 @@ import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { PageShell } from "@/components/PageShell";
 import { getDiscoverableCircles } from "@/lib/data";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 24;
+
+export const metadata: Metadata = {
+  title: "人気サークルランキング",
+  description:
+    "FANZA同人の人気作品データから抽出した注目サークルランキング。サークル単位で作品を横断検索できます。",
+  alternates: { canonical: "/circles" },
+};
 
 export default async function CirclesPage() {
   const { circles, hasMore, source } = await getDiscoverableCircles(

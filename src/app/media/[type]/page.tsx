@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
 import { DataModeBanner } from "@/components/DataModeBanner";
@@ -37,6 +38,22 @@ const MEDIA_META: Record<
 };
 
 type Props = { params: Promise<{ type: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { type } = await params;
+  if (!Object.keys(MEDIA_META).includes(type)) {
+    return { title: "ページが見つかりません" };
+  }
+
+  const mediaType = type as MediaType;
+  const meta = MEDIA_META[mediaType];
+
+  return {
+    title: meta.title,
+    description: `${meta.description}。サークル軸で横断検索できるCircleMap。`,
+    alternates: { canonical: `/media/${type}` },
+  };
+}
 
 export default async function MediaPage({ params }: Props) {
   const { type } = await params;

@@ -235,37 +235,6 @@ body {
   font-size: 0.82rem;
 }
 
-.home-circles-cta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  margin: 8px 0 32px;
-  padding: 14px 18px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.home-circles-cta:hover {
-  border-color: var(--accent2);
-  background: var(--surface2);
-}
-
-.home-circles-cta-label {
-  font-weight: 700;
-  color: var(--accent2);
-  font-size: 0.9rem;
-}
-
-.home-circles-cta-text {
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
 /* YouTube card grid — PCは4列、漫画と同じ縦長カード */
 .yt-grid {
   display: grid;

@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "プライバシーポリシー",
+  description:
+    "CircleMapのプライバシーポリシー。収集する情報、利用目的、Cookie、アフィリエイトについて。",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (

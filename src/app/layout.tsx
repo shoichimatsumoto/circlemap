@@ -3,6 +3,8 @@ import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import "./globals.css";
 import { DevBanner } from "@/components/DevBanner";
+import { JsonLd } from "@/components/JsonLd";
+import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
 const notoSans = Noto_Sans_JP({
   subsets: ["latin"],
@@ -11,9 +13,41 @@ const notoSans = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "CircleMap — 同人作品をサークル軸で探す",
-  description:
-    "FANZA同人の漫画・CG・音声・ゲームをサークル軸で横断できるデータベース",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: `${SITE_NAME} — 同人作品をサークル軸で探す`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "FANZA",
+    "同人",
+    "サークル",
+    "漫画",
+    "CG",
+    "音声",
+    "ゲーム",
+    "CircleMap",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — 同人作品をサークル軸で探す`,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({
@@ -23,6 +57,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <head>
+        <JsonLd />
+      </head>
       <body className={notoSans.className}>
         {children}
         <DevBanner />

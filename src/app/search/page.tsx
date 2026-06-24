@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
 import { DataModeBanner } from "@/components/DataModeBanner";
@@ -8,6 +9,14 @@ import { searchWorks } from "@/lib/data";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 24;
+
+export const metadata: Metadata = {
+  title: "作品・サークル検索",
+  description:
+    "キーワードでFANZA同人作品を検索。サークル名・作品タイトルから横断検索できます。",
+  alternates: { canonical: "/search" },
+  robots: { index: true, follow: true },
+};
 
 type Props = { searchParams: Promise<{ q?: string }> };
 

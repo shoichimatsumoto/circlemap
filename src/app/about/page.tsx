@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "運営者情報",
+  description:
+    "CircleMapの運営者情報・サイト目的・お問い合わせ先・アフィリエイトに関する表記。",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
