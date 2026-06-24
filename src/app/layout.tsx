@@ -61,6 +61,10 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
+        <meta
+          name="google-site-verification"
+          content="dMRssM_PIDE-52PIvUFePZ8_wIcv6YI2jMyUyhIMk9M"
+        />
         <JsonLd />
       </head>
       <body className={notoSans.className}>
