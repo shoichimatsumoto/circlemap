@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { buildGalleryImages, thumbDmmImageUrl } from "@/lib/dmm-image";
 
 type Props = {
+  workId: string;
   title: string;
   thumbnailUrl?: string;
   sampleImages?: string[];
@@ -10,20 +12,22 @@ type Props = {
 };
 
 export function WorkSampleGallery({
+  workId,
   title,
   thumbnailUrl,
   sampleImages,
   mediaType,
 }: Props) {
-  const images = useMemo(() => {
-    const samples = sampleImages ?? [];
-    if (samples.length > 0) {
-      return samples;
-    }
-    return thumbnailUrl ? [thumbnailUrl] : [];
-  }, [sampleImages, thumbnailUrl]);
+  const images = useMemo(
+    () => buildGalleryImages(thumbnailUrl, sampleImages),
+    [thumbnailUrl, sampleImages]
+  );
 
   const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    setActive(0);
+  }, [workId, images.length]);
 
   if (images.length === 0) {
     return (
@@ -33,16 +37,22 @@ export function WorkSampleGallery({
     );
   }
 
-  const safeActive = Math.min(active, images.length - 1);
+  const safeActive = Math.min(Math.max(0, active), images.length - 1);
+  const isLandscape = mediaType === "game";
 
   return (
-    <div className="work-sample-gallery">
-      <div className={`work-detail-thumb work-sample-main ${mediaType}`}>
+    <div className={`work-sample-gallery ${mediaType}`}>
+      <div
+        className={`work-detail-thumb work-sample-main ${mediaType}${isLandscape ? " landscape" : ""}`}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          key={images[safeActive]}
           src={images[safeActive]}
           alt={`${title} サンプル ${safeActive + 1}`}
           className="work-detail-image"
+          decoding="async"
+          fetchPriority="high"
         />
         <span className="media-badge lg">
           {safeActive + 1} / {images.length}
@@ -58,16 +68,21 @@ export function WorkSampleGallery({
                 type="button"
                 role="tab"
                 aria-selected={index === safeActive}
-                className={`work-sample-thumb${index === safeActive ? " active" : ""}`}
+                className={`work-sample-thumb${index === safeActive ? " active" : ""}${isLandscape ? " landscape" : ""}`}
                 onClick={() => setActive(index)}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt="" />
+                <img
+                  src={thumbDmmImageUrl(url)}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
               </button>
             ))}
           </div>
           <p className="work-sample-note">
-            クリックでサンプル画像を切り替えられます（FANZA登録分）
+            FANZA提供のサンプル画像です。下のサムネイルで切り替えできます。
           </p>
         </>
       ) : null}

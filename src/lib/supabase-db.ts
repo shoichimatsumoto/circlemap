@@ -1,5 +1,6 @@
 import { createSupabaseAnonClient, hasSupabasePublicConfig } from "@/lib/supabase";
 import { resolveAffiliateUrl } from "@/lib/dmm-affiliate";
+import { upgradeDmmImageUrl } from "@/lib/dmm-image";
 import type { Circle, MediaType, Work } from "@/lib/types";
 
 type CircleRow = {
@@ -60,8 +61,12 @@ function rowToWork(row: WorkRow): Work {
     circleId: row.circle_id,
     circleName: row.circle_name,
     affiliateUrl: resolveAffiliateUrl(row.affiliate_url ?? undefined),
-    thumbnailUrl: row.thumbnail_url ?? undefined,
-    sampleImages: row.sample_images?.length ? row.sample_images : undefined,
+    thumbnailUrl: row.thumbnail_url
+      ? upgradeDmmImageUrl(row.thumbnail_url)
+      : undefined,
+    sampleImages: row.sample_images?.length
+      ? row.sample_images.map(upgradeDmmImageUrl)
+      : undefined,
     description: row.description ?? undefined,
   };
 }

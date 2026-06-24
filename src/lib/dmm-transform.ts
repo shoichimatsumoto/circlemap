@@ -1,5 +1,6 @@
 import type { DmmItem } from "@/lib/dmm-types";
 import { buildAffiliateUrl, resolveAffiliateUrl } from "@/lib/dmm-affiliate";
+import { upgradeDmmImageUrl } from "@/lib/dmm-image";
 import type { Circle, MediaType, Work } from "@/lib/types";
 import { circleInitial } from "@/lib/types";
 
@@ -52,7 +53,7 @@ export function extractSampleImages(item: DmmItem): string[] {
   const large = item.sampleImageURL?.sample_l?.image ?? [];
   const small = item.sampleImageURL?.sample_s?.image ?? [];
   const images = large.length > 0 ? large : small;
-  return [...new Set(images.filter(Boolean))];
+  return [...new Set(images.filter(Boolean).map(upgradeDmmImageUrl))];
 }
 
 export function dmmItemToWork(item: DmmItem): Work {
@@ -60,7 +61,9 @@ export function dmmItemToWork(item: DmmItem): Work {
   const circleName = maker?.name ?? "不明なサークル";
   const circleId = maker?.id ? String(maker.id) : slugify(circleName);
   const genres = item.iteminfo?.genre?.map((g) => g.name) ?? [];
-  const thumbnailUrl = item.imageURL?.large ?? item.imageURL?.small;
+  const thumbnailUrl = upgradeDmmImageUrl(
+    item.imageURL?.large ?? item.imageURL?.small ?? ""
+  ) || undefined;
   const sampleImages = extractSampleImages(item);
 
   return {
