@@ -95,12 +95,38 @@ export async function fetchDoujinVoiceItems(hits = 20, offset = 1) {
   });
 }
 
+/** 音声作品をキーワードで追加取得（同期用） */
+export async function fetchVoiceCatalogItems(hits = 100, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    keyword: "ボイス",
+    hits: Math.min(hits, 100),
+    offset,
+    sort: "date",
+  });
+}
+
 export async function fetchDoujinCgItems(hits = 20, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
     service: "doujin",
     floor: "digital_doujin",
     hits: Math.min(hits * 6, 100),
+    offset,
+    sort: "date",
+  });
+}
+
+/** CG・イラスト集をキーワードで追加取得（同期用） */
+export async function fetchCgCatalogItems(hits = 100, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    keyword: "CG",
+    hits: Math.min(hits, 100),
     offset,
     sort: "date",
   });

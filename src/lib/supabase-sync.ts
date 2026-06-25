@@ -1,7 +1,9 @@
 import {
+  fetchCgCatalogItems,
   fetchDoujinGameItems,
   fetchDoujinMangaItems,
   fetchPopularDoujinItems,
+  fetchVoiceCatalogItems,
   hasDmmCredentials,
 } from "@/lib/dmm";
 import type { DmmItemListResponse } from "@/lib/dmm-types";
@@ -11,7 +13,7 @@ import {
   dmmItemsToWorks,
 } from "@/lib/dmm-transform";
 import { createSupabaseServiceClient } from "@/lib/supabase";
-import type { Circle, Work } from "@/lib/types";
+import type { Circle, MediaType, Work } from "@/lib/types";
 
 function parseResponse(json: unknown): Work[] {
   const data = json as DmmItemListResponse;
@@ -50,7 +52,7 @@ async function fetchPopularWorksWithRank(): Promise<Work[]> {
 function buildCatalogFetchTasks(): SyncFetchTask[] {
   const tasks: SyncFetchTask[] = [];
 
-  const mangaOffsets = [1, 101, 201, 301, 401, 501];
+  const mangaOffsets = [1, 101, 201, 301, 401, 501, 601, 701];
   for (const offset of mangaOffsets) {
     tasks.push(() => fetchDoujinMangaItems(100, offset));
   }
@@ -60,7 +62,30 @@ function buildCatalogFetchTasks(): SyncFetchTask[] {
     tasks.push(() => fetchDoujinGameItems(50, offset));
   }
 
+  const voiceOffsets = [1, 101, 201, 301];
+  for (const offset of voiceOffsets) {
+    tasks.push(() => fetchVoiceCatalogItems(100, offset));
+  }
+
+  const cgOffsets = [1, 101, 201, 301];
+  for (const offset of cgOffsets) {
+    tasks.push(() => fetchCgCatalogItems(100, offset));
+  }
+
   return tasks;
+}
+
+function countByMedia(works: Work[]): Record<MediaType, number> {
+  const counts: Record<MediaType, number> = {
+    manga: 0,
+    cg: 0,
+    voice: 0,
+    game: 0,
+  };
+  for (const work of works) {
+    counts[work.mediaType]++;
+  }
+  return counts;
 }
 
 async function runBatchedFetches(tasks: SyncFetchTask[]): Promise<Work[]> {
@@ -164,6 +189,7 @@ export async function syncDmmToSupabase(): Promise<{
   circlesSynced: number;
   worksFetched: number;
   popularRanked: number;
+  byMedia: Record<MediaType, number>;
 }> {
   if (!hasDmmCredentials()) {
     throw new Error("DMM API キーが未設定です");
@@ -180,6 +206,7 @@ export async function syncDmmToSupabase(): Promise<{
   }
 
   const popularRanked = works.filter((w) => w.popularityRank != null).length;
+  const byMedia = countByMedia(works);
   const circles = buildCirclesFromWorks(works);
   const circleRows = circles.map(circleToRow);
   const workRows = works.map(workToRow);
@@ -205,5 +232,6 @@ export async function syncDmmToSupabase(): Promise<{
     worksSynced: workRows.length,
     worksFetched: works.length,
     popularRanked,
+    byMedia,
   };
 }
