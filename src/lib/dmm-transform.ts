@@ -13,20 +13,27 @@ export function detectMediaType(item: DmmItem): MediaType {
   }
 
   const category = item.category_name ?? "";
+  const genreText = (item.iteminfo?.genre ?? []).map((g) => g.name).join(" ");
+  const text = `${category} ${genreText} ${item.title}`;
 
   if (
     category.includes("ボイス") ||
     category.includes("音声") ||
+    /ボイス|音声|ASMR|言葉責め|耳舐|喘ぎ|淫語|シチュエーション音声/i.test(text) ||
     (item.iteminfo?.voice_actor?.length ?? 0) > 0
   ) {
     return "voice";
   }
 
-  if (category.includes("CG") || category.includes("イラスト")) {
+  if (
+    category.includes("CG") ||
+    category.includes("イラスト") ||
+    /CG集|CG・|イラスト集|画集|CGコミック|画像集/i.test(text)
+  ) {
     return "cg";
   }
 
-  if (category.includes("ゲーム")) {
+  if (category.includes("ゲーム") || /ゲーム/i.test(genreText)) {
     return "game";
   }
 

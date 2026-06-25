@@ -108,6 +108,19 @@ export async function fetchVoiceCatalogItems(hits = 100, offset = 1) {
   });
 }
 
+/** 音声 追加キーワード（同期用） */
+export async function fetchVoiceCatalogItemsAlt(hits = 100, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    keyword: "音声",
+    hits: Math.min(hits, 100),
+    offset,
+    sort: "date",
+  });
+}
+
 export async function fetchDoujinCgItems(hits = 20, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
@@ -126,6 +139,19 @@ export async function fetchCgCatalogItems(hits = 100, offset = 1) {
     service: "doujin",
     floor: "digital_doujin",
     keyword: "CG",
+    hits: Math.min(hits, 100),
+    offset,
+    sort: "date",
+  });
+}
+
+/** CG 追加キーワード（同期用） */
+export async function fetchCgCatalogItemsAlt(hits = 100, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    keyword: "イラスト集",
     hits: Math.min(hits, 100),
     offset,
     sort: "date",

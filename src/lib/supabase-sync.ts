@@ -1,9 +1,11 @@
 import {
   fetchCgCatalogItems,
+  fetchCgCatalogItemsAlt,
   fetchDoujinGameItems,
   fetchDoujinMangaItems,
   fetchPopularDoujinItems,
   fetchVoiceCatalogItems,
+  fetchVoiceCatalogItemsAlt,
   hasDmmCredentials,
 } from "@/lib/dmm";
 import type { DmmItemListResponse } from "@/lib/dmm-types";
@@ -24,10 +26,44 @@ function parseResponse(json: unknown): Work[] {
 type SyncFetchTask = () => Promise<unknown>;
 
 const BATCH_SIZE = 5;
-
 const POPULAR_OFFSETS = [1, 101, 201, 301, 401];
 
-/** FANZA 人気順 API からランク付きで取得（順序を保つため逐次実行） */
+function workText(work: Work): string {
+  return `${work.title} ${work.tags.join(" ")} ${work.description ?? ""}`;
+}
+
+function isVoiceLike(work: Work): boolean {
+  return /ボイス|音声|ASMR|言葉責め|耳舐|喘|淫語|シチュエーション/i.test(
+    workText(work)
+  );
+}
+
+function isCgLike(work: Work): boolean {
+  return /CG集|CG・|イラスト集|画集|画像集|CGコミック/i.test(workText(work));
+}
+
+/** 音声キーワード取得結果から音声作品だけを抽出 */
+function extractVoiceWorks(works: Work[]): Work[] {
+  return works.flatMap((work) => {
+    if (work.mediaType === "game") return [];
+    if (work.mediaType === "voice" || isVoiceLike(work)) {
+      return [{ ...work, mediaType: "voice" as const }];
+    }
+    return [];
+  });
+}
+
+/** CGキーワード取得結果からCG作品だけを抽出 */
+function extractCgWorks(works: Work[]): Work[] {
+  return works.flatMap((work) => {
+    if (work.mediaType === "game" || work.mediaType === "voice") return [];
+    if (work.mediaType === "cg" || isCgLike(work)) {
+      return [{ ...work, mediaType: "cg" as const }];
+    }
+    return [];
+  });
+}
+
 async function fetchPopularWorksWithRank(): Promise<Work[]> {
   const works: Work[] = [];
   const seen = new Set<string>();
@@ -49,43 +85,18 @@ async function fetchPopularWorksWithRank(): Promise<Work[]> {
   return works;
 }
 
-function buildCatalogFetchTasks(): SyncFetchTask[] {
+function buildMangaGameTasks(): SyncFetchTask[] {
   const tasks: SyncFetchTask[] = [];
 
-  const mangaOffsets = [1, 101, 201, 301, 401, 501, 601, 701];
-  for (const offset of mangaOffsets) {
+  for (const offset of [1, 101, 201, 301, 401, 501, 601, 701]) {
     tasks.push(() => fetchDoujinMangaItems(100, offset));
   }
 
-  const gameOffsets = [1, 51, 101, 151, 201];
-  for (const offset of gameOffsets) {
+  for (const offset of [1, 51, 101, 151, 201]) {
     tasks.push(() => fetchDoujinGameItems(50, offset));
   }
 
-  const voiceOffsets = [1, 101, 201, 301];
-  for (const offset of voiceOffsets) {
-    tasks.push(() => fetchVoiceCatalogItems(100, offset));
-  }
-
-  const cgOffsets = [1, 101, 201, 301];
-  for (const offset of cgOffsets) {
-    tasks.push(() => fetchCgCatalogItems(100, offset));
-  }
-
   return tasks;
-}
-
-function countByMedia(works: Work[]): Record<MediaType, number> {
-  const counts: Record<MediaType, number> = {
-    manga: 0,
-    cg: 0,
-    voice: 0,
-    game: 0,
-  };
-  for (const work of works) {
-    counts[work.mediaType]++;
-  }
-  return counts;
 }
 
 async function runBatchedFetches(tasks: SyncFetchTask[]): Promise<Work[]> {
@@ -105,12 +116,69 @@ async function runBatchedFetches(tasks: SyncFetchTask[]): Promise<Work[]> {
   return dedupeWorks(allWorks);
 }
 
-/** 人気ランク付き作品とカタログ作品をマージ（人気ランクは上書き優先） */
-function mergeWorksForSync(popular: Work[], catalog: Work[]): Work[] {
+async function fetchVoiceCatalogWorks(): Promise<Work[]> {
+  const all: Work[] = [];
+  const fetches = [
+    fetchVoiceCatalogItems,
+    fetchVoiceCatalogItemsAlt,
+  ] as const;
+
+  for (const fetch of fetches) {
+    for (const offset of [1, 101, 201, 301, 401]) {
+      try {
+        const json = await fetch(100, offset);
+        all.push(...extractVoiceWorks(parseResponse(json)));
+      } catch {
+        // 続行
+      }
+    }
+  }
+
+  return dedupeWorks(all);
+}
+
+async function fetchCgCatalogWorks(): Promise<Work[]> {
+  const all: Work[] = [];
+  const fetches = [fetchCgCatalogItems, fetchCgCatalogItemsAlt] as const;
+
+  for (const fetch of fetches) {
+    for (const offset of [1, 101, 201, 301, 401]) {
+      try {
+        const json = await fetch(100, offset);
+        all.push(...extractCgWorks(parseResponse(json)));
+      } catch {
+        // 続行
+      }
+    }
+  }
+
+  return dedupeWorks(all);
+}
+
+/**
+ * マージ順: 漫画・ゲーム → 音声・CG（後勝ちで media_type 上書き）→ 人気ランク
+ */
+function mergeWorksForSync(
+  popular: Work[],
+  baseCatalog: Work[],
+  voiceCatalog: Work[],
+  cgCatalog: Work[]
+): Work[] {
   const byId = new Map<string, Work>();
 
-  for (const work of catalog) {
+  for (const work of baseCatalog) {
     byId.set(work.id, work);
+  }
+
+  for (const work of voiceCatalog) {
+    const existing = byId.get(work.id);
+    byId.set(work.id, existing ? { ...existing, ...work, mediaType: "voice" } : work);
+  }
+
+  for (const work of cgCatalog) {
+    const existing = byId.get(work.id);
+    if (existing?.mediaType === "voice") continue;
+    byId.set(work.id, existing ? { ...existing, ...work, mediaType: "cg" } : work);
   }
 
   for (const work of popular) {
@@ -121,17 +189,31 @@ function mergeWorksForSync(popular: Work[], catalog: Work[]): Work[] {
     );
   }
 
-  // カタログのみの作品は人気ランクなし（null で upsert）
   return [...byId.values()];
 }
 
 async function fetchWorksForSync(): Promise<Work[]> {
-  const [popular, catalog] = await Promise.all([
+  const [popular, baseCatalog, voiceCatalog, cgCatalog] = await Promise.all([
     fetchPopularWorksWithRank(),
-    runBatchedFetches(buildCatalogFetchTasks()),
+    runBatchedFetches(buildMangaGameTasks()),
+    fetchVoiceCatalogWorks(),
+    fetchCgCatalogWorks(),
   ]);
 
-  return mergeWorksForSync(popular, catalog);
+  return mergeWorksForSync(popular, baseCatalog, voiceCatalog, cgCatalog);
+}
+
+function countByMedia(works: Work[]): Record<MediaType, number> {
+  const counts: Record<MediaType, number> = {
+    manga: 0,
+    cg: 0,
+    voice: 0,
+    game: 0,
+  };
+  for (const work of works) {
+    counts[work.mediaType]++;
+  }
+  return counts;
 }
 
 function circleToRow(circle: Circle) {
