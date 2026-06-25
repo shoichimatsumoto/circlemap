@@ -13,6 +13,8 @@ import {
   buildCircleFromWorks,
   dedupeWorks,
   dmmItemsToWorks,
+  isGameLikeText,
+  isVoiceLikeText,
 } from "@/lib/dmm-transform";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import type { Circle, MediaType, Work } from "@/lib/types";
@@ -33,8 +35,13 @@ function workText(work: Work): string {
 }
 
 function isVoiceLike(work: Work): boolean {
-  return /ボイス|音声|ASMR|言葉責め|耳舐|喘|淫語|シチュエーション/i.test(
-    workText(work)
+  return isVoiceLikeText(workText(work), work.description ?? "");
+}
+
+function isGameLike(work: Work): boolean {
+  return (
+    work.mediaType === "game" ||
+    isGameLikeText(workText(work), work.description ?? "")
   );
 }
 
@@ -45,7 +52,7 @@ function isCgLike(work: Work): boolean {
 /** 音声キーワード取得結果から音声作品だけを抽出 */
 function extractVoiceWorks(works: Work[]): Work[] {
   return works.flatMap((work) => {
-    if (work.mediaType === "game") return [];
+    if (isGameLike(work)) return [];
     if (work.mediaType === "voice" || isVoiceLike(work)) {
       return [{ ...work, mediaType: "voice" as const }];
     }
@@ -172,6 +179,7 @@ function mergeWorksForSync(
 
   for (const work of voiceCatalog) {
     const existing = byId.get(work.id);
+    if (existing && isGameLike(existing)) continue;
     byId.set(work.id, existing ? { ...existing, ...work, mediaType: "voice" } : work);
   }
 

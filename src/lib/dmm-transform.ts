@@ -4,6 +4,35 @@ import { pickBestDmmImageUrl } from "@/lib/dmm-image";
 import type { Circle, MediaType, Work } from "@/lib/types";
 import { circleInitial } from "@/lib/types";
 
+const GAME_GENRE_RE =
+  /ゲーム|シミュレーション|デモ・体験版|RPG|SLG|アドベンチャー|アクション|格闘|パズル|育成/i;
+
+/** タグ・カテゴリからゲーム作品か判定（同人フロアのシミュレーション系も含む） */
+export function isGameLikeText(
+  text: string,
+  category = ""
+): boolean {
+  return category.includes("ゲーム") || GAME_GENRE_RE.test(text);
+}
+
+/** タグ・カテゴリから音声作品か判定（「音声付き」付きゲームは除外） */
+export function isVoiceLikeText(
+  text: string,
+  category = "",
+  hasVoiceActor = false
+): boolean {
+  if (isGameLikeText(text, category)) return false;
+
+  if (category.includes("ボイス")) return true;
+  if (category.includes("音声") && !category.includes("音声付")) return true;
+  if (/ボイス|ASMR|言葉責め|耳舐|喘ぎ|淫語|シチュエーション音声/i.test(text)) {
+    return true;
+  }
+  if (hasVoiceActor) return true;
+
+  return false;
+}
+
 export function detectMediaType(item: DmmItem): MediaType {
   if (
     item.service_code === "pcgame" ||
@@ -15,13 +44,13 @@ export function detectMediaType(item: DmmItem): MediaType {
   const category = item.category_name ?? "";
   const genreText = (item.iteminfo?.genre ?? []).map((g) => g.name).join(" ");
   const text = `${category} ${genreText} ${item.title}`;
+  const hasVoiceActor = (item.iteminfo?.voice_actor?.length ?? 0) > 0;
 
-  if (
-    category.includes("ボイス") ||
-    category.includes("音声") ||
-    /ボイス|音声|ASMR|言葉責め|耳舐|喘ぎ|淫語|シチュエーション音声/i.test(text) ||
-    (item.iteminfo?.voice_actor?.length ?? 0) > 0
-  ) {
+  if (isGameLikeText(text, category)) {
+    return "game";
+  }
+
+  if (isVoiceLikeText(text, category, hasVoiceActor)) {
     return "voice";
   }
 
@@ -31,10 +60,6 @@ export function detectMediaType(item: DmmItem): MediaType {
     /CG集|CG・|イラスト集|画集|CGコミック|画像集/i.test(text)
   ) {
     return "cg";
-  }
-
-  if (category.includes("ゲーム") || /ゲーム/i.test(genreText)) {
-    return "game";
   }
 
   return "manga";
