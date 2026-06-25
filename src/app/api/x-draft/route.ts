@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDiscoverableCircles, getCirclePage, getLatestWorks, getPopularWorks } from "@/lib/data";
 import { getXGuideHtml } from "@/lib/x-guide";
+import { escapeHtmlText, renderXDraftImagesHtml } from "@/lib/x-draft-ui";
 import { buildXPost, type XPostType } from "@/lib/x-post";
 
 export const dynamic = "force-dynamic";
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
       draft = buildXPost("popular", { popular });
     }
 
-    const { text, reply } = draft;
+    const { text, reply, images } = draft;
 
     const accept = request.headers.get("accept") ?? "";
 
@@ -99,22 +100,32 @@ export async function GET(request: Request) {
     .guide-body table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.88rem; }
     .guide-body td { padding: 0.35rem 0.5rem 0.35rem 0; vertical-align: top; }
     .guide-body td:first-child { width: 2rem; color: #a78bfa; font-weight: 700; }
+    .thumb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin: 0.75rem 0 0; }
+    .thumb-card { margin: 0; background: #1a1a22; border-radius: 8px; overflow: hidden; border: 1px solid #2a2a34; position: relative; }
+    .thumb-card.thumb-primary { border-color: #7c3aed; box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.35); }
+    .thumb-card img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; background: #0f0f12; }
+    .thumb-badge { position: absolute; top: 8px; left: 8px; background: #7c3aed; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.45rem; border-radius: 4px; }
+    .thumb-card figcaption { padding: 0.65rem 0.75rem 0.75rem; font-size: 0.82rem; line-height: 1.45; }
+    .thumb-card figcaption strong { display: block; color: #e8e8ec; margin-bottom: 0.2rem; }
+    .thumb-card figcaption span { display: block; color: #888; margin-bottom: 0.35rem; }
+    .thumb-card figcaption a { color: #a78bfa; font-size: 0.8rem; }
   </style>
 </head>
 <body>
   ${getXGuideHtml()}
   <h1>X投稿下書き（${type}）</h1>
-  <p class="meta">①本文を投稿 → ②自分の投稿にリプライでリンクを貼る（Xは本文URLよりリプの方が見られやすいです）</p>
+  <p class="meta">📷 サムネを添付 → ①本文を投稿 → ②リプライでリンク</p>
   <div class="types">
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=popular">人気TOP3</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=circle">注目サークル</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=weekly">週次まとめ</a>
   </div>
+  ${renderXDraftImagesHtml(images)}
   <h2>① 本文（URLなし）</h2>
-  <pre id="text">${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+  <pre id="text">${escapeHtmlText(text)}</pre>
   <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('text').innerText).then(()=>alert('本文をコピーしました'))">本文をコピー</button>
   <h2>② リプライ用リンク</h2>
-  <pre id="reply">${reply.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+  <pre id="reply">${escapeHtmlText(reply)}</pre>
   <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('reply').innerText).then(()=>alert('リプ用リンクをコピーしました'))">リプ用をコピー</button>
 </body>
 </html>`;
@@ -128,7 +139,8 @@ export async function GET(request: Request) {
       type,
       text,
       reply,
-      hint: "本文にURLを入れず、reply を自分の投稿へのリプライに貼るとX上で見られやすいです",
+      images,
+      hint: "images[0]（primary）を X に添付。本文は text、リンクは reply をリプライに",
     });
   } catch (error) {
     const message =

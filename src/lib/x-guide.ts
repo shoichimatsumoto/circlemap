@@ -8,7 +8,8 @@ export function getXGuideHtml(): string {
 
     <h3>投稿の流れ</h3>
     <ol>
-      <li>下の <strong>① 本文</strong> を投稿（URL なし）</li>
+      <li>下の <strong>★ サムネ</strong> を保存して X に添付</li>
+      <li><strong>① 本文</strong> を投稿（URL なし）</li>
       <li>自分の投稿に <strong>② リプライ用リンク</strong> を返信</li>
       <li>週 2〜3 回を目安に続ける</li>
     </ol>

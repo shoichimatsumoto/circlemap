@@ -1,14 +1,26 @@
+import { upgradeDmmImageUrl } from "@/lib/dmm-image";
 import { getSiteUrl, SITE_NAME } from "@/lib/site";
 import type { Circle, MediaType, Work } from "@/lib/types";
 import { MEDIA_NAMES } from "@/lib/types";
 
 export type XPostType = "popular" | "circle" | "weekly";
 
+export type XPostImage = {
+  workId: string;
+  title: string;
+  circleName: string;
+  thumbnailUrl: string;
+  /** X 投稿に添付するおすすめ（1枚目） */
+  primary?: boolean;
+};
+
 export type XPostDraft = {
   /** 本文（URLなし・拡散向け） */
   text: string;
   /** 自分で最初のリプライに貼るリンク集 */
   reply: string;
+  /** 投稿用サムネ（X に添付） */
+  images: XPostImage[];
 };
 
 function workUrl(workId: string): string {
@@ -28,6 +40,23 @@ function truncate(text: string, max: number): string {
   return `${text.slice(0, max - 1)}…`;
 }
 
+function collectImages(works: Work[]): XPostImage[] {
+  const images: XPostImage[] = [];
+
+  for (const work of works) {
+    if (!work.thumbnailUrl) continue;
+    images.push({
+      workId: work.id,
+      title: work.title,
+      circleName: work.circleName,
+      thumbnailUrl: upgradeDmmImageUrl(work.thumbnailUrl),
+      primary: images.length === 0,
+    });
+  }
+
+  return images;
+}
+
 /** 人気作品 TOP3 */
 export function buildPopularPost(works: Work[]): XPostDraft {
   const site = getSiteUrl();
@@ -37,6 +66,7 @@ export function buildPopularPost(works: Work[]): XPostDraft {
     return {
       text: `${SITE_NAME} — 人気作品データを取得できませんでした。`,
       reply: site,
+      images: [],
     };
   }
 
@@ -52,6 +82,7 @@ export function buildPopularPost(works: Work[]): XPostDraft {
   return {
     text: [`【${SITE_NAME}】FANZA同人 人気TOP3`, "", ...lines].join("\n"),
     reply: [...linkLines, "", `サークル軸で横断検索 → ${site}`].join("\n"),
+    images: collectImages(top),
   };
 }
 
@@ -77,6 +108,7 @@ export function buildCirclePost(circle: Circle, works: Work[]): XPostDraft {
       ...workLines,
     ].join("\n"),
     reply: url,
+    images: collectImages(picks.length > 0 ? picks : works),
   };
 }
 
@@ -107,6 +139,7 @@ export function buildWeeklyPost(
       ...latLines,
     ].join("\n"),
     reply: [...linkLines, "", site].join("\n"),
+    images: collectImages(picks),
   };
 }
 
