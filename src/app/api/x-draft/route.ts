@@ -47,22 +47,24 @@ export async function GET(request: Request) {
       getLatestWorks(3),
     ]);
 
-    let text: string;
+    let draft;
 
     if (type === "circle") {
       const { circles } = await getDiscoverableCircles(1, "popular");
       const circle = circles[0];
       if (circle) {
         const { works: circleWorks } = await getCirclePage(circle.id);
-        text = buildXPost("circle", { circle, circleWorks });
+        draft = buildXPost("circle", { circle, circleWorks });
       } else {
-        text = buildXPost("popular", { popular });
+        draft = buildXPost("popular", { popular });
       }
     } else if (type === "weekly") {
-      text = buildXPost("weekly", { popular, latest });
+      draft = buildXPost("weekly", { popular, latest });
     } else {
-      text = buildXPost("popular", { popular });
+      draft = buildXPost("popular", { popular });
     }
+
+    const { text, reply } = draft;
 
     const accept = request.headers.get("accept") ?? "";
 
@@ -76,6 +78,7 @@ export async function GET(request: Request) {
   <style>
     body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; background: #0f0f12; color: #e8e8ec; }
     h1 { font-size: 1.1rem; color: #a78bfa; }
+    h2 { font-size: 0.95rem; color: #c4b5fd; margin: 1.5rem 0 0.5rem; }
     pre { white-space: pre-wrap; word-break: break-word; background: #1a1a22; padding: 1rem; border-radius: 8px; line-height: 1.6; font-size: 0.95rem; }
     button { margin-top: 1rem; padding: 0.6rem 1.2rem; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
     button:hover { background: #6d28d9; }
@@ -86,14 +89,18 @@ export async function GET(request: Request) {
 </head>
 <body>
   <h1>X投稿下書き（${type}）</h1>
-  <p class="meta">コピーして X に貼り付けてください。投稿は手動です。</p>
+  <p class="meta">①本文を投稿 → ②自分の投稿にリプライでリンクを貼る（Xは本文URLよりリプの方が見られやすいです）</p>
   <div class="types">
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=popular">人気TOP3</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=circle">注目サークル</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=weekly">週次まとめ</a>
   </div>
+  <h2>① 本文（URLなし）</h2>
   <pre id="text">${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
-  <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('text').innerText).then(()=>alert('コピーしました'))">クリップボードにコピー</button>
+  <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('text').innerText).then(()=>alert('本文をコピーしました'))">本文をコピー</button>
+  <h2>② リプライ用リンク</h2>
+  <pre id="reply">${reply.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+  <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('reply').innerText).then(()=>alert('リプ用リンクをコピーしました'))">リプ用をコピー</button>
 </body>
 </html>`;
       return new Response(html, {
@@ -105,7 +112,8 @@ export async function GET(request: Request) {
       ok: true,
       type,
       text,
-      hint: "Accept: text/html でブラウザ用ページも表示できます",
+      reply,
+      hint: "本文にURLを入れず、reply を自分の投稿へのリプライに貼るとX上で見られやすいです",
     });
   } catch (error) {
     const message =
