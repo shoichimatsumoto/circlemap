@@ -29,12 +29,16 @@ create table if not exists works (
   thumbnail_url text,
   sample_images text[] not null default '{}',
   description text,
+  popularity_rank int,
   updated_at timestamptz not null default now()
 );
 
 create index if not exists works_circle_id_idx on works(circle_id);
 create index if not exists works_media_type_idx on works(media_type);
 create index if not exists works_date_idx on works(date desc);
+create index if not exists works_popularity_rank_idx
+  on works(popularity_rank asc nulls last)
+  where popularity_rank is not null;
 create index if not exists circles_name_idx on circles(name);
 
 -- サイトからは読み取りのみ（書き込みは同期バッチ用）

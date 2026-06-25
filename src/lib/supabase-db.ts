@@ -31,6 +31,7 @@ type WorkRow = {
   thumbnail_url: string | null;
   sample_images: string[] | null;
   description: string | null;
+  popularity_rank: number | null;
 };
 
 function rowToCircle(row: CircleRow): Circle {
@@ -68,6 +69,7 @@ function rowToWork(row: WorkRow): Work {
       ? row.sample_images.map(upgradeDmmImageUrl)
       : undefined,
     description: row.description ?? undefined,
+    popularityRank: row.popularity_rank ?? undefined,
   };
 }
 
@@ -117,7 +119,11 @@ export async function dbGetPopularWorks(
   const supabase = getClient();
   if (!supabase) return [];
 
-  const query = supabase.from("works").select("*").order("date", { ascending: false });
+  const query = supabase
+    .from("works")
+    .select("*")
+    .not("popularity_rank", "is", null)
+    .order("popularity_rank", { ascending: true });
 
   const { data, error } =
     offset > 0

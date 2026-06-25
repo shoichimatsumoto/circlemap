@@ -21,21 +21,34 @@ function parseResponse(json: unknown): Work[] {
 
 type SyncFetchTask = () => Promise<unknown>;
 
-/** 1バッチあたりの並列数（DMM API・Vercel タイムアウトのバランス） */
 const BATCH_SIZE = 5;
 
-/**
- * 同期用の DMM 取得タスク一覧。
- * 音声・CG は同人フロアの返却データから自動判定されるため、
- * ページを増やしてユニーク作品数を確保する。
- */
-function buildSyncFetchTasks(): SyncFetchTask[] {
-  const tasks: SyncFetchTask[] = [];
+const POPULAR_OFFSETS = [1, 101, 201, 301, 401];
 
-  const popularOffsets = [1, 101, 201, 301, 401];
-  for (const offset of popularOffsets) {
-    tasks.push(() => fetchPopularDoujinItems(100, offset));
+/** FANZA 人気順 API からランク付きで取得（順序を保つため逐次実行） */
+async function fetchPopularWorksWithRank(): Promise<Work[]> {
+  const works: Work[] = [];
+  const seen = new Set<string>();
+  let rank = 1;
+
+  for (const offset of POPULAR_OFFSETS) {
+    try {
+      const json = await fetchPopularDoujinItems(100, offset);
+      for (const work of parseResponse(json)) {
+        if (seen.has(work.id)) continue;
+        seen.add(work.id);
+        works.push({ ...work, popularityRank: rank++ });
+      }
+    } catch {
+      // 1ページ失敗しても続行
+    }
   }
+
+  return works;
+}
+
+function buildCatalogFetchTasks(): SyncFetchTask[] {
+  const tasks: SyncFetchTask[] = [];
 
   const mangaOffsets = [1, 101, 201, 301, 401, 501];
   for (const offset of mangaOffsets) {
@@ -67,8 +80,33 @@ async function runBatchedFetches(tasks: SyncFetchTask[]): Promise<Work[]> {
   return dedupeWorks(allWorks);
 }
 
+/** 人気ランク付き作品とカタログ作品をマージ（人気ランクは上書き優先） */
+function mergeWorksForSync(popular: Work[], catalog: Work[]): Work[] {
+  const byId = new Map<string, Work>();
+
+  for (const work of catalog) {
+    byId.set(work.id, work);
+  }
+
+  for (const work of popular) {
+    const existing = byId.get(work.id);
+    byId.set(
+      work.id,
+      existing ? { ...existing, popularityRank: work.popularityRank } : work
+    );
+  }
+
+  // カタログのみの作品は人気ランクなし（null で upsert）
+  return [...byId.values()];
+}
+
 async function fetchWorksForSync(): Promise<Work[]> {
-  return runBatchedFetches(buildSyncFetchTasks());
+  const [popular, catalog] = await Promise.all([
+    fetchPopularWorksWithRank(),
+    runBatchedFetches(buildCatalogFetchTasks()),
+  ]);
+
+  return mergeWorksForSync(popular, catalog);
 }
 
 function circleToRow(circle: Circle) {
@@ -103,6 +141,7 @@ function workToRow(work: Work) {
     thumbnail_url: work.thumbnailUrl ?? null,
     sample_images: work.sampleImages ?? [],
     description: work.description ?? null,
+    popularity_rank: work.popularityRank ?? null,
     updated_at: new Date().toISOString(),
   };
 }
@@ -124,6 +163,7 @@ export async function syncDmmToSupabase(): Promise<{
   worksSynced: number;
   circlesSynced: number;
   worksFetched: number;
+  popularRanked: number;
 }> {
   if (!hasDmmCredentials()) {
     throw new Error("DMM API キーが未設定です");
@@ -139,6 +179,7 @@ export async function syncDmmToSupabase(): Promise<{
     throw new Error("DMM から作品を取得できませんでした");
   }
 
+  const popularRanked = works.filter((w) => w.popularityRank != null).length;
   const circles = buildCirclesFromWorks(works);
   const circleRows = circles.map(circleToRow);
   const workRows = works.map(workToRow);
@@ -163,5 +204,6 @@ export async function syncDmmToSupabase(): Promise<{
     circlesSynced: circleRows.length,
     worksSynced: workRows.length,
     worksFetched: works.length,
+    popularRanked,
   };
 }

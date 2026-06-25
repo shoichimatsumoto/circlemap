@@ -15,6 +15,8 @@ export type Work = {
   thumbnailUrl?: string;
   sampleImages?: string[];
   description?: string;
+  /** FANZA 人気順（1 = 最上位）。人気API同期時のみ付与 */
+  popularityRank?: number;
 };
 
 export type Circle = {
