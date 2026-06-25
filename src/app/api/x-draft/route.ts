@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDiscoverableCircles, getCirclePage, getLatestWorks, getPopularWorks } from "@/lib/data";
+import { getXGuideHtml } from "@/lib/x-guide";
 import { buildXPost, type XPostType } from "@/lib/x-post";
 
 export const dynamic = "force-dynamic";
@@ -85,9 +86,23 @@ export async function GET(request: Request) {
     .meta { color: #888; font-size: 0.85rem; margin-bottom: 1rem; }
     .types { margin: 1rem 0; }
     .types a { color: #a78bfa; margin-right: 1rem; }
+    .guide { margin: 1.5rem 0; background: #1a1a22; border-radius: 8px; padding: 0.75rem 1rem; }
+    .guide summary { cursor: pointer; font-weight: 600; color: #c4b5fd; }
+    .guide-body { margin-top: 0.75rem; font-size: 0.9rem; line-height: 1.65; color: #ccc; }
+    .guide-body h3 { font-size: 0.88rem; color: #ddd; margin: 1rem 0 0.4rem; }
+    .guide-body ul, .guide-body ol { margin: 0.4rem 0 0.4rem 1.2rem; padding: 0; }
+    .guide-body li { margin: 0.25rem 0; }
+    .guide-body .bad li { color: #f0a0a0; }
+    .guide-body .note { color: #888; font-size: 0.82rem; margin: 0.4rem 0; }
+    .guide-body code { background: #0f0f12; padding: 0.1rem 0.35rem; border-radius: 4px; }
+    .guide-body a { color: #a78bfa; }
+    .guide-body table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.88rem; }
+    .guide-body td { padding: 0.35rem 0.5rem 0.35rem 0; vertical-align: top; }
+    .guide-body td:first-child { width: 2rem; color: #a78bfa; font-weight: 700; }
   </style>
 </head>
 <body>
+  ${getXGuideHtml()}
   <h1>X投稿下書き（${type}）</h1>
   <p class="meta">①本文を投稿 → ②自分の投稿にリプライでリンクを貼る（Xは本文URLよりリプの方が見られやすいです）</p>
   <div class="types">
