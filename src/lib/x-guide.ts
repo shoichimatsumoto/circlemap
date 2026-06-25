@@ -13,7 +13,7 @@ export function getXGuideHtml(): string {
       <li>自分の投稿に <strong>② リプライ用リンク</strong> を返信</li>
       <li>週 2〜3 回を目安に続ける</li>
     </ol>
-    <p class="note">X は本文に URL があると見られにくい傾向。リンクはリプライに載せる。</p>
+    <p class="note">サムネは候補の表示です。<strong>問題なさそうな画像だけ</strong> X に添付。全部アウトなら <strong>① 本文のみ</strong>で OK。</p>
     <p class="note">ハッシュタグは必須ではない。付けるなら <code>#CircleMap</code> だけで十分。</p>
 
     <h3>フォローしていい相手（10〜30件から）</h3>

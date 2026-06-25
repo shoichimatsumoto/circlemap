@@ -40,7 +40,7 @@ export function renderXDraftImagesHtml(images: XPostImage[]): string {
 
   return `
 <h2>📷 投稿用サムネ</h2>
-<p class="meta">★ の画像を X に添付。画像を長押し（スマホ）または右クリック（PC）で保存できます。</p>
+<p class="meta">★ の画像を X に添付（問題なさそうなものだけ）。<strong>全部アウトならテキストのみ</strong>で投稿。長押し / 右クリックで保存。</p>
 <div class="thumb-grid">${cards}</div>`;
 }
 
