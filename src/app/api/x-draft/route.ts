@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDiscoverableCircles, getCirclePage, getLatestWorks, getPopularWorks } from "@/lib/data";
-import { renderEngageTargetsHtml, STATIC_ENGAGE_TARGETS } from "@/lib/x-engage-targets";
+import { renderEngageTargetsHtml, SKIP_ENGAGE_TARGETS } from "@/lib/x-engage-targets";
 import { getXGuideHtml } from "@/lib/x-guide";
 import { escapeHtmlText, renderXDraftImagesHtml } from "@/lib/x-draft-ui";
 import { buildXPost, type XPostType } from "@/lib/x-post";
@@ -129,6 +129,9 @@ export async function GET(request: Request) {
     .engage-template { white-space: pre-wrap; background: #121218; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin: 0.4rem 0; }
     .engage-copy-btn { margin-top: 0.35rem; padding: 0.45rem 0.9rem; background: #3f3f50; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.88rem; }
     .engage-copy-btn:hover { background: #52526a; }
+    .engage-skip-table td { color: #c9a0a0; }
+    .engage-skip-table a { color: #e8a0a0; }
+    .bad-note { color: #e8a0a0 !important; }
   </style>
 </head>
 <body>
@@ -162,7 +165,7 @@ export async function GET(request: Request) {
       reply,
       images,
       engageTargets: {
-        static: STATIC_ENGAGE_TARGETS,
+        skip: SKIP_ENGAGE_TARGETS,
         circle: engageCircle?.name ?? null,
         works: engageWorks?.slice(0, 3).map((w) => ({
           id: w.id,
