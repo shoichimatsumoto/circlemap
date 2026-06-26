@@ -6,18 +6,19 @@ export function getXGuideHtml(): string {
   <div class="guide-body">
     <p><strong>基本方針：</strong>自分の投稿を続ける ＋ <strong>紹介したサークル公式</strong>にだけ絡む。</p>
 
-    <h3>投稿の流れ（月・水・土）</h3>
+    <h3>投稿の流れ（月・水・土 ＋ 日曜は任意でバズ）</h3>
     <ol>
       <li>下の <strong>★ サムネ</strong> を保存して X に添付（問題なければ）</li>
+      <li><strong>③ @メンション</strong> — サークル公式を X で検索し、見つかったら <strong>@ハンドル</strong> を ① に足す</li>
       <li><strong>① 本文</strong> を投稿（URL なし）</li>
       <li>自分の投稿に <strong>② リプライ用リンク</strong> を返信</li>
-      <li><strong>誰に絡む？</strong> でサークル公式を検索 → フォロー or いいね</li>
     </ol>
+    <p class="note"><strong>豆知識・バズ寄り</strong> タブは週1回（日曜など）。<strong>@</strong> を入れるとサークルに届きやすい（ハッシュタグ # は不要）。</p>
     <p class="note">サムネは問題なさそうなものだけ。全部アウトなら <strong>① 本文のみ</strong>。</p>
 
     <h3>絡み方の方針</h3>
     <ul>
-      <li><strong>◎ サークル公式</strong> — 投稿で紹介したサークルを X で検索して絡む</li>
+      <li><strong>◎ サークル公式</strong> — X で検索 → <strong>@</strong> を入れて投稿 or 引用</li>
       <li><strong>△ 同人まとめ・FANZA 公式</strong> — フォロー不要（詳しくなくて OK）</li>
       <li><strong>× シャドウバン警告あり</strong> — スキップ</li>
     </ul>
@@ -28,12 +29,14 @@ export function getXGuideHtml(): string {
       <li>フォローした人にすぐ DM</li>
       <li>本文に URL を詰め込む</li>
       <li>シャドウバン警告のあるアカウントに絡む</li>
+      <li># ハッシュタグをたくさん付ける</li>
     </ul>
 
     <h3>まとめ</h3>
     <table>
       <tr><td>◎</td><td>月・水・土の投稿を続ける</td></tr>
-      <tr><td>◎</td><td>紹介サークルの公式にいいね・引用</td></tr>
+      <tr><td>◎</td><td>日曜は「豆知識・バズ寄り」タブ（週1・任意）</td></tr>
+      <tr><td>◎</td><td>サークル公式の <strong>@</strong> を入れる・引用する</td></tr>
       <tr><td>◎</td><td>リンクはリプライに載せる</td></tr>
       <tr><td>△</td><td>同人まとめアカウントをフォロー</td></tr>
     </table>

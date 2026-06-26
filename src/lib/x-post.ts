@@ -3,7 +3,7 @@ import { getSiteUrl, SITE_NAME } from "@/lib/site";
 import type { Circle, MediaType, Work } from "@/lib/types";
 import { MEDIA_NAMES } from "@/lib/types";
 
-export type XPostType = "popular" | "circle" | "weekly";
+export type XPostType = "popular" | "circle" | "weekly" | "buzz";
 
 export type XPostImage = {
   workId: string;
@@ -21,6 +21,10 @@ export type XPostDraft = {
   reply: string;
   /** 投稿用サムネ（X に添付） */
   images: XPostImage[];
+  /** サークル公式の @（X検索後にユーザーが記入） */
+  mention?: string;
+  /** 紹介サークル名（@ 検索用） */
+  circleName?: string;
 };
 
 function workUrl(workId: string): string {
@@ -55,6 +59,81 @@ function collectImages(works: Work[]): XPostImage[] {
   }
 
   return images;
+}
+
+function countMediaTypes(circle: Circle): number {
+  let count = 0;
+  if (circle.mangaCount > 0) count++;
+  if (circle.cgCount > 0) count++;
+  if (circle.voiceCount > 0) count++;
+  if (circle.gameCount > 0) count++;
+  return count;
+}
+
+function mediaBreakdownShort(circle: Circle): string {
+  const parts: string[] = [];
+  if (circle.mangaCount > 0) parts.push(`漫画${circle.mangaCount}`);
+  if (circle.cgCount > 0) parts.push(`CG${circle.cgCount}`);
+  if (circle.voiceCount > 0) parts.push(`音声${circle.voiceCount}`);
+  if (circle.gameCount > 0) parts.push(`ゲーム${circle.gameCount}`);
+  return parts.join("・");
+}
+
+/** バズ向け：媒体が2種類以上のサークルを優先 */
+export function pickBuzzCircle(circles: Circle[]): Circle | null {
+  if (circles.length === 0) return null;
+
+  const scored = circles
+    .map((circle) => ({
+      circle,
+      score: countMediaTypes(circle) * 100 + Math.min(circle.workCount, 50),
+    }))
+    .filter((item) => item.score >= 200)
+    .sort((a, b) => b.score - a.score);
+
+  return scored[0]?.circle ?? circles[0];
+}
+
+/** 豆知識・バズ寄り（週1回向け） */
+export function buildBuzzPost(circle: Circle, works: Work[]): XPostDraft {
+  const url = circleUrl(circle.id);
+  const breakdown = mediaBreakdownShort(circle);
+  const mediaTypes = countMediaTypes(circle);
+  const featured = works[0];
+
+  const lines =
+    mediaTypes >= 3
+      ? [
+          "1サークルで複数媒体出してるやつ、他に知ってる？",
+          "",
+          `📌 ${circle.name}`,
+          breakdown,
+          "",
+          "FANZAだとフロアがバラバラ。",
+          "CircleMapだと1ページにまとまって見れる。",
+        ]
+      : [
+          "【知ってた？】",
+          "",
+          "FANZAだと同人とゲームは別フロア。",
+          "",
+          `でも「${circle.name}」は`,
+          breakdown,
+          "",
+          "→ CircleMap だと1ページで全部見れる",
+        ];
+
+  if (featured) {
+    lines.push("", `代表作: ${truncate(featured.title, 32)}`);
+  }
+
+  return {
+    text: lines.join("\n"),
+    reply: url,
+    images: collectImages(works.slice(0, 1)),
+    mention: "@",
+    circleName: circle.name,
+  };
 }
 
 /** 人気作品 TOP3 */
@@ -109,6 +188,8 @@ export function buildCirclePost(circle: Circle, works: Work[]): XPostDraft {
     ].join("\n"),
     reply: url,
     images: collectImages(picks.length > 0 ? picks : works),
+    mention: "@",
+    circleName: circle.name,
   };
 }
 
@@ -162,5 +243,10 @@ export function buildXPost(
       return buildCirclePost(data.circle, data.circleWorks ?? []);
     case "weekly":
       return buildWeeklyPost(data.popular ?? [], data.latest ?? []);
+    case "buzz":
+      if (!data.circle) {
+        return buildPopularPost(data.popular ?? []);
+      }
+      return buildBuzzPost(data.circle, data.circleWorks ?? []);
   }
 }

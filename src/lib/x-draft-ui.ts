@@ -44,6 +44,22 @@ export function renderXDraftImagesHtml(images: XPostImage[]): string {
 <div class="thumb-grid">${cards}</div>`;
 }
 
+function renderMentionHtml(circleName?: string): string {
+  if (!circleName) return "";
+
+  const searchUrl = `https://x.com/search?q=${encodeURIComponent(circleName)}&src=typed_query&f=user`;
+
+  return `
+<h2>③ @メンション（公式が見つかったら）</h2>
+<p class="meta">「${escapeHtml(circleName)}」を X でユーザ検索 → 公式の <strong>@ハンドル</strong> をコピーして ① の本文の<strong>先頭か末尾</strong>に足す。</p>
+<p class="meta"><a href="${escapeHtml(searchUrl)}" target="_blank" rel="noopener noreferrer">X でユーザ検索を開く →</a></p>
+<pre id="mention">@</pre>
+<button type="button" onclick="navigator.clipboard.writeText(document.getElementById('mention').innerText).then(()=>alert('@をコピーしました。ハンドルを足してから①と合わせて投稿'))">@ をコピー</button>
+<p class="note">引用リプする場合も、相手の <strong>@</strong> を入れると届きやすい。</p>`;
+}
+
 export function escapeHtmlText(text: string): string {
   return escapeHtml(text);
 }
+
+export { renderMentionHtml };

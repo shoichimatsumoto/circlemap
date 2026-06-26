@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 import { getDiscoverableCircles, getCirclePage, getLatestWorks, getPopularWorks } from "@/lib/data";
 import { renderEngageTargetsHtml, SKIP_ENGAGE_TARGETS } from "@/lib/x-engage-targets";
 import { getXGuideHtml } from "@/lib/x-guide";
-import { escapeHtmlText, renderXDraftImagesHtml } from "@/lib/x-draft-ui";
-import { buildXPost, type XPostType } from "@/lib/x-post";
+import { escapeHtmlText, renderMentionHtml, renderXDraftImagesHtml } from "@/lib/x-draft-ui";
+import { buildXPost, pickBuzzCircle, type XPostType } from "@/lib/x-post";
 
 export const dynamic = "force-dynamic";
 
-const VALID_TYPES: XPostType[] = ["popular", "circle", "weekly"];
+const VALID_TYPES: XPostType[] = ["popular", "circle", "weekly", "buzz"];
+
+const TYPE_LABELS: Record<XPostType, string> = {
+  popular: "人気TOP3",
+  circle: "注目サークル",
+  weekly: "週次まとめ",
+  buzz: "豆知識・バズ寄り",
+};
 
 function isAuthorized(request: Request): boolean {
   const syncSecret = process.env.SYNC_SECRET;
@@ -69,12 +76,24 @@ export async function GET(request: Request) {
     } else if (type === "weekly") {
       draft = buildXPost("weekly", { popular, latest });
       engageWorks = [...popular.slice(0, 2), ...latest.slice(0, 1)];
+    } else if (type === "buzz") {
+      const { circles } = await getDiscoverableCircles(40, "popular");
+      const buzzCircle = pickBuzzCircle(circles);
+      if (buzzCircle) {
+        const { works: circleWorks } = await getCirclePage(buzzCircle.id);
+        draft = buildXPost("buzz", { circle: buzzCircle, circleWorks });
+        engageCircle = buzzCircle;
+        engageWorks = circleWorks;
+      } else {
+        draft = buildXPost("popular", { popular });
+        engageWorks = popular;
+      }
     } else {
       draft = buildXPost("popular", { popular });
       engageWorks = popular;
     }
 
-    const { text, reply, images } = draft;
+    const { text, reply, images, circleName } = draft;
 
     const accept = request.headers.get("accept") ?? "";
 
@@ -137,14 +156,16 @@ export async function GET(request: Request) {
 <body>
   ${getXGuideHtml()}
   ${renderEngageTargetsHtml(engageCircle, engageWorks)}
-  <h1>X投稿下書き（${type}）</h1>
-  <p class="meta">📷 サムネを添付 → ①本文を投稿 → ②リプライでリンク</p>
+  <h1>X投稿下書き（${TYPE_LABELS[type]}）</h1>
+  <p class="meta">📷 サムネ → ③@（任意）→ ①本文 → ②リプ</p>
   <div class="types">
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=popular">人気TOP3</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=circle">注目サークル</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=weekly">週次まとめ</a>
+    <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=buzz">豆知識・バズ寄り</a>
   </div>
   ${renderXDraftImagesHtml(images)}
+  ${renderMentionHtml(circleName ?? engageCircle?.name)}
   <h2>① 本文（URLなし）</h2>
   <pre id="text">${escapeHtmlText(text)}</pre>
   <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('text').innerText).then(()=>alert('本文をコピーしました'))">本文をコピー</button>
@@ -166,7 +187,8 @@ export async function GET(request: Request) {
       images,
       engageTargets: {
         skip: SKIP_ENGAGE_TARGETS,
-        circle: engageCircle?.name ?? null,
+        mention: draft.mention ?? null,
+        circleName: circleName ?? engageCircle?.name ?? null,
         works: engageWorks?.slice(0, 3).map((w) => ({
           id: w.id,
           title: w.title,

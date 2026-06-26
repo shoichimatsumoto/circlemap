@@ -36,7 +36,7 @@ function buildDynamicTargets(
     const circlePage = `${getSiteUrl()}/circle?id=${encodeURIComponent(circle.id)}`;
     dynamic.push({
       label: `注目サークル: ${circle.name}`,
-      how: `X でユーザ検索 → 公式があればフォロー＋新作にいいね（シャドウバン警告はスキップ）。慣れたら引用:「他作品は CircleMap にまとまってます」→ リプで ${circlePage}`,
+      how: `X でユーザ検索 → 公式の @ があれば ③ に入れてフォロー＋新作にいいね（シャドウバン警告はスキップ）。慣れたら引用:「他作品は CircleMap にまとまってます」→ リプで ${circlePage}`,
       searchUrl: `https://x.com/search?q=${encodeURIComponent(circle.name)}&src=typed_query&f=user`,
     });
   }
@@ -45,7 +45,7 @@ function buildDynamicTargets(
     if (circle && work.circleId === circle.id) continue;
     dynamic.push({
       label: `${work.circleName}（${work.title}）`,
-      how: `サークル名で検索。公式アカウントを見つけたらフォロー or いいね`,
+      how: `サークル名で検索。公式の @ が見つかったら ③ に入れてフォロー or いいね`,
       searchUrl: `https://x.com/search?q=${encodeURIComponent(work.circleName)}&src=typed_query&f=user`,
     });
   }
@@ -106,7 +106,7 @@ ${dynamic
     <h3>サークル公式への絡み方</h3>
     <ol>
       <li>下の検索リンクでサークル名を検索 → <strong>ユーザー</strong> タブ</li>
-      <li>公式っぽいアカウントを見つけたら <strong>フォロー</strong> or <strong>いいね</strong></li>
+      <li>公式っぽいアカウントを見つけたら <strong>@ハンドル</strong> を ③ に入れる → <strong>フォロー</strong> or <strong>いいね</strong></li>
       <li>新作・告知ツイートがあれば <strong>引用</strong>（下のテンプレ使用）</li>
       <li>CircleMap リンクは <strong>自分の投稿へのリプ</strong> に載せる</li>
       <li>シャドウバン警告が出ていたら <strong>スキップ</strong></li>
