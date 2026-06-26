@@ -17,13 +17,7 @@ export function getXGuideHtml(): string {
     <p class="note">ハッシュタグは必須ではない。付けるなら <code>#CircleMap</code> だけで十分。</p>
 
     <h3>フォローしていい相手（10〜30件から）</h3>
-    <ul>
-      <li><strong>同人・FANZA 系の情報アカウント</strong> — 新刊・セール・ジャンル別まとめ</li>
-      <li><strong>サークル公式</strong> — 気になるサークルの X</li>
-      <li><strong>同人イベント関連</strong> — コミケ・即売会の公式・まとめ</li>
-      <li><strong>同ジャンルの個人</strong> — 紹介・感想を書いている人</li>
-    </ul>
-    <p>「同人誌好き」全員を機械的にフォローする必要はない。CircleMap の内容（サークル横断・人気作品）と近いアカウントだけでよい。</p>
+    <p>具体的な ID リストは下の <strong>「誰に絡む？」</strong> セクションを見てください。</p>
 
     <h3>あまりおすすめしないやり方</h3>
     <ul class="bad">

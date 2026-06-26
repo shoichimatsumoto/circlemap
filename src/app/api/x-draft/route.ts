@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDiscoverableCircles, getCirclePage, getLatestWorks, getPopularWorks } from "@/lib/data";
+import { renderEngageTargetsHtml, STATIC_ENGAGE_TARGETS } from "@/lib/x-engage-targets";
 import { getXGuideHtml } from "@/lib/x-guide";
 import { escapeHtmlText, renderXDraftImagesHtml } from "@/lib/x-draft-ui";
 import { buildXPost, type XPostType } from "@/lib/x-post";
@@ -50,6 +51,8 @@ export async function GET(request: Request) {
     ]);
 
     let draft;
+    let engageCircle: Awaited<ReturnType<typeof getCirclePage>>["circle"] | undefined;
+    let engageWorks: Awaited<ReturnType<typeof getPopularWorks>>["works"] | undefined;
 
     if (type === "circle") {
       const { circles } = await getDiscoverableCircles(1, "popular");
@@ -57,13 +60,18 @@ export async function GET(request: Request) {
       if (circle) {
         const { works: circleWorks } = await getCirclePage(circle.id);
         draft = buildXPost("circle", { circle, circleWorks });
+        engageCircle = circle;
+        engageWorks = circleWorks;
       } else {
         draft = buildXPost("popular", { popular });
+        engageWorks = popular;
       }
     } else if (type === "weekly") {
       draft = buildXPost("weekly", { popular, latest });
+      engageWorks = [...popular.slice(0, 2), ...latest.slice(0, 1)];
     } else {
       draft = buildXPost("popular", { popular });
+      engageWorks = popular;
     }
 
     const { text, reply, images } = draft;
@@ -109,10 +117,23 @@ export async function GET(request: Request) {
     .thumb-card figcaption strong { display: block; color: #e8e8ec; margin-bottom: 0.2rem; }
     .thumb-card figcaption span { display: block; color: #888; margin-bottom: 0.35rem; }
     .thumb-card figcaption a { color: #a78bfa; font-size: 0.8rem; }
+    .engage-guide { margin-top: 1rem; }
+    .engage-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.5rem 0; }
+    .engage-table th, .engage-table td { border: 1px solid #2a2a34; padding: 0.45rem 0.5rem; text-align: left; vertical-align: top; }
+    .engage-table th { background: #121218; color: #c4b5fd; }
+    .engage-table a { color: #a78bfa; }
+    .engage-priority { display: inline-block; font-size: 0.68rem; background: #7c3aed; color: #fff; padding: 0.1rem 0.35rem; border-radius: 4px; margin-right: 0.25rem; }
+    .engage-dynamic { margin: 0.4rem 0 0.4rem 1.2rem; }
+    .engage-dynamic li { margin: 0.6rem 0; }
+    .engage-dynamic a { color: #a78bfa; font-size: 0.85rem; }
+    .engage-template { white-space: pre-wrap; background: #121218; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin: 0.4rem 0; }
+    .engage-copy-btn { margin-top: 0.35rem; padding: 0.45rem 0.9rem; background: #3f3f50; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.88rem; }
+    .engage-copy-btn:hover { background: #52526a; }
   </style>
 </head>
 <body>
   ${getXGuideHtml()}
+  ${renderEngageTargetsHtml(engageCircle, engageWorks)}
   <h1>X投稿下書き（${type}）</h1>
   <p class="meta">📷 サムネを添付 → ①本文を投稿 → ②リプライでリンク</p>
   <div class="types">
@@ -140,6 +161,15 @@ export async function GET(request: Request) {
       text,
       reply,
       images,
+      engageTargets: {
+        static: STATIC_ENGAGE_TARGETS,
+        circle: engageCircle?.name ?? null,
+        works: engageWorks?.slice(0, 3).map((w) => ({
+          id: w.id,
+          title: w.title,
+          circleName: w.circleName,
+        })),
+      },
       hint: "images[0]（primary）を X に添付。本文は text、リンクは reply をリプライに",
     });
   } catch (error) {
