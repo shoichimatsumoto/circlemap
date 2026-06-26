@@ -60,32 +60,33 @@ export function buildCircleSeoDescription(circle: Circle): string {
   return chunks.join("。").slice(0, 160);
 }
 
+/** 作品ページ用 JSON-LD（Product ではなく CreativeWork：レビュー未所持のアフィリエイト紹介向け） */
 export function buildWorkJsonLd(work: Work) {
   const pageUrl = `${getSiteUrl()}/work/${work.id}`;
+  const datePublished =
+    work.date && work.date !== "—"
+      ? work.date.replace(/\//g, "-")
+      : undefined;
 
   return {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": "CreativeWork",
     name: work.title,
     description: buildWorkSeoDescription(work),
     url: pageUrl,
     image: work.thumbnailUrl ?? undefined,
-    brand: {
-      "@type": "Brand",
+    author: {
+      "@type": "Organization",
       name: work.circleName,
     },
-    category: MEDIA_NAMES[work.mediaType],
-  ...(work.price > 0
-      ? {
-          offers: {
-            "@type": "Offer",
-            price: work.price,
-            priceCurrency: "JPY",
-            availability: "https://schema.org/InStock",
-            url: work.affiliateUrl ?? pageUrl,
-          },
-        }
-      : {}),
+    genre: work.tags.length > 0 ? work.tags.slice(0, 6) : undefined,
+    datePublished,
+    inLanguage: "ja-JP",
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: getSiteUrl(),
+    },
   };
 }
 
