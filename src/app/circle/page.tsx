@@ -1,10 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { CircleJsonLd } from "@/components/CircleJsonLd";
 import { CirclePageClient } from "@/components/CirclePageClient";
 import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { PageShell } from "@/components/PageShell";
 import { getCirclePage, getDiscoverableCircles } from "@/lib/data";
+import { buildCircleSeoDescription, buildCircleSeoTitle } from "@/lib/seo";
+import { getSiteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +30,25 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 
   const { circle } = await getCirclePage(id);
-  const description = `${circle.name}の同人作品一覧。漫画・CG・音声・ゲームをサークル軸で横断検索できます。`;
+  const title = buildCircleSeoTitle(circle);
+  const description = buildCircleSeoDescription(circle);
+  const pageUrl = `${getSiteUrl()}/circle?id=${encodeURIComponent(id)}`;
 
   return {
-    title: circle.name,
+    title,
     description,
     alternates: { canonical: `/circle?id=${encodeURIComponent(id)}` },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: pageUrl,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
@@ -75,6 +91,7 @@ export default async function CirclePage({ searchParams }: Props) {
 
   return (
     <PageShell active="circle">
+      <CircleJsonLd circle={circle} />
       <DataModeBanner source={source} />
       <div className="feed-wrap">
         <nav className="breadcrumb">

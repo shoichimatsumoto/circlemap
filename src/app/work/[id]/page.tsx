@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { PageShell } from "@/components/PageShell";
+import { CircleJsonLd } from "@/components/CircleJsonLd";
 import { DataModeBanner } from "@/components/DataModeBanner";
+import { PageShell } from "@/components/PageShell";
+import { WorkJsonLd } from "@/components/WorkJsonLd";
 import { WorkPageClient } from "@/components/WorkPageClient";
 import { getWork } from "@/lib/data";
+import { buildWorkSeoDescription, buildWorkSeoTitle } from "@/lib/seo";
 import { getSiteUrl } from "@/lib/site";
-import { MEDIA_NAMES } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "作品が見つかりません" };
   }
 
-  const title = work.title;
-  const description = `${work.circleName}の${MEDIA_NAMES[work.mediaType]}「${work.title}」。CircleMapでサークルの他作品も横断検索できます。`;
+  const title = buildWorkSeoTitle(work);
+  const description = buildWorkSeoDescription(work);
+  const pageUrl = `${getSiteUrl()}/work/${work.id}`;
 
   return {
     title,
@@ -31,8 +34,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       type: "article",
-      url: `${getSiteUrl()}/work/${work.id}`,
+      url: pageUrl,
       images: work.thumbnailUrl ? [{ url: work.thumbnailUrl }] : undefined,
+    },
+    twitter: {
+      card: work.thumbnailUrl ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: work.thumbnailUrl ? [work.thumbnailUrl] : undefined,
     },
   };
 }
@@ -45,6 +54,7 @@ export default async function WorkPage({ params }: Props) {
 
   return (
     <PageShell active="work">
+      <WorkJsonLd work={work} />
       <DataModeBanner source={source} />
       <div className="feed-wrap">
         <nav className="breadcrumb">
