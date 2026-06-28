@@ -8,12 +8,13 @@ export function getXGuideHtml(): string {
 
     <h3>投稿の流れ（月・水・土 ＋ 日曜は任意でバズ）</h3>
     <ol>
-      <li>下の <strong>★ サムネ</strong> を保存して X に添付（問題なければ）</li>
+      <li>下の <strong>★ サムネ</strong> を保存して X に添付（<strong>フック・拡散向け</strong> は特にサムネ推奨）</li>
       <li><strong>③ @メンション</strong> — サークル公式を X で検索し、見つかったら <strong>@ハンドル</strong> を ① に足す</li>
       <li><strong>① 本文</strong> を投稿（URL なし）</li>
       <li>自分の投稿に <strong>② リプライ用リンク</strong> を返信</li>
     </ol>
-    <p class="note"><strong>豆知識・バズ寄り</strong> タブは週1回（日曜など）。<strong>@</strong> を入れるとサークルに届きやすい（ハッシュタグ # は不要）。</p>
+    <p class="note"><strong>豆知識・バズ寄り</strong> … 週1回（日曜など）。サイトの強みを伝える系。</p>
+    <p class="note"><strong>フック・拡散向け</strong> … 月1〜2回。<strong>【衝撃】</strong>系の短文＋問いかけ。サムネ必須推奨。buzz と交互で OK。</p>
     <p class="note">サムネは問題なさそうなものだけ。全部アウトなら <strong>① 本文のみ</strong>。</p>
 
     <h3>絡み方の方針</h3>
@@ -36,6 +37,7 @@ export function getXGuideHtml(): string {
     <table>
       <tr><td>◎</td><td>月・水・土の投稿を続ける</td></tr>
       <tr><td>◎</td><td>日曜は「豆知識・バズ寄り」タブ（週1・任意）</td></tr>
+      <tr><td>◎</td><td>月1〜2回「フック・拡散向け」（【衝撃】系・サムネ必須推奨）</td></tr>
       <tr><td>◎</td><td>サークル公式の <strong>@</strong> を入れる・引用する</td></tr>
       <tr><td>◎</td><td>リンクはリプライに載せる</td></tr>
       <tr><td>△</td><td>同人まとめアカウントをフォロー</td></tr>

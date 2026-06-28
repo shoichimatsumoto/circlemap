@@ -7,13 +7,14 @@ import { buildXPost, pickBuzzCircle, type XPostType } from "@/lib/x-post";
 
 export const dynamic = "force-dynamic";
 
-const VALID_TYPES: XPostType[] = ["popular", "circle", "weekly", "buzz"];
+const VALID_TYPES: XPostType[] = ["popular", "circle", "weekly", "buzz", "hook"];
 
 const TYPE_LABELS: Record<XPostType, string> = {
   popular: "人気TOP3",
   circle: "注目サークル",
   weekly: "週次まとめ",
   buzz: "豆知識・バズ寄り",
+  hook: "フック・拡散向け",
 };
 
 function isAuthorized(request: Request): boolean {
@@ -88,6 +89,10 @@ export async function GET(request: Request) {
         draft = buildXPost("popular", { popular });
         engageWorks = popular;
       }
+    } else if (type === "hook") {
+      const { works: hookPopular } = await getPopularWorks(30);
+      draft = buildXPost("hook", { popular: hookPopular });
+      engageWorks = hookPopular.slice(0, 1);
     } else {
       draft = buildXPost("popular", { popular });
       engageWorks = popular;
@@ -163,6 +168,7 @@ export async function GET(request: Request) {
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=circle">注目サークル</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=weekly">週次まとめ</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=buzz">豆知識・バズ寄り</a>
+    <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=hook">フック・拡散向け</a>
   </div>
   ${renderXDraftImagesHtml(images)}
   ${renderMentionHtml(circleName ?? engageCircle?.name)}

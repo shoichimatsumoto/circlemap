@@ -3,7 +3,7 @@ import { getSiteUrl, SITE_NAME } from "@/lib/site";
 import type { Circle, MediaType, Work } from "@/lib/types";
 import { MEDIA_NAMES } from "@/lib/types";
 
-export type XPostType = "popular" | "circle" | "weekly" | "buzz";
+export type XPostType = "popular" | "circle" | "weekly" | "buzz" | "hook";
 
 export type XPostImage = {
   workId: string;
@@ -92,6 +92,100 @@ export function pickBuzzCircle(circles: Circle[]): Circle | null {
     .sort((a, b) => b.score - a.score);
 
   return scored[0]?.circle ?? circles[0];
+}
+
+/** フック向け：音声・人気作を優先 */
+const HOOK_TAG_PRIORITY = [
+  "耳舐め",
+  "寝落とし",
+  "密着",
+  "年上",
+  "囁き",
+  "ASMR",
+  "お姉さん",
+  "ヤンデレ",
+  "催眠",
+  "甘やかし",
+];
+
+function scoreHookWork(work: Work): number {
+  let score = 0;
+  if (work.mediaType === "voice") score += 60;
+  if (work.mediaType === "cg") score += 25;
+  if (work.thumbnailUrl) score += 10;
+  for (const tag of work.tags) {
+    if (HOOK_TAG_PRIORITY.some((keyword) => tag.includes(keyword))) score += 20;
+  }
+  if (work.popularityRank && work.popularityRank <= 30) {
+    score += 40 - work.popularityRank;
+  }
+  return score;
+}
+
+export function pickHookWork(works: Work[]): Work | null {
+  if (works.length === 0) return null;
+  const scored = works
+    .map((work) => ({ work, score: scoreHookWork(work) }))
+    .sort((a, b) => b.score - a.score);
+  return scored[0]?.work ?? works[0];
+}
+
+function pickHookTag(work: Work): string | undefined {
+  return work.tags.find((tag) =>
+    HOOK_TAG_PRIORITY.some((keyword) => tag.includes(keyword))
+  );
+}
+
+/** 拡散フック（【衝撃】系・月1〜2回・サムネ必須推奨） */
+export function buildHookPost(work: Work): XPostDraft {
+  const url = workUrl(work.id);
+  const title = truncate(work.title, 38);
+  const tag = pickHookTag(work);
+  const meta =
+    work.mediaType === "voice" && work.duration
+      ? `${work.duration}・${work.circleName}`
+      : work.mediaType === "manga" && work.pages
+        ? `${work.pages}P・${work.circleName}`
+        : work.circleName;
+
+  let lines: string[];
+
+  if (work.mediaType === "voice") {
+    lines = [
+      "【やばい】この音声、タイトルだけで想像力が止まらない…",
+      "",
+      `「${title}」`,
+      meta,
+      "",
+      "寝落とし目的で聴いたのに、最後まで起きてる人いない？",
+    ];
+  } else if (work.mediaType === "cg") {
+    lines = [
+      "【衝撃】表紙だけで止まってる人多くない？",
+      "",
+      `「${title}」`,
+      work.circleName,
+      "",
+      "中身まで見てない人、結構いる説。",
+    ];
+  } else {
+    lines = [
+      tag ? `【知らん人多数】${tag}系、これ知ってる？` : "【知らん人多数】これ知ってる？",
+      "",
+      `「${title}」`,
+      `${work.circleName} / ${mediaTag(work.mediaType)}`,
+      "",
+      "同じサークルの他作品、探すの面倒くさくない？",
+    ];
+  }
+
+  return {
+    text: lines.join("\n"),
+    reply: [url, circleUrl(work.circleId)].join("\n"),
+    images: collectImages([work]),
+    mention: "@",
+    circleName: work.circleName,
+  };
 }
 
 /** 豆知識・バズ寄り（週1回向け） */
@@ -248,5 +342,11 @@ export function buildXPost(
         return buildPopularPost(data.popular ?? []);
       }
       return buildBuzzPost(data.circle, data.circleWorks ?? []);
+    case "hook":
+      if (data.popular && data.popular.length > 0) {
+        const work = pickHookWork(data.popular) ?? data.popular[0];
+        return buildHookPost(work);
+      }
+      return buildPopularPost(data.popular ?? []);
   }
 }
