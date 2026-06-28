@@ -1,7 +1,7 @@
 /** X 運用メモ（x-draft ページ用） */
 export function getXGuideHtml(): string {
   return `
-<details class="guide" open>
+<details class="guide">
   <summary>X 運用のコツ（CircleMap）</summary>
   <div class="guide-body">
     <p><strong>基本方針：</strong>自分の投稿を続ける ＋ <strong>紹介したサークル公式</strong>にだけ絡む。</p>

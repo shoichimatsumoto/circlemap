@@ -94,7 +94,7 @@ ${dynamic
   ).join("");
 
   return `
-<details class="guide engage-guide" open>
+<details class="guide engage-guide">
   <summary>誰に絡む？（サークル公式中心）</summary>
   <div class="guide-body">
     <p><strong>方針：</strong>同人界隈のまとめアカウントにはフォローしない。<strong>投稿で紹介したサークルの公式</strong>にだけ絡む。</p>
