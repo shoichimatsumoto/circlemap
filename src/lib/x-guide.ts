@@ -15,6 +15,7 @@ export function getXGuideHtml(): string {
     </ol>
     <p class="note"><strong>豆知識・バズ寄り</strong> … 週1回（日曜など）。サイトの強みを伝える系。</p>
     <p class="note"><strong>フック・拡散向け</strong> … 月1〜2回。<strong>【衝撃】</strong>系の短文＋問いかけ。サムネ必須推奨。buzz と交互で OK。</p>
+    <p class="note"><strong>センシティブ対策：</strong>① 本文に <strong>R-18 作品タイトル・URL を入れない</strong>（サークル名＋媒体のみ）。タイトルは CircleMap のリンク先で見てもらう。</p>
     <p class="note">サムネは問題なさそうなものだけ。全部アウトなら <strong>① 本文のみ</strong>。</p>
 
     <h3>絡み方の方針</h3>
@@ -28,6 +29,7 @@ export function getXGuideHtml(): string {
     <ul class="bad">
       <li>同人界隈アカウントを mass フォロー</li>
       <li>フォローした人にすぐ DM</li>
+      <li>本文に R-18 作品タイトルをそのまま載せる</li>
       <li>本文に URL を詰め込む</li>
       <li>シャドウバン警告のあるアカウントに絡む</li>
       <li># ハッシュタグをたくさん付ける</li>

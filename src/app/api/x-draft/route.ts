@@ -162,7 +162,7 @@ export async function GET(request: Request) {
   ${getXGuideHtml()}
   ${renderEngageTargetsHtml(engageCircle, engageWorks)}
   <h1>X投稿下書き（${TYPE_LABELS[type]}）</h1>
-  <p class="meta">📷 サムネ → ③@（任意）→ ①本文 → ②リプ</p>
+  <p class="meta">📷 サムネ → ③@（任意）→ ①本文（タイトルなし）→ ②リプ</p>
   <div class="types">
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=popular">人気TOP3</a>
     <a href="?secret=${encodeURIComponent(url.searchParams.get("secret") ?? "")}&type=circle">注目サークル</a>

@@ -39,10 +39,30 @@ function mediaTag(type: MediaType): string {
   return MEDIA_NAMES[type];
 }
 
-function truncate(text: string, max: number): string {
-  if (text.length <= max) return text;
-  return `${text.slice(0, max - 1)}…`;
+/** X 本文用：R-18 タイトルは載せずサークル名＋媒体だけ */
+function formatXSafeWorkLine(work: Work, label: string): string {
+  const suffix =
+    work.popularityRank != null ? `（人気${work.popularityRank}位）` : "";
+  return `${label}. ${work.circleName} / ${mediaTag(work.mediaType)}${suffix}`;
 }
+
+function formatXSafeWorkPick(work: Work, index: number): string {
+  return `${index}. ${work.circleName} / ${mediaTag(work.mediaType)}`;
+}
+
+function formatXSafeCircleWorkLine(work: Work): string {
+  return `・${mediaTag(work.mediaType)}（${work.circleName}）`;
+}
+
+function formatXReplyBlock(works: Work[], footer?: string): string {
+  const blocks = works.map((work, i) =>
+    [`${i + 1}. ${work.circleName}`, workUrl(work.id)].join("\n")
+  );
+  if (footer) blocks.push("", footer);
+  return blocks.join("\n\n");
+}
+
+const X_SAFE_FOOTER = "※ 作品タイトル（R18）はリンク先で確認";
 
 function collectImages(works: Work[]): XPostImage[] {
   const images: XPostImage[] = [];
@@ -139,23 +159,21 @@ function pickHookTag(work: Work): string | undefined {
 /** 拡散フック（【衝撃】系・月1〜2回・サムネ必須推奨） */
 export function buildHookPost(work: Work): XPostDraft {
   const url = workUrl(work.id);
-  const title = truncate(work.title, 38);
   const tag = pickHookTag(work);
   const meta =
     work.mediaType === "voice" && work.duration
-      ? `${work.duration}・${work.circleName}`
+      ? `${work.duration}・${work.circleName} / 音声`
       : work.mediaType === "manga" && work.pages
-        ? `${work.pages}P・${work.circleName}`
-        : work.circleName;
+        ? `${work.pages}P・${work.circleName} / 漫画`
+        : `${work.circleName} / ${mediaTag(work.mediaType)}`;
 
   let lines: string[];
 
   if (work.mediaType === "voice") {
     lines = [
-      "【やばい】この音声、タイトルだけで想像力が止まらない…",
+      "【やばい】今週人気の音声、長尺らしい…",
       "",
-      `「${title}」`,
-      meta,
+      `📌 ${meta}`,
       "",
       "寝落とし目的で聴いたのに、最後まで起きてる人いない？",
     ];
@@ -163,8 +181,7 @@ export function buildHookPost(work: Work): XPostDraft {
     lines = [
       "【衝撃】表紙だけで止まってる人多くない？",
       "",
-      `「${title}」`,
-      work.circleName,
+      `📌 ${work.circleName} / CG`,
       "",
       "中身まで見てない人、結構いる説。",
     ];
@@ -172,16 +189,17 @@ export function buildHookPost(work: Work): XPostDraft {
     lines = [
       tag ? `【知らん人多数】${tag}系、これ知ってる？` : "【知らん人多数】これ知ってる？",
       "",
-      `「${title}」`,
-      `${work.circleName} / ${mediaTag(work.mediaType)}`,
+      `📌 ${meta}`,
       "",
       "同じサークルの他作品、探すの面倒くさくない？",
     ];
   }
 
+  lines.push("", X_SAFE_FOOTER);
+
   return {
     text: lines.join("\n"),
-    reply: [url, circleUrl(work.circleId)].join("\n"),
+    reply: formatXReplyBlock([work]),
     images: collectImages([work]),
     mention: "@",
     circleName: work.circleName,
@@ -218,8 +236,13 @@ export function buildBuzzPost(circle: Circle, works: Work[]): XPostDraft {
         ];
 
   if (featured) {
-    lines.push("", `代表作: ${truncate(featured.title, 32)}`);
+    lines.push(
+      "",
+      `代表作: ${featured.circleName} / ${mediaTag(featured.mediaType)}`
+    );
   }
+
+  lines.push("", X_SAFE_FOOTER);
 
   return {
     text: lines.join("\n"),
@@ -243,18 +266,17 @@ export function buildPopularPost(works: Work[]): XPostDraft {
     };
   }
 
-  const lines = top.map((work, i) => {
-    const title = truncate(work.title, 36);
-    return `${i + 1}. ${title}\n   ${work.circleName} / ${mediaTag(work.mediaType)}`;
-  });
-
-  const linkLines = top.map(
-    (work, i) => `${i + 1}. ${workUrl(work.id)}`
-  );
+  const lines = top.map((work, i) => formatXSafeWorkPick(work, i + 1));
 
   return {
-    text: [`【${SITE_NAME}】FANZA同人 人気TOP3`, "", ...lines].join("\n"),
-    reply: [...linkLines, "", `サークル軸で横断検索 → ${site}`].join("\n"),
+    text: [
+      `【${SITE_NAME}】FANZA同人 人気TOP3`,
+      "",
+      ...lines,
+      "",
+      X_SAFE_FOOTER,
+    ].join("\n"),
+    reply: formatXReplyBlock(top, `サークル軸で横断検索 → ${site}`),
     images: collectImages(top),
   };
 }
@@ -266,9 +288,7 @@ export function buildCirclePost(circle: Circle, works: Work[]): XPostDraft {
 
   const workLines =
     picks.length > 0
-      ? picks.map(
-          (w) => `・${truncate(w.title, 28)}（${mediaTag(w.mediaType)}）`
-        )
+      ? picks.map((w) => formatXSafeCircleWorkLine(w))
       : ["・作品一覧はサイトでチェック"];
 
   return {
@@ -279,6 +299,8 @@ export function buildCirclePost(circle: Circle, works: Work[]): XPostDraft {
       `作品数 ${circle.workCount} / 漫画${circle.mangaCount} CG${circle.cgCount} 音声${circle.voiceCount} ゲーム${circle.gameCount}`,
       "",
       ...workLines,
+      "",
+      X_SAFE_FOOTER,
     ].join("\n"),
     reply: url,
     images: collectImages(picks.length > 0 ? picks : works),
@@ -297,14 +319,10 @@ export function buildWeeklyPost(
 
   const popLines = popular
     .slice(0, 2)
-    .map(
-      (w, i) => `人気${i + 1}. ${truncate(w.title, 30)}（${w.circleName}）`
-    );
+    .map((w, i) => formatXSafeWorkLine(w, `人気${i + 1}`));
   const latLines = latest
     .slice(0, 1)
-    .map((w) => `新着. ${truncate(w.title, 30)}（${w.circleName}）`);
-
-  const linkLines = picks.map((w) => workUrl(w.id));
+    .map((w) => formatXSafeWorkLine(w, "新着"));
 
   return {
     text: [
@@ -312,8 +330,10 @@ export function buildWeeklyPost(
       "",
       ...popLines,
       ...latLines,
+      "",
+      X_SAFE_FOOTER,
     ].join("\n"),
-    reply: [...linkLines, "", site].join("\n"),
+    reply: formatXReplyBlock(picks, site),
     images: collectImages(picks),
   };
 }
