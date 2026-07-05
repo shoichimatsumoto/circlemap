@@ -48,3 +48,56 @@ export function getXGuideHtml(): string {
   </div>
 </details>`;
 }
+
+/** X 画像加工マニュアル（外注・Canva）— x-draft ページ用 */
+export function getXImageManualHtml(): string {
+  return `
+<details class="guide" open>
+  <summary>📷 画像加工マニュアル（外注・Canva）</summary>
+  <div class="guide-body">
+    <p><strong>目的：</strong>★ サムネを X 向けに整える。詳細版は <code>docs/x-image-outsourcing-manual.md</code></p>
+
+    <h3>いつコラージュするか</h3>
+    <table>
+      <tr><td>◎</td><td><strong>人気TOP3 / 週次 / フック</strong> … 3枚横並びコラージュ</td></tr>
+      <tr><td>△</td><td><strong>注目サークル</strong> … ★1枚そのまま or 軽加工</td></tr>
+      <tr><td>—</td><td><strong>豆知識</strong> … 画像なしでも可</td></tr>
+    </table>
+
+    <h3>Canva 手順（3枚横並び）</h3>
+    <ol>
+      <li><a href="https://www.canva.com/" target="_blank" rel="noopener">Canva</a> → カスタムサイズ <strong>1080 × 1350 px</strong>（4:5）</li>
+      <li>背景色 <code>#0f0f12</code></li>
+      <li>x-draft の ★ ＋ 2・3枚目をアップロード → <strong>横3列</strong>（各 約300×400px、上端揃え）</li>
+      <li>露骨なサムネは使わない（差し替え or 画像なし投稿）</li>
+      <li>右下に <strong>circlemap.jp</strong>（紫 <code>#a78bfa</code> 24〜28px 太字、余白24px）</li>
+      <li><strong>PNG</strong> でダウンロード → X に添付</li>
+    </ol>
+
+    <h3>★1枚だけ（注目サークル等）</h3>
+    <ol>
+      <li>同じ 1080×1350、背景 <code>#0f0f12</code></li>
+      <li>★ を中央（幅 約720px）、右下 <strong>circlemap.jp</strong></li>
+      <li>PNG 書き出し</li>
+    </ol>
+
+    <h3>禁止</h3>
+    <ul class="bad">
+      <li>画像・本文に R-18 作品タイトルを入れる</li>
+      <li>露骨すぎるサムネをそのまま使う</li>
+      <li>画像に # ハッシュタグ</li>
+    </ul>
+
+    <h3>投稿順（再確認）</h3>
+    <p>加工PNG → ③@（任意）→ ①本文 → ②リプライ</p>
+
+    <h3>完了報告</h3>
+    <pre class="engage-template">【CircleMap X 投稿完了】
+日付: YYYY/MM/DD
+タイプ: 人気TOP3 など
+投稿URL: https://x.com/circlemap_jp/status/…
+画像: 3枚コラージュ / ★そのまま / 画像なし
+@: あり / なし</pre>
+  </div>
+</details>`;
+}

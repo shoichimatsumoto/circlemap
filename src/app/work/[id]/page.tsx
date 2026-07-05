@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CircleJsonLd } from "@/components/CircleJsonLd";
 import { DataModeBanner } from "@/components/DataModeBanner";
+import { DoujinLogArticleBanner } from "@/components/DoujinLogArticleBanner";
 import { PageShell } from "@/components/PageShell";
 import { WorkJsonLd } from "@/components/WorkJsonLd";
 import { WorkPageClient } from "@/components/WorkPageClient";
@@ -64,6 +65,7 @@ export default async function WorkPage({ params }: Props) {
           <span>/</span>
           <span className="breadcrumb-current">{work.title}</span>
         </nav>
+        <DoujinLogArticleBanner workId={work.id} circleId={work.circleId} />
         <WorkPageClient work={work} relatedWorks={relatedWorks} />
       </div>
     </PageShell>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { CircleJsonLd } from "@/components/CircleJsonLd";
 import { CirclePageClient } from "@/components/CirclePageClient";
+import { DoujinLogArticleBanner } from "@/components/DoujinLogArticleBanner";
 import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { PageShell } from "@/components/PageShell";
@@ -101,6 +102,7 @@ export default async function CirclePage({ searchParams }: Props) {
           <span>/</span>
           <span>{circle.name}</span>
         </nav>
+        <DoujinLogArticleBanner circleId={circle.id} />
         <CirclePageClient circle={circle} works={works} featured={featured} />
       </div>
     </PageShell>

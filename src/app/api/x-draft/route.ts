@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDiscoverableCircles, getCirclePage, getLatestWorks, getPopularWorks } from "@/lib/data";
 import { renderEngageTargetsHtml, SKIP_ENGAGE_TARGETS } from "@/lib/x-engage-targets";
-import { getXGuideHtml } from "@/lib/x-guide";
+import { getXGuideHtml, getXImageManualHtml } from "@/lib/x-guide";
 import { escapeHtmlText, renderMentionHtml, renderXDraftImagesHtml } from "@/lib/x-draft-ui";
 import { buildXPost, pickBuzzCircle, type XPostType } from "@/lib/x-post";
 
@@ -160,6 +160,7 @@ export async function GET(request: Request) {
 </head>
 <body>
   ${getXGuideHtml()}
+  ${getXImageManualHtml()}
   ${renderEngageTargetsHtml(engageCircle, engageWorks)}
   <h1>X投稿下書き（${TYPE_LABELS[type]}）</h1>
   <p class="meta">📷 サムネ → ③@（任意）→ ①本文（タイトルなし）→ ②リプ</p>
