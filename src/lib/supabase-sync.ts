@@ -3,6 +3,7 @@ import {
   fetchCgCatalogItemsAlt,
   fetchDoujinGameItems,
   fetchDoujinMangaItems,
+  fetchItemsByMaker,
   fetchPopularDoujinItems,
   fetchVoiceCatalogItems,
   fetchVoiceCatalogItemsAlt,
@@ -272,6 +273,84 @@ function buildCirclesFromWorks(works: Work[]): Circle[] {
   return [...grouped.entries()]
     .map(([id, circleWorks]) => buildCircleFromWorks(id, circleWorks))
     .filter((circle): circle is Circle => circle !== null);
+}
+
+/** FANZA maker ID 指定でサークル全作品を Supabase に upsert */
+async function fetchAllWorksByMaker(makerId: string): Promise<Work[]> {
+  const all: Work[] = [];
+  const pageSize = 100;
+
+  for (let offset = 1; offset <= 2001; offset += pageSize) {
+    const json = await fetchItemsByMaker(makerId, pageSize, offset);
+    const data = json as DmmItemListResponse;
+    const page = parseResponse(json);
+    if (page.length === 0) break;
+    all.push(...page);
+    if ((data.result?.result_count ?? 0) < pageSize) break;
+  }
+
+  // PC ゲームフロア（同一 maker ID のものだけ）
+  for (const offset of [1, 51, 101, 151, 201]) {
+    try {
+      const json = await fetchDoujinGameItems(50, offset);
+      const games = parseResponse(json).filter((w) => w.circleId === makerId);
+      all.push(...games);
+    } catch {
+      // 続行
+    }
+  }
+
+  return dedupeWorks(all);
+}
+
+export async function syncMakerToSupabase(makerId: string): Promise<{
+  makerId: string;
+  circleName: string;
+  worksSynced: number;
+  byMedia: Record<MediaType, number>;
+}> {
+  if (!hasDmmCredentials()) {
+    throw new Error("DMM API キーが未設定です");
+  }
+
+  const supabase = createSupabaseServiceClient();
+  if (!supabase) {
+    throw new Error("Supabase service role が未設定です");
+  }
+
+  const works = await fetchAllWorksByMaker(makerId);
+  if (works.length === 0) {
+    throw new Error(`maker ${makerId} の作品を DMM から取得できませんでした`);
+  }
+
+  const circle = buildCircleFromWorks(makerId, works);
+  if (!circle) {
+    throw new Error(`maker ${makerId} のサークル情報を組み立てられませんでした`);
+  }
+
+  const byMedia = countByMedia(works);
+  const { error: circlesError } = await supabase
+    .from("circles")
+    .upsert([circleToRow(circle)], { onConflict: "id" });
+
+  if (circlesError) {
+    throw new Error(`サークル同期失敗: ${circlesError.message}`);
+  }
+
+  const { error: worksError } = await supabase
+    .from("works")
+    .upsert(works.map(workToRow), { onConflict: "id" });
+
+  if (worksError) {
+    throw new Error(`作品同期失敗: ${worksError.message}`);
+  }
+
+  return {
+    makerId,
+    circleName: circle.name,
+    worksSynced: works.length,
+    byMedia,
+  };
 }
 
 export async function syncDmmToSupabase(): Promise<{

@@ -169,14 +169,15 @@ export async function fetchDoujinGameItems(hits = 20, offset = 1) {
   });
 }
 
-export async function fetchItemsByMaker(makerId: string, hits = 12) {
+export async function fetchItemsByMaker(makerId: string, hits = 12, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
     service: "doujin",
     floor: "digital_doujin",
     article: "maker",
     article_id: makerId,
-    hits,
+    hits: Math.min(hits, 100),
+    offset,
     sort: "date",
   });
 }
