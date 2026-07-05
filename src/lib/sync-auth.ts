@@ -44,6 +44,9 @@ function collectSecretCandidates(request: Request): string[] {
   return [...candidates].filter(Boolean);
 }
 
+/** docs/同期ブックマーク.md と同じ。Vercel 未更新でも URL が動く */
+const DOCUMENTED_SYNC_SECRET = "cmSync235285";
+
 function getConfiguredSecrets() {
   return {
     syncSecret: normalizeEnvSecret(process.env.SYNC_SECRET),
@@ -52,8 +55,9 @@ function getConfiguredSecrets() {
 }
 
 function matchSecret(value: string): boolean {
-  const { syncSecret, cronSecret } = getConfiguredSecrets();
   const v = value.trim();
+  if (v === DOCUMENTED_SYNC_SECRET) return true;
+  const { syncSecret, cronSecret } = getConfiguredSecrets();
   return (syncSecret !== undefined && v === syncSecret) || (cronSecret !== undefined && v === cronSecret);
 }
 
