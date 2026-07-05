@@ -1,3 +1,15 @@
+function normalizeEnvSecret(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  let s = value.trim();
+  if (
+    (s.startsWith('"') && s.endsWith('"')) ||
+    (s.startsWith("'") && s.endsWith("'"))
+  ) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 function collectSecretCandidates(request: Request): string[] {
   const url = new URL(request.url);
   const candidates = new Set<string>();
@@ -5,7 +17,6 @@ function collectSecretCandidates(request: Request): string[] {
   const fromQuery = url.searchParams.get("secret")?.trim();
   if (fromQuery) {
     candidates.add(fromQuery);
-    // searchParams は + を空白にする。元 URL から取り直す
     candidates.add(fromQuery.replace(/ /g, "+"));
   }
 
@@ -33,9 +44,21 @@ function collectSecretCandidates(request: Request): string[] {
   return [...candidates].filter(Boolean);
 }
 
+function getConfiguredSecrets() {
+  return {
+    syncSecret: normalizeEnvSecret(process.env.SYNC_SECRET),
+    cronSecret: normalizeEnvSecret(process.env.CRON_SECRET),
+  };
+}
+
+function matchSecret(value: string): boolean {
+  const { syncSecret, cronSecret } = getConfiguredSecrets();
+  const v = value.trim();
+  return (syncSecret !== undefined && v === syncSecret) || (cronSecret !== undefined && v === cronSecret);
+}
+
 export function getSyncSecretStatus() {
-  const syncSecret = process.env.SYNC_SECRET?.trim();
-  const cronSecret = process.env.CRON_SECRET?.trim();
+  const { syncSecret, cronSecret } = getConfiguredSecrets();
   return {
     hasSyncSecret: Boolean(syncSecret),
     hasCronSecret: Boolean(cronSecret),
@@ -43,8 +66,7 @@ export function getSyncSecretStatus() {
 }
 
 export function checkSyncAuth(request: Request): { ok: true } | { ok: false; message: string } {
-  const syncSecret = process.env.SYNC_SECRET?.trim();
-  const cronSecret = process.env.CRON_SECRET?.trim();
+  const { syncSecret, cronSecret } = getConfiguredSecrets();
 
   if (!syncSecret && !cronSecret) {
     return {
@@ -59,18 +81,41 @@ export function checkSyncAuth(request: Request): { ok: true } | { ok: false; mes
     return {
       ok: false,
       message:
-        "?secret=... を URL に付けてください（Vercel の SYNC_SECRET または CRON_SECRET と同じ値）",
+        "secret が必要です。/tools/sync のフォームから実行するか、POST で JSON 送信してください",
     };
   }
 
   for (const value of candidates) {
-    if (syncSecret && value === syncSecret) return { ok: true };
-    if (cronSecret && value === cronSecret) return { ok: true };
+    if (matchSecret(value)) return { ok: true };
   }
 
   return {
     ok: false,
     message:
-      "secret が一致しません。Vercel で Reveal → コピーし直すか、secret に + / = / & がある場合は encodeURIComponent でエンコードしてください。それでもダメなら SYNC_SECRET を英数字だけの値に変更 → Redeploy",
+      "secret が一致しません。Vercel → SYNC_SECRET を Reveal して /tools/sync に貼り付けてください",
+  };
+}
+
+export function checkSyncAuthValue(
+  secret: string | undefined
+): { ok: true } | { ok: false; message: string } {
+  const { syncSecret, cronSecret } = getConfiguredSecrets();
+
+  if (!syncSecret && !cronSecret) {
+    return {
+      ok: false,
+      message: "SYNC_SECRET / CRON_SECRET が Vercel に未設定です",
+    };
+  }
+
+  if (!secret?.trim()) {
+    return { ok: false, message: "secret を入力してください" };
+  }
+
+  if (matchSecret(secret)) return { ok: true };
+
+  return {
+    ok: false,
+    message: "secret が一致しません。Vercel → SYNC_SECRET を Reveal して貼り付け直してください",
   };
 }
