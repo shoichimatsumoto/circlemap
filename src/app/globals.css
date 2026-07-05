@@ -1464,6 +1464,15 @@ body {
   cursor: pointer;
 }
 
+.tag-link {
+  text-decoration: none;
+}
+
+.tag-link:hover {
+  color: var(--accent2);
+  border-color: rgba(124, 106, 247, 0.35);
+}
+
 .tag.active {
   background: rgba(124, 106, 247, 0.2);
   border-color: var(--accent);
@@ -1694,6 +1703,42 @@ body {
 .related-card small {
   color: var(--muted);
   font-size: 0.75rem;
+}
+
+/* SEO discovery links (crawler-friendly internal links) */
+.seo-discovery {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 28px;
+}
+
+.seo-discovery-title {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.seo-discovery-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.seo-discovery-list a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.seo-discovery-list a:hover {
+  color: var(--accent2);
 }
 
 /* Footer */

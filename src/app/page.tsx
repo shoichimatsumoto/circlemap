@@ -3,6 +3,7 @@ import { CategoryChips } from "@/components/CategoryChips";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
+import { SeoDiscoveryLinks } from "@/components/SeoDiscoveryLinks";
 import { getLatestWorks, getPopularWorks } from "@/lib/data";
 import type { DataSource } from "@/lib/types";
 import type { Metadata } from "next";
@@ -70,6 +71,8 @@ export default async function HomePage() {
             keyPrefix="latest-"
           />
         </section>
+
+        <SeoDiscoveryLinks />
       </div>
     </PageShell>
   );

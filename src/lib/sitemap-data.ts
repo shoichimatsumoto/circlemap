@@ -6,6 +6,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 const MEDIA_TYPES: MediaType[] = ["manga", "cg", "voice", "game"];
 const PAGE_SIZE = 1000;
 
+/** 作品サイトマップ1ファイルあたりの URL 数 */
+export const SITEMAP_WORKS_CHUNK_SIZE = 1000;
+
 export type SitemapEntry = {
   url: string;
   lastModified?: Date;
@@ -49,7 +52,7 @@ async function fetchAllSitemapRows(
   return rows;
 }
 
-function getStaticPages(base: string, now: Date): SitemapEntry[] {
+export function getStaticSitemapEntries(base: string, now: Date): SitemapEntry[] {
   return [
     { url: base, lastModified: now, changeFrequency: "daily", priority: 1 },
     {
@@ -91,42 +94,138 @@ function getStaticPages(base: string, now: Date): SitemapEntry[] {
   ];
 }
 
+function mapWorkRows(
+  base: string,
+  works: SitemapRow[],
+  now: Date,
+): SitemapEntry[] {
+  return works.map((work) => ({
+    url: `${base}/work/${work.id}`,
+    lastModified: work.updated_at ? new Date(work.updated_at) : now,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+}
+
+function mapCircleRows(
+  base: string,
+  circles: SitemapRow[],
+  now: Date,
+): SitemapEntry[] {
+  return circles.map((circle) => ({
+    url: `${base}/circle?id=${encodeURIComponent(circle.id)}`,
+    lastModified: circle.updated_at ? new Date(circle.updated_at) : now,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+}
+
+async function fetchDbSitemapRows(): Promise<{
+  works: SitemapRow[];
+  circles: SitemapRow[];
+} | null> {
+  if (!hasSupabasePublicConfig()) {
+    return null;
+  }
+
+  const supabase = createSupabaseAnonClient();
+  if (!supabase) {
+    return null;
+  }
+
+  const [works, circles] = await Promise.all([
+    fetchAllSitemapRows(supabase, "works"),
+    fetchAllSitemapRows(supabase, "circles"),
+  ]);
+
+  return { works, circles };
+}
+
+export async function getWorkSitemapEntries(): Promise<SitemapEntry[]> {
+  const base = getSiteUrl();
+  const now = new Date();
+
+  try {
+    const rows = await fetchDbSitemapRows();
+    if (!rows) {
+      return [];
+    }
+    return mapWorkRows(base, rows.works, now);
+  } catch {
+    return [];
+  }
+}
+
+export async function getCircleSitemapEntries(): Promise<SitemapEntry[]> {
+  const base = getSiteUrl();
+  const now = new Date();
+
+  try {
+    const rows = await fetchDbSitemapRows();
+    if (!rows) {
+      return [];
+    }
+    return mapCircleRows(base, rows.circles, now);
+  } catch {
+    return [];
+  }
+}
+
+export function chunkSitemapEntries(
+  entries: SitemapEntry[],
+  chunkSize: number,
+): SitemapEntry[][] {
+  if (entries.length === 0) {
+    return [];
+  }
+
+  const chunks: SitemapEntry[][] = [];
+  for (let i = 0; i < entries.length; i += chunkSize) {
+    chunks.push(entries.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+/** サイトマップ index に載せる子サイトマップ URL 一覧 */
+export async function getSitemapChildUrls(): Promise<string[]> {
+  const base = getSiteUrl();
+  const now = new Date();
+  const urls = [`${base}/sitemap/static.xml`];
+
+  try {
+    const rows = await fetchDbSitemapRows();
+    if (!rows) {
+      return urls;
+    }
+
+    const workChunks = chunkSitemapEntries(
+      mapWorkRows(base, rows.works, now),
+      SITEMAP_WORKS_CHUNK_SIZE,
+    );
+
+    for (let i = 0; i < workChunks.length; i++) {
+      urls.push(`${base}/sitemap/works/${i + 1}`);
+    }
+
+    if (rows.circles.length > 0) {
+      urls.push(`${base}/sitemap/circles.xml`);
+    }
+  } catch {
+    // static のみ
+  }
+
+  return urls;
+}
+
+/** 後方互換: 単一サイトマップ用（テスト・フォールバック） */
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   const base = getSiteUrl();
   const now = new Date();
-  const staticPages = getStaticPages(base, now);
+  const staticPages = getStaticSitemapEntries(base, now);
+  const [workPages, circlePages] = await Promise.all([
+    getWorkSitemapEntries(),
+    getCircleSitemapEntries(),
+  ]);
 
-  if (!hasSupabasePublicConfig()) {
-    return staticPages;
-  }
-
-  try {
-    const supabase = createSupabaseAnonClient();
-    if (!supabase) {
-      return staticPages;
-    }
-
-    const [works, circles] = await Promise.all([
-      fetchAllSitemapRows(supabase, "works"),
-      fetchAllSitemapRows(supabase, "circles"),
-    ]);
-
-    const workPages: SitemapEntry[] = works.map((work) => ({
-      url: `${base}/work/${work.id}`,
-      lastModified: work.updated_at ? new Date(work.updated_at) : now,
-      changeFrequency: "weekly",
-      priority: 0.6,
-    }));
-
-    const circlePages: SitemapEntry[] = circles.map((circle) => ({
-      url: `${base}/circle?id=${encodeURIComponent(circle.id)}`,
-      lastModified: circle.updated_at ? new Date(circle.updated_at) : now,
-      changeFrequency: "weekly",
-      priority: 0.5,
-    }));
-
-    return [...staticPages, ...workPages, ...circlePages];
-  } catch {
-    return staticPages;
-  }
+  return [...staticPages, ...workPages, ...circlePages];
 }

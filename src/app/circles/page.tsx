@@ -1,6 +1,7 @@
 import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { PageShell } from "@/components/PageShell";
+import { SeoDiscoveryLinks } from "@/components/SeoDiscoveryLinks";
 import { getDiscoverableCircles } from "@/lib/data";
 import type { Metadata } from "next";
 
@@ -41,6 +42,7 @@ export default async function CirclesPage() {
           layout="list"
           showRank
         />
+        <SeoDiscoveryLinks />
       </main>
     </PageShell>
   );

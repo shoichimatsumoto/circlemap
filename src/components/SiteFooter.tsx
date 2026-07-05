@@ -9,6 +9,10 @@ export function SiteFooter() {
           <p>FANZA同人をサークル軸で探すコレクター向けデータベース</p>
         </div>
         <nav className="footer-nav">
+          <Link href="/circles">人気サークル</Link>
+          <Link href="/circle">サークル一覧</Link>
+          <Link href="/media/manga">漫画</Link>
+          <Link href="/media/voice">音声</Link>
           <Link href="/about">運営者情報</Link>
           <Link href="/privacy">プライバシーポリシー</Link>
           <a

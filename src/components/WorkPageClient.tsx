@@ -63,9 +63,13 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
 
             <div className="tag-row">
               {work.tags.map((tag) => (
-                <span key={tag} className="tag">
+                <Link
+                  key={tag}
+                  href={`/search?q=${encodeURIComponent(tag)}`}
+                  className="tag tag-link"
+                >
                   #{tag}
-                </span>
+                </Link>
               ))}
             </div>
 

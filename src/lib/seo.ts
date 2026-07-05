@@ -110,3 +110,62 @@ export function buildCircleJsonLd(circle: Circle) {
     },
   };
 }
+
+export function buildWorkBreadcrumbJsonLd(work: Work) {
+  const base = getSiteUrl();
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: base,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: work.circleName,
+        item: `${base}/circle?id=${encodeURIComponent(work.circleId)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: work.title,
+        item: `${base}/work/${work.id}`,
+      },
+    ],
+  };
+}
+
+export function buildCircleBreadcrumbJsonLd(circle: Circle) {
+  const base = getSiteUrl();
+  const pageUrl = `${base}/circle?id=${encodeURIComponent(circle.id)}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: base,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "サークル一覧",
+        item: `${base}/circles`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: circle.name,
+        item: pageUrl,
+      },
+    ],
+  };
+}

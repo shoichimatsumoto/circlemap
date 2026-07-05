@@ -6,6 +6,7 @@ import { DoujinLogArticleBanner } from "@/components/DoujinLogArticleBanner";
 import { InfiniteCircleList } from "@/components/InfiniteCircleList";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { PageShell } from "@/components/PageShell";
+import { SeoDiscoveryLinks } from "@/components/SeoDiscoveryLinks";
 import { getCirclePage, getDiscoverableCircles } from "@/lib/data";
 import { buildCircleSeoDescription, buildCircleSeoTitle } from "@/lib/seo";
 import { getSiteUrl } from "@/lib/site";
@@ -83,6 +84,7 @@ export default async function CirclePage({ searchParams }: Props) {
             pageSize={PAGE_SIZE}
             layout="list"
           />
+          <SeoDiscoveryLinks />
         </div>
       </PageShell>
     );

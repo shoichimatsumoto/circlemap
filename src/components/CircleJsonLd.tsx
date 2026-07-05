@@ -1,4 +1,7 @@
-import { buildCircleJsonLd } from "@/lib/seo";
+import {
+  buildCircleBreadcrumbJsonLd,
+  buildCircleJsonLd,
+} from "@/lib/seo";
 import type { Circle } from "@/lib/types";
 
 type Props = {
@@ -6,12 +9,20 @@ type Props = {
 };
 
 export function CircleJsonLd({ circle }: Props) {
-  const jsonLd = buildCircleJsonLd(circle);
-
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildCircleJsonLd(circle)),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildCircleBreadcrumbJsonLd(circle)),
+        }}
+      />
+    </>
   );
 }

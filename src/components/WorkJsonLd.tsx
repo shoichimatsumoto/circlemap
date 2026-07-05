@@ -1,4 +1,7 @@
-import { buildWorkJsonLd } from "@/lib/seo";
+import {
+  buildWorkBreadcrumbJsonLd,
+  buildWorkJsonLd,
+} from "@/lib/seo";
 import type { Work } from "@/lib/types";
 
 type Props = {
@@ -6,12 +9,20 @@ type Props = {
 };
 
 export function WorkJsonLd({ work }: Props) {
-  const jsonLd = buildWorkJsonLd(work);
-
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildWorkJsonLd(work)),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildWorkBreadcrumbJsonLd(work)),
+        }}
+      />
+    </>
   );
 }

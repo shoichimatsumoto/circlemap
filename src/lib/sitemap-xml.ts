@@ -40,3 +40,38 @@ export function buildSitemapXml(entries: SitemapEntry[]): string {
     "",
   ].join("\n");
 }
+
+export function buildSitemapIndexXml(
+  sitemapUrls: string[],
+  lastModified?: Date,
+): string {
+  const lastmod = lastModified?.toISOString();
+  const items = sitemapUrls
+    .map((url) => {
+      const lines = ["  <sitemap>", `    <loc>${escapeXml(url)}</loc>`];
+      if (lastmod) {
+        lines.push(`    <lastmod>${lastmod}</lastmod>`);
+      }
+      lines.push("  </sitemap>");
+      return lines.join("\n");
+    })
+    .join("\n");
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    items,
+    "</sitemapindex>",
+    "",
+  ].join("\n");
+}
+
+export function sitemapXmlResponse(xml: string): Response {
+  return new Response(xml, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600, s-maxage=86400",
+    },
+  });
+}
