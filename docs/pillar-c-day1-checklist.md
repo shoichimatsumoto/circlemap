@@ -41,8 +41,8 @@
 ### A-3. メモ
 
 ```
-公開 URL: ________________________________
-公開日: ________________________________
+公開 URL: https://note.com/ero_log_memo/n/n33830aacf1f9 ✅
+公開日: 2026-07-06 ✅
 ```
 
 → 第2弾・Blogterest 申請時に貼る
@@ -138,8 +138,8 @@ Blogterest URL: http://______________.blogterest.net/
 
 ## 今日の完了チェック
 
-- [ ] note アカウント作成
-- [ ] 第1弾 note 公開（URL メモ）
+- [x] note アカウント作成（ero_log_memo）
+- [x] 第1弾 note 公開
 - [ ] Blogterest サイト作成（URL メモ）
 - [ ] DMM アフィリ申請 or サイト追加
 - [ ] 記事 **5本** 投稿
