@@ -51,6 +51,8 @@
 
 ## Part B: Blogterest（20分）
 
+**詳細手順:** [`pillar-c-blogterest-manual.md`](pillar-c-blogterest-manual.md)
+
 ### B-1. サイト作成
 
 1. Blogterest のトップ（`blogterest.net`）→ **ブログ作成**
@@ -68,7 +70,10 @@
 ### B-2. サイト URL をメモ
 
 ```
-Blogterest URL: http://______________.blogterest.net/
+ドメイン: erologmemo.com ✅（2026-07-07 お名前.com）
+Blogterest URL: http://erologmemo.blogterest.net/ ✅
+本番 URL（目標）: https://erologmemo.com/
+本番 URL（目標）: https://erologmemo.com/
 ```
 
 ---
@@ -140,9 +145,11 @@ Blogterest URL: http://______________.blogterest.net/
 
 - [x] note アカウント作成（ero_log_memo）
 - [x] 第1弾 note 公開
-- [ ] Blogterest サイト作成（URL メモ）
-- [ ] DMM アフィリ申請 or サイト追加
-- [ ] 記事 **5本** 投稿
+- [x] Blogterest サイト作成（[erologmemo.blogterest.net](http://erologmemo.blogterest.net/)）
+- [x] お名前.com DNS（A → 209.58.177.64）設定済み
+- [x] `http://erologmemo.com` 反映確認（http・保護されていない通信は正常）
+- [ ] note 第2弾（Day1記録）公開
+- [x] 記事 **2本** 投稿（page/1/・page/2/ — 2026/07/08）
 - [ ] 重複チェック用スプレッドシート作成
 
 ---
