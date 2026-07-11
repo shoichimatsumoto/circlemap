@@ -104,7 +104,7 @@ Blogterest URL: http://erologmemo.blogterest.net/ ✅
 ・「動画はこちら」→ エロタレ or DMM リンク
 
 【カテゴリ・タグ】
-・動画に合ったタグを2〜3個
+・動画に合ったタグを **最大8個**（5〜8個推奨）
 ```
 
 ### 注意
@@ -148,8 +148,9 @@ Blogterest URL: http://erologmemo.blogterest.net/ ✅
 - [x] Blogterest サイト作成（[erologmemo.blogterest.net](http://erologmemo.blogterest.net/)）
 - [x] お名前.com DNS（A → 209.58.177.64）設定済み
 - [x] `http://erologmemo.com` 反映確認（http・保護されていない通信は正常）
-- [ ] note 第2弾（Day1記録）公開
-- [x] 記事 **2本** 投稿（page/1/・page/2/ — 2026/07/08）
+- [x] note 第2弾（Day1記録）公開 — https://note.com/ero_log_memo/n/n46de51743fa1
+- [x] 記事 **7本** 投稿（page/1〜7 — 最新 2026/07/09）
+- [x] DMM アフィリ `erologmemo.com` サイト追加申請（2026/07/09・審査待ち）
 - [ ] 重複チェック用スプレッドシート作成
 
 ---
