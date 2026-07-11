@@ -216,6 +216,6 @@ Blogterest 仮 URL:
 Blogterest 管理画面 URL:
 DNS VALUE（Blogterest 指示）:
 erologmemo.com 反映日:
-DMM サイト登録: 申請済み 2026/07/09（審査待ち）
+DMM サイト登録: 不承認 2026/07/10 → 再申請待ち（記事増・問い合わせ設置後）
 エロタレ申請日: ⬜
 ```
