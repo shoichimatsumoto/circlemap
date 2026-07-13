@@ -150,8 +150,9 @@ Blogterest URL: http://erologmemo.blogterest.net/ ✅
 - [x] `http://erologmemo.com` 反映確認（http・保護されていない通信は正常）
 - [x] note 第2弾（Day1記録）公開 — https://note.com/ero_log_memo/n/n46de51743fa1
 - [x] 記事 **7本** 投稿（page/1〜7 — 最新 2026/07/09）
+- [x] 運営者情報・プライバシーポリシー・問い合わせ・フッターリンク（2026/07/11）
 - [x] DMM アフィリ `erologmemo.com` サイト追加申請（2026/07/09）
-- [ ] DMM アフィリ **再申請**（2026/07/10 不承認 → 下記対策後）
+- [ ] DMM アフィリ **再申請**（不承認 2026/07/10 → 記事15本+で再チャレンジ）
 - [ ] 重複チェック用スプレッドシート作成
 
 ---
