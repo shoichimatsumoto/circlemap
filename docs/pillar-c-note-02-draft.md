@@ -14,6 +14,11 @@
 | **公開 URL** | https://note.com/ero_log_memo/n/n46de51743fa1 （2026-07-09 公開済み） |
 | **ハッシュタグ** | `#副業` `#独自ドメイン` `#エログ` `#エロタレスト` `#Blogterest` |
 
+### note 公開メモ（2026/07/17）
+
+- `erologmemo.blogterest.net` … 本文に入れると「公開に失敗しました」（更新時もNG）
+- **OK:** `Blogterest サブドメイン（erologmemo）` に言い換え（2026/07/17 更新確認済み）
+
 ---
 
 ## 本文（ここからコピー）
@@ -38,7 +43,7 @@
 | 項目 | 結果 |
 |------|------|
 | ドメイン | **erologmemo.com**（お名前.com） |
-| Blogterest | [erologmemo.blogterest.net](http://erologmemo.blogterest.net/) |
+| Blogterest | Blogterest サブドメイン（erologmemo） |
 | サイト名 | **エログメモ** |
 | 独自ドメイン | **http://erologmemo.com** で表示確認 ✅ |
 

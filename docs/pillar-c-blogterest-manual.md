@@ -148,7 +148,7 @@ Blogterest 仮 URL: http://erologmemo.blogterest.net/
 2〜3行の説明
 
 動画はこちら
-→ （エロタレ or DMM リンク）
+（「動画はこちら」にリンクボタンで動画向きURLを貼る）
 
 【カテゴリ・タグ】
 2〜3個
