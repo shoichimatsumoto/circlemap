@@ -138,25 +138,37 @@ B. 文章タブのツールバー「画像アイコン」→ アップロード 
 
 ---
 
-### Step 5: 本文を書く
+### Step 5: 本文を書く（htmlソース一括・2026/07/19〜）
 
-**型:**
+**文章タブは空のまま。** あらすじ・MGSパーツ・「動画はこちら」を **すべて「動画埋め込み(htmlソース)」タブ** に貼る。
 
+文章タブと htmlソース を混ぜると `<script>` が `<p>` 内に入り、**MGS広告が出ない** ことがある（page/34 で発生）。
+
+**型（htmlソースタブにそのまま貼る）:**
+
+```html
+<p>（あらすじ1行目）</p>
+<p>（あらすじ2行目）</p>
+<div id="erKokOrigin" class="erKokOrigin"></div><script src="//kok.eroterest.net/origin/?da=&ma=PHUD85LRHHCYILLYEXO3NCQ3I7&tag=&pch=&n=&rn=&spn=&sprn=&ms=&mw=&mw2=&mt=&mcl=&mbg=&mc=&msz=&ts=&tt=&tcl=&tbg=&tsz=&tlh=&tc=&tmc=&tu=&lts=&ltt=&ltcl=&ltbg=&ltsz=&ltr=&ltlh=&ltc=&ltmc=&ltu=&ds=&dt=&dcl=&dsz=&dlh=&dc=&lds=&ldt=&ldcl=&ldsz=&ldr=&ldlh=&ldc=&ids=&idss=&ib=&ibs=&ibc=&ir=&irs=&ls=&lsbg=&lsc=&sf="></script>
+<p><a href="（動画向きURL）" target="_blank" rel="noopener" class="movieLink">動画はこちら</a></p>
 ```
-（2〜3行の説明。動画のあらすじ風。露骨すぎる表現は避ける）
 
-動画はこちら
-```
+**ルール:**
 
-「動画はこちら」を選択 → **リンクボタン（鎖マーク）** で Step 2 の動画向きURLを貼る。`→` や生URLの行は書かない。
+- `<div>` と `<script>` は **同じ行・`<p>` の外**（間に改行だけ入れない）
+- `<script>` を `<p>` で囲まない
+- 「動画はこちら」に `→` や生URLの行は書かない
+- **文章タブ** は触らない（空でOK）
 
 **リンク先（3箇所とも同じURL）:**
 
 - サムネ画像のクリック先
-- 本文の「動画はこちら」
+- htmlソース内の「動画はこちら」
 - 記事下の画像（pagePiece）
 
 **貼るURL:** Senzuri / VJAV / TokyoMotion 等の **対応動画サイトの直URL**（`movie.eroterest.net` は使わない）
+
+> **参考:** page/39 はこの型でMGSパーツが正常。page/34 は script が `<p>` 内になり広告未表示。
 
 ---
 
@@ -189,7 +201,7 @@ B. 文章タブのツールバー「画像アイコン」→ アップロード 
 
 - [ ] タイトルにキーワードあり
 - [ ] **サムネ画像をアップロード**
-- [ ] 本文 2〜3行 + 「動画はこちら」リンク
+- [ ] **htmlソース** にあらすじ + MGSパーツ + 「動画はこちら」（文章タブは空）
 - [ ] 同じ動画を7日以内に使っていない
 - [ ] 公開してトップに表示された
 - [ ] duplicate-log.csv に記録した
