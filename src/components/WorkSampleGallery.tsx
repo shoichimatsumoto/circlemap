@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildGalleryImages, thumbDmmImageUrl } from "@/lib/dmm-image";
 
 type Props = {
@@ -24,10 +24,40 @@ export function WorkSampleGallery({
   );
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     setActiveIndex(0);
   }, [workId]);
+
+  const goPrev = useCallback(() => {
+    setActiveIndex((index) =>
+      images.length === 0 ? 0 : (index - 1 + images.length) % images.length
+    );
+  }, [images.length]);
+
+  const goNext = useCallback(() => {
+    setActiveIndex((index) =>
+      images.length === 0 ? 0 : (index + 1) % images.length
+    );
+  }, [images.length]);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        goPrev();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        goNext();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [images.length, goPrev, goNext]);
 
   if (images.length === 0) {
     return (
@@ -39,11 +69,29 @@ export function WorkSampleGallery({
 
   const safeActive = Math.min(Math.max(0, activeIndex), images.length - 1);
   const isLandscape = mediaType === "game";
+  const canNavigate = images.length > 1;
+
+  function onTouchStart(event: React.TouchEvent) {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+  }
+
+  function onTouchEnd(event: React.TouchEvent) {
+    if (touchStartX.current == null || !canNavigate) return;
+    const endX = event.changedTouches[0]?.clientX;
+    if (endX == null) return;
+    const delta = endX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 40) return;
+    if (delta > 0) goPrev();
+    else goNext();
+  }
 
   return (
     <div className={`work-sample-gallery ${mediaType}`}>
       <div
         className={`work-detail-thumb work-sample-main ${mediaType}${isLandscape ? " landscape" : ""}`}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -53,13 +101,35 @@ export function WorkSampleGallery({
           className="work-detail-image"
           decoding="async"
           fetchPriority="high"
+          draggable={false}
         />
         <span className="media-badge lg">
           {safeActive + 1} / {images.length}
         </span>
+
+        {canNavigate ? (
+          <>
+            <button
+              type="button"
+              className="work-sample-nav prev"
+              aria-label="前のサンプル画像"
+              onClick={goPrev}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="work-sample-nav next"
+              aria-label="次のサンプル画像"
+              onClick={goNext}
+            >
+              ›
+            </button>
+          </>
+        ) : null}
       </div>
 
-      {images.length > 1 ? (
+      {canNavigate ? (
         <>
           <div className="work-sample-thumbs" role="tablist" aria-label="サンプル画像">
             {images.map((url, index) => (
@@ -82,7 +152,7 @@ export function WorkSampleGallery({
             ))}
           </div>
           <p className="work-sample-note">
-            FANZA提供のサンプル画像です。下のサムネイルで切り替えできます。
+            FANZA提供のサンプル画像です。左右の矢印・スワイプ・下のサムネイルで切り替えできます。
           </p>
         </>
       ) : null}
