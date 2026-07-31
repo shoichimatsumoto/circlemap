@@ -142,23 +142,34 @@ B. 文章タブのツールバー「画像アイコン」→ アップロード 
 
 **文章タブは空のまま。** あらすじ・MGSパーツ・「動画はこちら」を **すべて「動画埋め込み(htmlソース)」タブ** に貼る。
 
-文章タブと htmlソース を混ぜると `<script>` が `<p>` 内に入り、**MGS広告が出ない** ことがある（page/34 で発生）。
+文章タブと htmlソース を混ぜると `<script>` が `<p>` 内に入り、**MGS広告が出ない** ことがある（page/34 / page/44）。
 
-**型（htmlソースタブにそのまま貼る）:**
+**Blogterest 向け：改行なし1行で一括貼り（推奨）**
+
+複数行＋空行で貼ると保存時に `<p><br />` が挟まり、`<script>` が `<p>` 内に入る。**改行のない1行HTML** を1回コピペする。
+
+**コピー元（ターミナル不要・おすすめ）:**
+
+1. Cursor が出した **` ```html ` コードブロック** から1行コピー  
+   **または** [`pillar-c-blogterest-onepaste.txt`](pillar-c-blogterest-onepaste.txt) の「コピー開始〜終了」の1行
+2. コピー確認: メモ帳に一度貼る → 先頭が `<p>` ならOK（タグが無い＝本文だけコピーしている）
+3. **動画埋め込み(htmlソース)** にだけ貼る（**文章タブは空**）
+
+ターミナル（任意）: `python3 gen-blogterest-html.py --copy ...`
+
+**人間が読む用の形（生成結果と同じ中身・改行は見やすさのみ）:**
 
 ```html
-<p>（あらすじ1行目）</p>
-<p>（あらすじ2行目）</p>
-<div id="erKokOrigin" class="erKokOrigin"></div><script src="//kok.eroterest.net/origin/?da=&ma=PHUD85LRHHCYILLYEXO3NCQ3I7&tag=&pch=&n=&rn=&spn=&sprn=&ms=&mw=&mw2=&mt=&mcl=&mbg=&mc=&msz=&ts=&tt=&tcl=&tbg=&tsz=&tlh=&tc=&tmc=&tu=&lts=&ltt=&ltcl=&ltbg=&ltsz=&ltr=&ltlh=&ltc=&ltmc=&ltu=&ds=&dt=&dcl=&dsz=&dlh=&dc=&lds=&ldt=&ldcl=&ldsz=&ldr=&ldlh=&ldc=&ids=&idss=&ib=&ibs=&ibc=&ir=&irs=&ls=&lsbg=&lsc=&sf="></script>
-<p><a href="（動画向きURL）" target="_blank" rel="noopener" class="movieLink">動画はこちら</a></p>
+<p>（あらすじ1行目）</p><p>（あらすじ2行目）</p><div id="erKokOrigin" class="erKokOrigin"></div><script src="//kok.eroterest.net/origin/?da=&ma=PHUD85LRHHCYILLYEXO3NCQ3I7&tag=entryTags&pch=2&n=&rn=&spn=&sprn=&ms=&mw=&mw2=&mt=&mcl=&mbg=&mc=&msz=&ts=&tt=&tcl=&tbg=&tsz=&tlh=&tc=&tmc=&tu=&lts=&ltt=&ltcl=&ltbg=&ltsz=&ltr=&ltlh=&ltc=&ltmc=&ltu=&ds=&dt=&dcl=&dsz=&dlh=&dc=&lds=&ldt=&ldcl=&ldsz=&ldr=&ldlh=&ldc=&ids=&idss=&ib=&ibs=&ibc=&ir=&irs=&ls=&lsbg=&lsc=&sf="></script><p><a href="（動画向きURL）" target="_blank" rel="noopener" class="movieLink">動画はこちら</a></p>
 ```
 
 **ルール:**
 
-- `<div>` と `<script>` は **同じ行・`<p>` の外**（間に改行だけ入れない）
-- `<script>` を `<p>` で囲まない
+- 貼るのは **上記1行**（`<div>` と `<script>` の間に改行を入れない）
+- `<script>` を `<p>` で囲まない（エディタ任せにしない）
 - 「動画はこちら」に `→` や生URLの行は書かない
 - **文章タブ** は触らない（空でOK）
+- 1行貼りでも壊れたら → htmlソースを空にして **もう一度1行だけ** 貼り直し
 
 **リンク先（3箇所とも同じURL）:**
 

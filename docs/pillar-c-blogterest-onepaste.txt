@@ -1,0 +1,14 @@
+# Blogterest 一括貼り（ターミナル不要）
+#
+# 手順:
+#   1. 記事編集 → 文章タブは空
+#   2. 「動画埋め込み(htmlソース)」だけ開く → 既存を削除
+#   3. 下の「=== コピー開始 ===」〜「=== コピー終了 ===」の1行だけ選択してコピー
+#      （メモ帳に貼って先頭が <p> ならOK。タグが無いならコピーし直し）
+#   4. htmlソースタブに貼る → 更新
+#
+# ※ 文章(htmlエディタ)タブに貼るとソースが画面に出る（page/45 の状態）
+
+=== コピー開始 === page/45 44662182 ===
+<p>夫婦旅行で泊まった民宿が、夫の目の前で乱交の場に…。ながえスタイルの寝取られ短編。</p><p>巴ひかり出演。人妻・羞恥・フェラ。約2分のダイジェスト。</p><div id="erKokOrigin" class="erKokOrigin"></div><script src="//kok.eroterest.net/origin/?da=&ma=PHUD85LRHHCYILLYEXO3NCQ3I7&tag=entryTags&pch=2&n=&rn=&spn=&sprn=&ms=&mw=&mw2=&mt=&mcl=&mbg=&mc=&msz=&ts=&tt=&tcl=&tbg=&tsz=&tlh=&tc=&tmc=&tu=&lts=&ltt=&ltcl=&ltbg=&ltsz=&ltr=&ltlh=&ltc=&ltmc=&ltu=&ds=&dt=&dcl=&dsz=&dlh=&dc=&lds=&ldt=&ldcl=&ldsz=&ldr=&ldlh=&ldc=&ids=&idss=&ib=&ibs=&ibc=&ir=&irs=&ls=&lsbg=&lsc=&sf="></script><p><a href="https://video.laxd.com/a/content/SQSWQXSRMvZJ2VqF" target="_blank" rel="noopener" class="movieLink">動画はこちら</a></p>
+=== コピー終了 ===

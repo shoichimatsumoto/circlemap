@@ -1,0 +1,62 @@
+# WordPress REST API 認証用 .htaccess 追記
+# シン・レンタルサーバー / XServer 系で Application Password が 401 になるとき
+
+## 症状
+- rest_not_logged_in / rest_cannot_create (401)
+- アプリケーションパスワード・ユーザー名は正しい
+
+## 手順 A（.htaccess — まずこちら）
+
+1. シン「ファイルマネージャ」→ **`public_html/.htaccess`**
+2. **`# BEGIN WordPress` より上** に以下を貼る（WordPress ブロックの中ではない）
+3. 保存
+
+```apache
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+```
+
+### A で直らないとき（追記）
+
+同じく `# BEGIN WordPress` の **上** に追加:
+
+```apache
+SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
+```
+
+---
+
+## 手順 B（mu-plugin — A と併用推奨）
+
+1. ファイルマネージャで `public_html/wp-content/` を開く
+2. **`mu-plugins` フォルダがなければ新規作成**
+3. リポジトリの `docs/wp-mu-plugin-rest-auth-fix.php` を  
+   **`public_html/wp-content/mu-plugins/rest-auth-fix.php`** としてアップロード
+
+---
+
+## 手順 C（wp-config.php — 最終手段）
+
+`public_html/wp-config.php` の  
+`/* 編集が必要なのはここまで */` **の直前** に追加:
+
+```php
+if (empty($_SERVER['HTTP_AUTHORIZATION']) && !empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $_SERVER['HTTP_AUTHORIZATION'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+}
+```
+
+---
+
+## テスト
+
+```bash
+cd ~/Desktop/circlemap/circlemap/docs
+python3 wp-post-draft.py --title test --line1 a --line2 b --video-url https://example.com/v
+```
+
+## 参考
+- https://mseeeen.msen.jp/failed-to-auth-aceess-to-wordpress-api-on-xserver/
