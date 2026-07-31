@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { track } from "@vercel/analytics/react";
 import { WorkCard } from "@/components/WorkCard";
 import {
   formatWorkMeta,
@@ -171,6 +172,13 @@ export function CirclePageClient({ circle, works, featured }: Props) {
                   className="btn btn-fanza"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    track("fanza_click", {
+                      workId: featured.id,
+                      mediaType: featured.mediaType,
+                      source: "circle_page",
+                    })
+                  }
                 >
                   FANZAで見る
                 </a>

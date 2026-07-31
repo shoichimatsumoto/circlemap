@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { track } from "@vercel/analytics/react";
 import { WorkCard } from "@/components/WorkCard";
 import { WorkSampleGallery } from "@/components/WorkSampleGallery";
 import {
@@ -107,6 +108,13 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
                   className="btn btn-fanza btn-lg"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    track("fanza_click", {
+                      workId: work.id,
+                      mediaType: work.mediaType,
+                      source: "work_page",
+                    })
+                  }
                 >
                   FANZAで購入する
                 </a>
