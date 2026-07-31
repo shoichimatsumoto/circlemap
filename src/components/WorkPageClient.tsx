@@ -8,7 +8,6 @@ import { WorkSampleGallery } from "@/components/WorkSampleGallery";
 import {
   formatPrice,
   formatWorkMeta,
-  MEDIA_LABELS,
   MEDIA_NAMES,
   type Work,
 } from "@/lib/types";
@@ -18,9 +17,19 @@ type Props = {
   relatedWorks: Work[];
 };
 
+type FanzaSource = "work_page" | "work_page_sticky";
+
 export function WorkPageClient({ work, relatedWorks }: Props) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  function trackFanzaClick(source: FanzaSource) {
+    track("fanza_click", {
+      workId: work.id,
+      mediaType: work.mediaType,
+      source,
+    });
+  }
 
   function togglePlay() {
     if (playing) {
@@ -62,6 +71,31 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
               {formatWorkMeta(work)} · {work.date} 発売
             </p>
 
+            <div className="work-detail-actions">
+              {work.affiliateUrl ? (
+                <a
+                  href={work.affiliateUrl}
+                  className="btn btn-fanza btn-lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackFanzaClick("work_page")}
+                >
+                  FANZAで購入する
+                </a>
+              ) : (
+                <button className="btn btn-fanza btn-lg" type="button" disabled>
+                  FANZAで購入する
+                </button>
+              )}
+              <button className="btn btn-secondary" type="button">
+                ★ お気に入り
+              </button>
+            </div>
+
+            <p className="affiliate-note">
+              ※ 購入はFANZAで完結。CircleMap経由の購入でアフィリエイト報酬が発生します。
+            </p>
+
             <div className="tag-row">
               {work.tags.map((tag) => (
                 <Link
@@ -100,37 +134,6 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
                 </div>
               </div>
             )}
-
-            <div className="work-detail-actions">
-              {work.affiliateUrl ? (
-                <a
-                  href={work.affiliateUrl}
-                  className="btn btn-fanza btn-lg"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() =>
-                    track("fanza_click", {
-                      workId: work.id,
-                      mediaType: work.mediaType,
-                      source: "work_page",
-                    })
-                  }
-                >
-                  FANZAで購入する
-                </a>
-              ) : (
-                <button className="btn btn-fanza btn-lg" type="button" disabled>
-                  FANZAで購入する
-                </button>
-              )}
-              <button className="btn btn-secondary" type="button">
-                ★ お気に入り
-              </button>
-            </div>
-
-            <p className="affiliate-note">
-              ※ 購入はFANZAで完結。CircleMap経由の購入でアフィリエイト報酬が発生します。
-            </p>
           </div>
         </div>
 
@@ -168,6 +171,28 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
             がここで横断表示 — これがCircleMapの差別化
           </p>
         </section>
+      )}
+
+      {work.affiliateUrl && (
+        <div className="work-fanza-sticky" role="region" aria-label="購入">
+          <div className="work-fanza-sticky-inner">
+            <div className="work-fanza-sticky-meta">
+              <span className="work-fanza-sticky-price">
+                {formatPrice(work.price)}
+              </span>
+              <span className="work-fanza-sticky-title">{work.title}</span>
+            </div>
+            <a
+              href={work.affiliateUrl}
+              className="btn btn-fanza work-fanza-sticky-btn"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackFanzaClick("work_page_sticky")}
+            >
+              FANZAで購入
+            </a>
+          </div>
+        </div>
       )}
     </>
   );

@@ -1200,12 +1200,81 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 12px;
+  margin: 4px 0 10px;
 }
 
 .affiliate-note {
   color: var(--muted);
   font-size: 0.75rem;
+  margin-bottom: 16px;
+}
+
+/* Mobile: always-visible FANZA CTA (work pages) */
+.work-fanza-sticky {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .work-detail {
+    padding-bottom: 88px;
+  }
+
+  .work-sample-thumbs {
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+
+  .work-fanza-sticky {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgba(12, 12, 16, 0.94);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+
+  .work-fanza-sticky-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .work-fanza-sticky-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .work-fanza-sticky-price {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .work-fanza-sticky-title {
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .work-fanza-sticky-btn {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
 }
 
 .work-description {
