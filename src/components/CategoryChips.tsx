@@ -6,6 +6,7 @@ const chips = [
   { href: "/media/cg", label: "CG集" },
   { href: "/media/voice", label: "音声" },
   { href: "/media/game", label: "ゲーム" },
+  { href: "/media/ai", label: "AI" },
   { href: "/circles", label: "人気サークル" },
 ];
 
