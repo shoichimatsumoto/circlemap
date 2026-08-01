@@ -175,7 +175,7 @@ export function WorkPageClient({
             ))}
           </div>
           <p className="cross-media-note">
-            💡 同じサークルの<strong>漫画・CG・音声</strong>
+            💡 同じサークルの<strong>漫画・CG・音声・AI</strong>
             がここで横断表示 — これがCircleMapの差別化
           </p>
         </section>

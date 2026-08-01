@@ -45,7 +45,7 @@ syncMakerToSupabase(makerId)
     console.log(`   サークル: ${result.circleName}`);
     console.log(`   作品数: ${result.worksSynced}`);
     console.log(
-      `   内訳: 漫画${result.byMedia.manga} / CG${result.byMedia.cg} / 音声${result.byMedia.voice} / ゲーム${result.byMedia.game}`
+      `   内訳: 漫画${result.byMedia.manga} / CG${result.byMedia.cg} / 音声${result.byMedia.voice} / ゲーム${result.byMedia.game} / AI${result.byMedia.ai}`
     );
   })
   .catch((err) => {

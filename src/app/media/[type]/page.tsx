@@ -35,6 +35,11 @@ const MEDIA_META: Record<
     title: "同人ゲーム",
     description: "アダルトPCゲームを新しい順で表示",
   },
+  ai: {
+    title: "AI同人",
+    description:
+      "AI生成・一部AI利用の同人作品を新しい順で表示。サークル軸で他媒体も横断できます",
+  },
 };
 
 type Props = { params: Promise<{ type: string }> };

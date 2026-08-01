@@ -8,6 +8,7 @@ function mediaBreakdown(circle: Circle): string {
   if (circle.cgCount > 0) parts.push(`CG${circle.cgCount}`);
   if (circle.voiceCount > 0) parts.push(`音声${circle.voiceCount}`);
   if (circle.gameCount > 0) parts.push(`ゲーム${circle.gameCount}`);
+  if (circle.aiCount > 0) parts.push(`AI${circle.aiCount}`);
   return parts.join("・");
 }
 
@@ -36,7 +37,7 @@ export function buildWorkSeoDescription(work: Work): string {
   }
 
   chunks.push(
-    "同サークルの漫画・CG・音声・ゲームを1ページで横断検索できます"
+    "同サークルの漫画・CG・音声・ゲーム・AIを1ページで横断検索できます"
   );
 
   return chunks.join("。").slice(0, 160);

@@ -20,6 +20,7 @@ const mediaLinks: { href: string; label: string; type: MediaType }[] = [
   { href: "/media/cg", label: "CG集", type: "cg" },
   { href: "/media/voice", label: "音声", type: "voice" },
   { href: "/media/game", label: "ゲーム", type: "game" },
+  { href: "/media/ai", label: "AI", type: "ai" },
 ];
 
 export function SiteSidebar({ active }: { active?: SidebarKey }) {

@@ -10,7 +10,7 @@ import type { MediaType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const MEDIA_TYPES = new Set(["manga", "cg", "voice", "game"]);
+const MEDIA_TYPES = new Set(["manga", "cg", "voice", "game", "ai"]);
 
 function parsePaging(url: URL) {
   const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10));

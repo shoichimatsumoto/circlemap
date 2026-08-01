@@ -27,6 +27,7 @@ export const metadata: Metadata = {
     "CG",
     "音声",
     "ゲーム",
+    "AI",
     "CircleMap",
   ],
   openGraph: {

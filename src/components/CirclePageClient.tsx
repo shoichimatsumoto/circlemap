@@ -47,6 +47,7 @@ export function CirclePageClient({ circle, works, featured }: Props) {
       { filter: "cg", icon: "🎨", label: "CG", count: circle.cgCount },
       { filter: "voice", icon: "🎧", label: "音声", count: circle.voiceCount },
       { filter: "game", icon: "🎮", label: "ゲーム", count: circle.gameCount },
+      { filter: "ai", icon: "✨", label: "AI", count: circle.aiCount },
     ];
 
   const filteredWorks = useMemo(() => {

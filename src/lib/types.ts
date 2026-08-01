@@ -1,4 +1,4 @@
-export type MediaType = "manga" | "cg" | "voice" | "game";
+export type MediaType = "manga" | "cg" | "voice" | "game" | "ai";
 
 export type Work = {
   id: string;
@@ -31,6 +31,7 @@ export type Circle = {
   cgCount: number;
   voiceCount: number;
   gameCount: number;
+  aiCount: number;
   tags: string[];
 };
 
@@ -41,6 +42,7 @@ export const MEDIA_LABELS: Record<MediaType, string> = {
   cg: "🎨",
   voice: "🎧",
   game: "🎮",
+  ai: "✨",
 };
 
 export const MEDIA_NAMES: Record<MediaType, string> = {
@@ -48,6 +50,7 @@ export const MEDIA_NAMES: Record<MediaType, string> = {
   cg: "CG",
   voice: "音声",
   game: "ゲーム",
+  ai: "AI",
 };
 
 export function formatPrice(price: number): string {

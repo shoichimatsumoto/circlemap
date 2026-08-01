@@ -12,6 +12,7 @@ create table if not exists circles (
   cg_count int not null default 0,
   voice_count int not null default 0,
   game_count int not null default 0,
+  ai_count int not null default 0,
   tags text[] not null default '{}',
   updated_at timestamptz not null default now()
 );
@@ -19,7 +20,7 @@ create table if not exists circles (
 create table if not exists works (
   id text primary key,
   title text not null,
-  media_type text not null check (media_type in ('manga', 'cg', 'voice', 'game')),
+  media_type text not null check (media_type in ('manga', 'cg', 'voice', 'game', 'ai')),
   price int not null default 0,
   date text,
   tags text[] not null default '{}',

@@ -33,6 +33,18 @@ export function isVoiceLikeText(
   return false;
 }
 
+/** タグ・カテゴリ・タイトルから AI生成／一部AI 作品か判定（AI補助のみは除外） */
+export function isAiLikeText(text: string, genreNames: string[] = []): boolean {
+  if (genreNames.some((g) => g === "AI" || g === "AI生成" || g === "一部AI" || g === "AI一部利用")) {
+    return true;
+  }
+  if (/AI生成|一部AI|AI一部利用|【AI生成】|【一部AI】|【AI】/i.test(text)) {
+    return true;
+  }
+  // 「AI補助」だけの作品は媒体AIにしない
+  return false;
+}
+
 export function detectMediaType(item: DmmItem): MediaType {
   if (
     item.service_code === "pcgame" ||
@@ -42,9 +54,15 @@ export function detectMediaType(item: DmmItem): MediaType {
   }
 
   const category = item.category_name ?? "";
-  const genreText = (item.iteminfo?.genre ?? []).map((g) => g.name).join(" ");
+  const genres = item.iteminfo?.genre?.map((g) => g.name) ?? [];
+  const genreText = genres.join(" ");
   const text = `${category} ${genreText} ${item.title}`;
   const hasVoiceActor = (item.iteminfo?.voice_actor?.length ?? 0) > 0;
+
+  // AI生成・一部AI は媒体として優先（漫画／CGにしない）
+  if (isAiLikeText(text, genres)) {
+    return "ai";
+  }
 
   if (isGameLikeText(text, category)) {
     return "game";
@@ -147,7 +165,13 @@ export function buildCircleFromWorks(
   if (works.length === 0) return null;
 
   const name = works[0].circleName;
-  const counts = { manga: 0, cg: 0, voice: 0, game: 0 };
+  const counts: Record<MediaType, number> = {
+    manga: 0,
+    cg: 0,
+    voice: 0,
+    game: 0,
+    ai: 0,
+  };
 
   for (const work of works) {
     counts[work.mediaType]++;
@@ -166,7 +190,7 @@ export function buildCircleFromWorks(
     id: circleId,
     name,
     initial: circleInitial(name),
-    description: `${name} の作品を漫画・CG・音声・ゲーム横断で一覧`,
+    description: `${name} の作品を漫画・CG・音声・ゲーム・AI横断で一覧`,
     workCount: works.length,
     latestDate: works[0]?.date ?? "—",
     avgPrice,
@@ -174,6 +198,7 @@ export function buildCircleFromWorks(
     cgCount: counts.cg,
     voiceCount: counts.voice,
     gameCount: counts.game,
+    aiCount: counts.ai,
     tags: Array.from(tagSet).slice(0, 8),
   };
 }

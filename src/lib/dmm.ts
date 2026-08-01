@@ -169,6 +169,19 @@ export async function fetchDoujinGameItems(hits = 20, offset = 1) {
   });
 }
 
+/** AI生成・一部AI をキーワードで追加取得（一覧・DMMフォールバック用） */
+export async function fetchDoujinAiItems(hits = 20, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    keyword: "AI生成",
+    hits: Math.min(hits * 4, 100),
+    offset,
+    sort: "date",
+  });
+}
+
 export async function fetchItemsByMaker(makerId: string, hits = 12, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
@@ -226,4 +239,5 @@ export const MEDIA_FETCHERS: Record<
   voice: fetchDoujinVoiceItems,
   cg: fetchDoujinCgItems,
   game: fetchDoujinGameItems,
+  ai: fetchDoujinAiItems,
 };

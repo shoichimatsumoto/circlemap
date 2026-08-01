@@ -1,7 +1,7 @@
 export const SITE_NAME = "CircleMap";
 
 export const SITE_DESCRIPTION =
-  "FANZA同人の漫画・CG・音声・ゲームをサークル軸で横断検索できるデータベース。人気作品・新着・サークルランキングから探せます。";
+  "FANZA同人の漫画・CG・音声・ゲーム・AIをサークル軸で横断検索できるデータベース。人気作品・新着・サークルランキングから探せます。";
 
 export function getSiteUrl(): string {
   const url =

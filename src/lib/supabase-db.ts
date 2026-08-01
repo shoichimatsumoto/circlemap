@@ -15,6 +15,7 @@ type CircleRow = {
   cg_count: number;
   voice_count: number;
   game_count: number;
+  ai_count?: number | null;
   tags: string[] | null;
 };
 
@@ -47,6 +48,7 @@ function rowToCircle(row: CircleRow): Circle {
     cgCount: row.cg_count,
     voiceCount: row.voice_count,
     gameCount: row.game_count,
+    aiCount: row.ai_count ?? 0,
     tags: row.tags ?? [],
   };
 }

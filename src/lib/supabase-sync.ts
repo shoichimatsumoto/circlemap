@@ -53,6 +53,7 @@ function isCgLike(work: Work): boolean {
 /** 音声キーワード取得結果から音声作品だけを抽出 */
 function extractVoiceWorks(works: Work[]): Work[] {
   return works.flatMap((work) => {
+    if (work.mediaType === "ai") return [];
     if (isGameLike(work)) return [];
     if (work.mediaType === "voice" || isVoiceLike(work)) {
       return [{ ...work, mediaType: "voice" as const }];
@@ -64,7 +65,13 @@ function extractVoiceWorks(works: Work[]): Work[] {
 /** CGキーワード取得結果からCG作品だけを抽出 */
 function extractCgWorks(works: Work[]): Work[] {
   return works.flatMap((work) => {
-    if (work.mediaType === "game" || work.mediaType === "voice") return [];
+    if (
+      work.mediaType === "game" ||
+      work.mediaType === "voice" ||
+      work.mediaType === "ai"
+    ) {
+      return [];
+    }
     if (work.mediaType === "cg" || isCgLike(work)) {
       return [{ ...work, mediaType: "cg" as const }];
     }
@@ -165,6 +172,7 @@ async function fetchCgCatalogWorks(): Promise<Work[]> {
 
 /**
  * マージ順: 漫画・ゲーム → 音声・CG（後勝ちで media_type 上書き）→ 人気ランク
+ * ※ AI は漫画／CG／音声への上書きをしない
  */
 function mergeWorksForSync(
   popular: Work[],
@@ -181,12 +189,26 @@ function mergeWorksForSync(
   for (const work of voiceCatalog) {
     const existing = byId.get(work.id);
     if (existing && isGameLike(existing)) continue;
+    if (existing?.mediaType === "ai" || work.mediaType === "ai") {
+      byId.set(
+        work.id,
+        existing ? { ...existing, ...work, mediaType: "ai" } : work
+      );
+      continue;
+    }
     byId.set(work.id, existing ? { ...existing, ...work, mediaType: "voice" } : work);
   }
 
   for (const work of cgCatalog) {
     const existing = byId.get(work.id);
-    if (existing?.mediaType === "voice") continue;
+    if (existing?.mediaType === "voice" || existing?.mediaType === "ai") continue;
+    if (work.mediaType === "ai") {
+      byId.set(
+        work.id,
+        existing ? { ...existing, ...work, mediaType: "ai" } : work
+      );
+      continue;
+    }
     byId.set(work.id, existing ? { ...existing, ...work, mediaType: "cg" } : work);
   }
 
@@ -218,6 +240,7 @@ function countByMedia(works: Work[]): Record<MediaType, number> {
     cg: 0,
     voice: 0,
     game: 0,
+    ai: 0,
   };
   for (const work of works) {
     counts[work.mediaType]++;
@@ -238,6 +261,7 @@ function circleToRow(circle: Circle) {
     cg_count: circle.cgCount,
     voice_count: circle.voiceCount,
     game_count: circle.gameCount,
+    ai_count: circle.aiCount,
     tags: circle.tags,
     updated_at: new Date().toISOString(),
   };

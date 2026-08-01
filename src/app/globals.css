@@ -324,6 +324,7 @@ body {
 .yt-thumb-fallback.cg { background: linear-gradient(160deg, #713f12, #422006); }
 .yt-thumb-fallback.voice { background: linear-gradient(160deg, #1e3a8a, #172554); }
 .yt-thumb-fallback.game { background: linear-gradient(160deg, #831843, #500724); }
+.yt-thumb-fallback.ai { background: linear-gradient(160deg, #5b21b6, #312e81); }
 
 .yt-media-chip {
   position: absolute;
@@ -346,6 +347,7 @@ body {
 .yt-media-chip.cg { background: rgba(133, 77, 14, 0.92); }
 .yt-media-chip.voice { background: rgba(29, 78, 216, 0.92); }
 .yt-media-chip.game { background: rgba(157, 23, 77, 0.92); }
+.yt-media-chip.ai { background: rgba(109, 40, 217, 0.92); }
 
 .yt-media-badge {
   display: none;

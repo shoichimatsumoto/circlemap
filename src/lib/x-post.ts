@@ -87,6 +87,7 @@ function countMediaTypes(circle: Circle): number {
   if (circle.cgCount > 0) count++;
   if (circle.voiceCount > 0) count++;
   if (circle.gameCount > 0) count++;
+  if (circle.aiCount > 0) count++;
   return count;
 }
 
@@ -96,6 +97,7 @@ function mediaBreakdownShort(circle: Circle): string {
   if (circle.cgCount > 0) parts.push(`CG${circle.cgCount}`);
   if (circle.voiceCount > 0) parts.push(`音声${circle.voiceCount}`);
   if (circle.gameCount > 0) parts.push(`ゲーム${circle.gameCount}`);
+  if (circle.aiCount > 0) parts.push(`AI${circle.aiCount}`);
   return parts.join("・");
 }
 
@@ -296,7 +298,7 @@ export function buildCirclePost(circle: Circle, works: Work[]): XPostDraft {
       `【${SITE_NAME}】注目サークル`,
       "",
       `📌 ${circle.name}`,
-      `作品数 ${circle.workCount} / 漫画${circle.mangaCount} CG${circle.cgCount} 音声${circle.voiceCount} ゲーム${circle.gameCount}`,
+      `作品数 ${circle.workCount} / 漫画${circle.mangaCount} CG${circle.cgCount} 音声${circle.voiceCount} ゲーム${circle.gameCount} AI${circle.aiCount}`,
       "",
       ...workLines,
       "",

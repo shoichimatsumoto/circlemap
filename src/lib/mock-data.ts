@@ -12,6 +12,7 @@ export const DEMO_CIRCLE: Circle = {
   cgCount: 9,
   voiceCount: 8,
   gameCount: 1,
+  aiCount: 0,
   tags: ["年上", "耳舐め", "寝落とし", "囁き"],
 };
 

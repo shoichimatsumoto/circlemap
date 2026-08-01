@@ -3,7 +3,7 @@ import { createSupabaseAnonClient, hasSupabasePublicConfig } from "@/lib/supabas
 import type { MediaType } from "@/lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const MEDIA_TYPES: MediaType[] = ["manga", "cg", "voice", "game"];
+const MEDIA_TYPES: MediaType[] = ["manga", "cg", "voice", "game", "ai"];
 const PAGE_SIZE = 1000;
 
 /** 作品サイトマップ1ファイルあたりの URL 数 */
