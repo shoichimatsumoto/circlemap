@@ -243,6 +243,34 @@ export async function dbGetRelatedWorks(
   return (data as WorkRow[]).map(rowToWork);
 }
 
+/** 同タグ・別サークルの作品（同じ系統）。呼び出し側で系統タグ選定済み想定 */
+export async function dbGetRelatedByTags(
+  tags: string[],
+  excludeWorkId: string,
+  excludeCircleId: string,
+  fetchLimit: number
+): Promise<Work[]> {
+  const supabase = getClient();
+  if (!supabase || tags.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("works")
+    .select("*")
+    .overlaps("tags", tags)
+    .neq("id", excludeWorkId)
+    .neq("circle_id", excludeCircleId)
+    .not("thumbnail_url", "is", null)
+    .limit(fetchLimit);
+
+  if (error || !data) {
+    if (error) {
+      console.error("[CircleMap] dbGetRelatedByTags failed:", error.message);
+    }
+    return [];
+  }
+  return (data as WorkRow[]).map(rowToWork);
+}
+
 export async function dbGetCircle(circleId: string): Promise<Circle | null> {
   const supabase = getClient();
   if (!supabase) return null;

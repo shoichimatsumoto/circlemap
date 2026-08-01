@@ -49,7 +49,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function WorkPage({ params }: Props) {
   const { id } = await params;
-  const { work, relatedWorks, source } = await getWork(id);
+  const { work, relatedWorks, relatedByTagWorks, relatedByTagLabels, source } =
+    await getWork(id);
 
   if (!work) notFound();
 
@@ -66,7 +67,12 @@ export default async function WorkPage({ params }: Props) {
           <span className="breadcrumb-current">{work.title}</span>
         </nav>
         <DoujinLogArticleBanner workId={work.id} circleId={work.circleId} />
-        <WorkPageClient work={work} relatedWorks={relatedWorks} />
+        <WorkPageClient
+          work={work}
+          relatedWorks={relatedWorks}
+          relatedByTagWorks={relatedByTagWorks}
+          relatedByTagLabels={relatedByTagLabels}
+        />
       </div>
     </PageShell>
   );

@@ -28,6 +28,7 @@ import {
   dbGetCircles,
   dbGetLatestWorks,
   dbGetPopularWorks,
+  dbGetRelatedByTags,
   dbGetRelatedWorks,
   dbGetTopCircle,
   dbGetWork,
@@ -35,6 +36,11 @@ import {
   dbHasData,
   dbSearchWorks,
 } from "@/lib/supabase-db";
+import {
+  finalizeRelatedByTagWorks,
+  pickSystemTags,
+  RELATED_BY_TAG_FETCH,
+} from "@/lib/related-by-tag";
 import type { Circle, DataSource, MediaType, Work } from "@/lib/types";
 
 function parseResponse(json: unknown): Work[] {
@@ -328,14 +334,33 @@ export async function searchWorks(
 export async function getWork(id: string): Promise<{
   work: Work | null;
   relatedWorks: Work[];
+  relatedByTagWorks: Work[];
+  relatedByTagLabels: string[];
   source: DataSource;
 }> {
   try {
     const work = await dbGetWork(id);
     if (work) {
       const enriched = await enrichWorkFromDmm(work, id);
-      const relatedWorks = await dbGetRelatedWorks(enriched.circleId, enriched.id, 6);
-      return { work: enriched, relatedWorks, source: "supabase" };
+      const systemTags = pickSystemTags(enriched.tags);
+      const [relatedWorks, relatedRaw] = await Promise.all([
+        dbGetRelatedWorks(enriched.circleId, enriched.id, 6),
+        systemTags.length > 0
+          ? dbGetRelatedByTags(
+              systemTags,
+              enriched.id,
+              enriched.circleId,
+              RELATED_BY_TAG_FETCH
+            )
+          : Promise.resolve([]),
+      ]);
+      return {
+        work: enriched,
+        relatedWorks,
+        relatedByTagWorks: finalizeRelatedByTagWorks(relatedRaw),
+        relatedByTagLabels: systemTags,
+        source: "supabase",
+      };
     }
   } catch (error) {
     console.error("[CircleMap] Supabase work fetch failed:", error);
@@ -376,9 +401,12 @@ export async function getWork(id: string): Promise<{
           }
         }
 
+        const systemTags = pickSystemTags(work.tags);
         return {
           work,
           relatedWorks: related.slice(0, 6),
+          relatedByTagWorks: [],
+          relatedByTagLabels: systemTags,
           source: "dmm",
         };
       }
@@ -389,16 +417,32 @@ export async function getWork(id: string): Promise<{
 
   const mockWork = DEMO_WORKS.find((w) => w.id === id);
   if (mockWork) {
+    const systemTags = pickSystemTags(mockWork.tags);
+    const relatedByTagRaw = DEMO_WORKS.filter(
+      (w) =>
+        w.id !== mockWork.id &&
+        w.circleId !== mockWork.circleId &&
+        w.thumbnailUrl &&
+        systemTags.some((t) => w.tags.includes(t))
+    );
     return {
       work: mockWork,
       relatedWorks: DEMO_WORKS.filter(
         (w) => w.circleId === mockWork.circleId && w.id !== mockWork.id
       ).slice(0, 3),
+      relatedByTagWorks: finalizeRelatedByTagWorks(relatedByTagRaw),
+      relatedByTagLabels: systemTags,
       source: "mock",
     };
   }
 
-  return { work: null, relatedWorks: [], source: "mock" };
+  return {
+    work: null,
+    relatedWorks: [],
+    relatedByTagWorks: [],
+    relatedByTagLabels: [],
+    source: "mock",
+  };
 }
 
 export async function getCirclePage(circleId = "demo"): Promise<{

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { track } from "@vercel/analytics/react";
 import { WorkCard } from "@/components/WorkCard";
 import { WorkSampleGallery } from "@/components/WorkSampleGallery";
+import { relatedByTagHeading } from "@/lib/related-by-tag";
 import {
   formatPrice,
   formatWorkMeta,
@@ -15,11 +16,18 @@ import {
 type Props = {
   work: Work;
   relatedWorks: Work[];
+  relatedByTagWorks?: Work[];
+  relatedByTagLabels?: string[];
 };
 
 type FanzaSource = "work_page" | "work_page_sticky";
 
-export function WorkPageClient({ work, relatedWorks }: Props) {
+export function WorkPageClient({
+  work,
+  relatedWorks,
+  relatedByTagWorks = [],
+  relatedByTagLabels = [],
+}: Props) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -170,6 +178,31 @@ export function WorkPageClient({ work, relatedWorks }: Props) {
             💡 同じサークルの<strong>漫画・CG・音声</strong>
             がここで横断表示 — これがCircleMapの差別化
           </p>
+        </section>
+      )}
+
+      {relatedByTagWorks.length > 0 && (
+        <section className="work-section">
+          <div className="section-head">
+            <h2>{relatedByTagHeading(relatedByTagLabels)}</h2>
+            {relatedByTagLabels[0] && (
+              <Link
+                href={`/search?q=${encodeURIComponent(relatedByTagLabels[0])}`}
+                className="link-more"
+              >
+                「#{relatedByTagLabels[0]}」をもっと見る →
+              </Link>
+            )}
+          </div>
+          <p className="related-by-tag-lead">
+            #{relatedByTagLabels.join(" #")}{" "}
+            などでつながる、別サークルの作品です。
+          </p>
+          <div className="yt-grid">
+            {relatedByTagWorks.map((w) => (
+              <WorkCard key={w.id} work={w} />
+            ))}
+          </div>
         </section>
       )}
 

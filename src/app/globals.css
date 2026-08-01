@@ -1342,6 +1342,13 @@ body {
 
 .cross-media-note strong { color: var(--accent2); }
 
+.related-by-tag-lead {
+  margin: -4px 0 14px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
 .featured-thumb {
   text-decoration: none;
   display: block;
