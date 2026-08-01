@@ -12,7 +12,8 @@ WP は **ステージング** で Erg 相当の半自動基盤をコツコツ作
 | エロタレ反映 | ✅ 反映ボタン（30分間隔） | 切替まで使わない |
 | 記事公開 | ✅ 本番 | ステージングのみ |
 | 文案・選定 | Cursor + キューCSV | 同じ CSV を流用 |
-| HTML生成 | `gen-blogterest-html.py` | `wp-post-draft.py`（共通 `erolog_article.py`） |
+| HTML生成 | `gen-blogterest-html.py` | `wp-post-mirror.py`（共通 `erolog_article.py`） |
+| **Blogterest 登録後** | エロタレ反映 | **必ず WP ミラー**（下書き or 公開） |
 | 重複管理 | `pillar-c-reflection-queue.csv` | 同ファイルを正とする |
 | 自動化の先 | 半自動が上限 | cron + REST API で拡張 |
 
@@ -75,23 +76,30 @@ python3 wp-post-draft.py \
   --eroterest-page 44707650
 ```
 
-### Phase 2 — ミラー連携（**手動運用で継続**）
+### Phase 2 — ミラー連携（**Blogterest 登録 = 必ず WP ミラー**）
 
-**方針:** Blogterest 本番は今まで通り。余裕があるとき **ミラーすれば WP の記事が増える**（自動同期は Phase 3 以降）。  
-**過去分（遅延OK 等）はミラーしない。これから新規に出す文案だけ** `pillar-c-wp-mirror.csv` に載せる。
+**方針（2026/07/31〜）:** Blogterest に **新規登録した記事は全部** staging WP にも載せる。  
+**過去分はミラーしない。** 保留・削除（被り2回等）は WP に載せない。
+
+| Blogterest | WP ミラー |
+|------------|-----------|
+| 新規登録 → 遅延OK | ✅ 必ず |
+| 保留・削除 | ❌ しない |
+| 2回目タイトル差替えのみ | BT のみ（WP は `--refresh` で任意更新） |
 
 - [x] `pillar-c-wp-mirror.csv`（本文・タグ・動画URL 付きミラー用）
 - [x] `wp-post-mirror.py`（未ミラー行 → WP 投稿、`wp_post_id` 自動記録）
-- [x] 表示確認（あらすじ・MGS・動画リンク・タグ）— id=13 で OK
-- [x] MGS: Blogterest 同一 HTML（script 直書き）で staging 表示 OK
-- [ ] Blogterest 文案を出すたびに `pillar-c-wp-mirror.csv` へ1行追加 → `--page` または `--all`
+- [x] 表示確認（あらすじ・MGS・動画リンク・タグ）
+- [x] **運用ルール確定:** 登録のたびにミラー CSV + `--page`
+- [x] page/96（44707610）ミラー → WP id=23
 - [ ] 7日重複: `pillar-c-duplicate-log.csv` と eroterest_page の突合
 
-**手動ミラーの流れ（3ステップ）**
+**登録後の流れ（4ステップ）**
 
-1. Blogterest に登録した文案と同内容を `pillar-c-wp-mirror.csv` に1行追加
-2. `python3 wp-post-mirror.py --page （eroterest_page）`
-3. WP でプレビュー確認（問題なければ公開 or 下書きのまま）
+1. Blogterest 新規登録
+2. エロタレ反映 → 結果を `pillar-c-reflection-queue.csv` に記録
+3. **遅延OK なら** 同内容を `pillar-c-wp-mirror.csv` に1行追加
+4. `python3 wp-post-mirror.py --page （eroterest_page）` → 下書き確認（公開は任意）
 
 ```bash
 cd ~/Desktop/circlemap/circlemap/docs

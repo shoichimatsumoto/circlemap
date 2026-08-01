@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""pillar-c-wp-mirror.csv → WordPress 下書きミラー.
+"""pillar-c-wp-mirror.csv → WordPress ミラー.
 
-Blogterest 本番と並行。wp_post_id が空の行だけ投稿する。
+運用: Blogterest 新規登録（遅延OK）ごとに pillar-c-wp-mirror.csv へ1行追加して実行。
+wp_post_id が空の行だけ投稿する。
 
 Usage:
   python3 wp-post-mirror.py --list
