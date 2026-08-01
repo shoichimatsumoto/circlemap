@@ -182,6 +182,19 @@ export async function fetchDoujinAiItems(hits = 20, offset = 1) {
   });
 }
 
+/** 一部AI 追加キーワード（同期用） */
+export async function fetchDoujinAiItemsAlt(hits = 100, offset = 1) {
+  return searchDmmItems({
+    site: "FANZA",
+    service: "doujin",
+    floor: "digital_doujin",
+    keyword: "一部AI",
+    hits: Math.min(hits, 100),
+    offset,
+    sort: "date",
+  });
+}
+
 export async function fetchItemsByMaker(makerId: string, hits = 12, offset = 1) {
   return searchDmmItems({
     site: "FANZA",

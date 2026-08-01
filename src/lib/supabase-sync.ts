@@ -1,6 +1,8 @@
 import {
   fetchCgCatalogItems,
   fetchCgCatalogItemsAlt,
+  fetchDoujinAiItems,
+  fetchDoujinAiItemsAlt,
   fetchDoujinGameItems,
   fetchDoujinMangaItems,
   fetchItemsByMaker,
@@ -170,15 +172,39 @@ async function fetchCgCatalogWorks(): Promise<Work[]> {
   return dedupeWorks(all);
 }
 
+/** AI 在庫は上限付き（無限に増やさない） */
+const AI_CATALOG_MAX = 400;
+
+async function fetchAiCatalogWorks(): Promise<Work[]> {
+  const all: Work[] = [];
+  const fetches = [fetchDoujinAiItems, fetchDoujinAiItemsAlt] as const;
+
+  // 3ページ×2キーワード程度に抑える
+  for (const fetch of fetches) {
+    for (const offset of [1, 101, 201]) {
+      try {
+        const json = await fetch(100, offset);
+        const page = parseResponse(json).filter((w) => w.mediaType === "ai");
+        all.push(...page);
+      } catch {
+        // 続行
+      }
+    }
+  }
+
+  return dedupeWorks(all).slice(0, AI_CATALOG_MAX);
+}
+
 /**
- * マージ順: 漫画・ゲーム → 音声・CG（後勝ちで media_type 上書き）→ 人気ランク
+ * マージ順: 漫画・ゲーム → 音声・CG（後勝ちで media_type 上書き）→ AI → 人気ランク
  * ※ AI は漫画／CG／音声への上書きをしない
  */
 function mergeWorksForSync(
   popular: Work[],
   baseCatalog: Work[],
   voiceCatalog: Work[],
-  cgCatalog: Work[]
+  cgCatalog: Work[],
+  aiCatalog: Work[] = []
 ): Work[] {
   const byId = new Map<string, Work>();
 
@@ -212,6 +238,16 @@ function mergeWorksForSync(
     byId.set(work.id, existing ? { ...existing, ...work, mediaType: "cg" } : work);
   }
 
+  for (const work of aiCatalog) {
+    const existing = byId.get(work.id);
+    byId.set(
+      work.id,
+      existing
+        ? { ...existing, ...work, mediaType: "ai" }
+        : { ...work, mediaType: "ai" }
+    );
+  }
+
   for (const work of popular) {
     const existing = byId.get(work.id);
     byId.set(
@@ -224,14 +260,22 @@ function mergeWorksForSync(
 }
 
 async function fetchWorksForSync(): Promise<Work[]> {
-  const [popular, baseCatalog, voiceCatalog, cgCatalog] = await Promise.all([
-    fetchPopularWorksWithRank(),
-    runBatchedFetches(buildMangaGameTasks()),
-    fetchVoiceCatalogWorks(),
-    fetchCgCatalogWorks(),
-  ]);
+  const [popular, baseCatalog, voiceCatalog, cgCatalog, aiCatalog] =
+    await Promise.all([
+      fetchPopularWorksWithRank(),
+      runBatchedFetches(buildMangaGameTasks()),
+      fetchVoiceCatalogWorks(),
+      fetchCgCatalogWorks(),
+      fetchAiCatalogWorks(),
+    ]);
 
-  return mergeWorksForSync(popular, baseCatalog, voiceCatalog, cgCatalog);
+  return mergeWorksForSync(
+    popular,
+    baseCatalog,
+    voiceCatalog,
+    cgCatalog,
+    aiCatalog
+  );
 }
 
 function countByMedia(works: Work[]): Record<MediaType, number> {

@@ -14,14 +14,16 @@ function mediaBreakdown(circle: Circle): string {
 
 /** 作品ページの title（layout の template で | CircleMap が付く） */
 export function buildWorkSeoTitle(work: Work): string {
-  return `${work.title}｜${work.circleName}（${MEDIA_NAMES[work.mediaType]}）`;
+  // FANZA直と並んだとき「サークルまとめ」だと分かるようにする
+  return `${work.title}｜${work.circleName}の作品まとめ（${MEDIA_NAMES[work.mediaType]}）`;
 }
 
 /** 作品ページの description（検索向け・160字前後） */
 export function buildWorkSeoDescription(work: Work): string {
   const media = MEDIA_NAMES[work.mediaType];
   const chunks: string[] = [
-    `${work.circleName}の${media}「${work.title}」`,
+    `${work.circleName}の${media}「${work.title}」をCircleMapで紹介`,
+    "FANZAでは別フロアに散らばる同サークルの漫画・CG・音声・ゲーム・AIを1ページで横断できます",
   ];
 
   if (work.price > 0) {
@@ -31,31 +33,29 @@ export function buildWorkSeoDescription(work: Work): string {
     chunks.push(`${work.date}発売`);
   }
 
-  const tags = work.tags.slice(0, 4);
+  const tags = work.tags
+    .filter((t) => !["男性向け", "成人向け", "専売", "同人"].includes(t))
+    .slice(0, 3);
   if (tags.length > 0) {
     chunks.push(tags.join("、"));
   }
-
-  chunks.push(
-    "同サークルの漫画・CG・音声・ゲーム・AIを1ページで横断検索できます"
-  );
 
   return chunks.join("。").slice(0, 160);
 }
 
 /** サークルページの title */
 export function buildCircleSeoTitle(circle: Circle): string {
-  return `${circle.name}の全作品一覧`;
+  return `${circle.name}｜同人サークル作品まとめ（全媒体）`;
 }
 
 /** サークルページの description */
 export function buildCircleSeoDescription(circle: Circle): string {
   const breakdown = mediaBreakdown(circle);
   const chunks = [
-    `${circle.name}の同人作品${circle.workCount}件`,
-    breakdown ? `内訳：${breakdown}` : "",
+    `${circle.name}の同人作品をCircleMapでサークル単位にまとめ`,
+    breakdown ? `内訳：${breakdown}` : `全${circle.workCount}件`,
     circle.latestDate !== "—" ? `最新作 ${circle.latestDate}` : "",
-    "FANZAでは別フロアに散らばる作品をサークル単位でまとめて見られます",
+    "FANZAの漫画・CG・音声・ゲーム・AIを横断して探せます",
   ].filter(Boolean);
 
   return chunks.join("。").slice(0, 160);
