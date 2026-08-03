@@ -108,9 +108,55 @@ python3 wp-post-mirror.py --page 44707610
 python3 wp-post-mirror.py --all
 ```
 
-### Phase 3 — Erg 相当ルール（段階的）
+### Phase 3 — 自動化（段階的）
 
 Blogterest 運用で確立したルールをコード化。**完全自動は狙わない。**
+
+#### 3a — ミラー同期（**着手済**）
+
+| コマンド | 用途 |
+|----------|------|
+| `python3 wp-sync.py status` | 遅延OK × ミラー CSV の突合 |
+| `python3 wp-sync.py run` | 未ミラーを一括 WP 下書き |
+| `python3 wp-sync.py run --page ID` | 1件だけ |
+
+- [x] `wp_mirror_lib.py`（CSV 読み書き・投稿・`append_mirror_row`）
+- [x] `wp-sync.py`（status / stash-add / sync-mirror / run）
+- [x] `pillar-c-copy-stash.csv`（文案 stash → 遅延OK 後に自動ミラー追記）
+
+**登録後の流れ（3b 以降）**
+
+1. Blogterest 登録前 … `python3 wp-sync.py stash-add --page … --title … --line1 … --line2 … --video-url … --tags …`
+2. エロタレ反映 → キュー CSV を **遅延OK** に更新
+3. `python3 wp-sync.py run --page （eroterest_page）` … sync-mirror + WP 下書き（1コマンド）
+
+#### 3b — stash 連携（**完了**）
+
+#### 3b+ — WP 先行（Blogterest 負荷軽減）
+
+Blogterest がキツい間は **文案 → stash → WP 下書き** だけ回す。
+
+| コマンド | 用途 |
+|----------|------|
+| `python3 wp-sync.py stash-add ...` | 文案保存（BT 登録前で OK） |
+| `python3 wp-sync.py draft-stash` | stash → WP 下書き（**BT / 遅延OK 不要**） |
+| `python3 wp-sync.py run` | BT で遅延OK になった分をミラー（従来） |
+
+**Blogterest 最小運用:** エロタレ反映に必要な分だけ（週2〜3本など）。WP は stash で先行ストック。
+
+#### 3c — 定期実行
+
+```bash
+cp docs/wp-deploy/com.erologmemo.wp-sync.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.erologmemo.wp-sync.plist
+# 毎朝7時: wp-sync.py run（遅延OK 分を自動 WP 下書き）
+# ログ: docs/wp-sync.log
+```
+
+- [x] launchd テンプレ `wp-deploy/com.erologmemo.wp-sync.plist`
+- [ ] ユーザーが load して有効化
+
+#### 3c — Erg 相当ルール
 
 | Erg 機能 | 自前実装案 |
 |----------|-----------|
@@ -137,6 +183,10 @@ Blogterest 運用で確立したルールをコード化。**完全自動は狙�
 | [`erolog_article.py`](erolog_article.py) | MGS + 本文 HTML（BT/WP 共通） |
 | [`gen-blogterest-html.py`](gen-blogterest-html.py) | Blogterest 1行貼り |
 | [`wp-post-draft.py`](wp-post-draft.py) | WP REST 下書き |
+| [`wp-post-mirror.py`](wp-post-mirror.py) | ミラー CSV → WP 下書き |
+| [`wp-sync.py`](wp-sync.py) | 状態確認 + stash + 一括ミラー |
+| [`wp_mirror_lib.py`](wp_mirror_lib.py) | ミラー CSV 共通処理 |
+| [`pillar-c-copy-stash.csv`](pillar-c-copy-stash.csv) | 文案 stash（遅延OK 前） |
 | [`wp-config.example.env`](wp-config.example.env) | 認証テンプレ |
 | [`pillar-c-reflection-queue.csv`](pillar-c-reflection-queue.csv) | 使用済み page・状態 |
 | [`pillar-c-duplicate-log.csv`](pillar-c-duplicate-log.csv) | 7日 NG |

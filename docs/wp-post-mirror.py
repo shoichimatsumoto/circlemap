@@ -13,55 +13,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import csv
 import sys
 from pathlib import Path
 
 from erolog_article import build_html_wp
-from wp_client import get_client, resolve_tag_ids, wp_request
-
-MIRROR_CSV = Path(__file__).with_name("pillar-c-wp-mirror.csv")
-CONFIG_ENV = Path(__file__).with_name("wp-config.env")
-
-
-def read_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
-    if not path.is_file():
-        sys.exit(f"ミラー CSV がありません: {path}")
-    with path.open(encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f)
-        fieldnames = list(reader.fieldnames or [])
-        rows = [dict(row) for row in reader]
-    return fieldnames, rows
-
-
-def write_rows(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
-    with path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
-
-
-def post_row(row: dict[str, str], base: str, user: str, app_password: str) -> tuple[int, str]:
-    title = row["title"].strip()
-    line1 = row["line1"].strip()
-    line2 = row["line2"].strip()
-    video_url = row["video_url"].strip()
-    tags = row.get("tags", "").split()[:8]
-    page_id = int(row["eroterest_page"])
-
-    content = build_html_wp(line1, line2, video_url)
-    tag_ids = resolve_tag_ids(base, user, app_password, tags) if tags else []
-    payload: dict = {
-        "title": title,
-        "content": content,
-        "status": "draft",
-        "tags": tag_ids,
-        "meta": {"eroterest_page": page_id, "video_url": video_url},
-    }
-    result = wp_request(base, user, app_password, "POST", "/wp-json/wp/v2/posts", payload)
-    if not isinstance(result, dict):
-        raise RuntimeError("投稿応答が不正です")
-    return int(result["id"]), str(result.get("link", ""))
+from wp_client import CONFIG_ENV, get_client, wp_request
+from wp_mirror_lib import MIRROR_CSV, post_mirror_row, read_mirror_rows, write_mirror_rows
 
 
 def refresh_row(row: dict[str, str], base: str, user: str, app_password: str) -> None:
@@ -93,7 +50,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    fieldnames, rows = read_rows(args.csv)
+    if not args.csv.is_file():
+        sys.exit(f"ミラー CSV がありません: {args.csv}")
+    fieldnames, rows = read_mirror_rows(args.csv)
 
     if args.list:
         for row in rows:
@@ -131,13 +90,13 @@ def main() -> None:
         if row.get("wp_post_id", "").strip():
             print(f"スキップ（済）: {row['eroterest_page']}")
             continue
-        post_id, link = post_row(row, base, user, app_password)
+        post_id, link = post_mirror_row(row, base, user, app_password)
         row["wp_post_id"] = str(post_id)
         print(f"下書き作成 OK: page={row['eroterest_page']} id={post_id} {link}")
         posted += 1
 
     if posted:
-        write_rows(args.csv, fieldnames, rows)
+        write_mirror_rows(rows, args.csv, fieldnames)
 
 
 if __name__ == "__main__":
