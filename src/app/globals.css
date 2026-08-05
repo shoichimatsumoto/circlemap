@@ -1226,8 +1226,24 @@ body {
     gap: 8px;
   }
 
-  .work-sample-main .work-detail-image {
+  .work-sample-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     max-height: min(38vh, 280px);
+    background: #111;
+  }
+
+  .work-sample-main .work-detail-image {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(38vh, 280px);
+    object-fit: contain;
+  }
+
+  .work-sample-main.landscape {
+    max-height: min(32vh, 220px);
   }
 
   .work-sample-main.landscape .work-detail-image,
