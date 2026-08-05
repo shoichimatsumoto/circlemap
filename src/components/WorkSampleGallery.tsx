@@ -24,10 +24,12 @@ export function WorkSampleGallery({
   );
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [orient, setOrient] = useState<"landscape" | "portrait">("portrait");
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     setActiveIndex(0);
+    setOrient("portrait");
   }, [workId]);
 
   const goPrev = useCallback(() => {
@@ -68,8 +70,14 @@ export function WorkSampleGallery({
   }
 
   const safeActive = Math.min(Math.max(0, activeIndex), images.length - 1);
-  const isLandscape = mediaType === "game";
+  const isLandscape = orient === "landscape";
   const canNavigate = images.length > 1;
+
+  function onImageLoad(event: React.SyntheticEvent<HTMLImageElement>) {
+    const { naturalWidth: w, naturalHeight: h } = event.currentTarget;
+    if (!w || !h) return;
+    setOrient(w >= h ? "landscape" : "portrait");
+  }
 
   function onTouchStart(event: React.TouchEvent) {
     touchStartX.current = event.changedTouches[0]?.clientX ?? null;
@@ -102,6 +110,7 @@ export function WorkSampleGallery({
           decoding="async"
           fetchPriority="high"
           draggable={false}
+          onLoad={onImageLoad}
         />
         <span className="media-badge lg">
           {safeActive + 1} / {images.length}

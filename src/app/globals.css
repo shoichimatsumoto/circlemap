@@ -1221,31 +1221,46 @@ body {
     padding-bottom: 88px;
   }
 
-  /* Compact sample: shrink-wrap + center (no side black bars / no heavy crop) */
+  /*
+   * Fixed sample stage for all media / aspect ratios:
+   * cover(4:3), manga pages, tall voice samples, mixed CG, games.
+   * Image is always contain-centered inside the same slot.
+   */
   .work-sample-gallery {
     gap: 8px;
-    align-items: center;
   }
 
-  .work-sample-main {
-    width: fit-content;
-    max-width: 100%;
-    margin-inline: auto;
+  .work-sample-main,
+  .work-sample-main.landscape,
+  .work-detail-thumb.game.work-sample-main.landscape {
+    width: 100%;
+    height: min(40vh, 280px);
+    max-height: min(40vh, 280px);
+    min-height: 0;
+    aspect-ratio: auto;
+    display: grid;
+    place-items: center;
     background: #111;
+    overflow: hidden;
   }
 
-  .work-sample-main .work-detail-image {
+  .work-sample-main.landscape,
+  .work-detail-thumb.game.work-sample-main.landscape {
+    height: min(34vh, 240px);
+    max-height: min(34vh, 240px);
+  }
+
+  .work-sample-main .work-detail-image,
+  .work-sample-main.landscape .work-detail-image,
+  .work-detail-thumb.game.work-sample-main.landscape .work-detail-image {
     display: block;
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: min(40vh, 280px);
+    max-height: 100%;
     object-fit: contain;
-  }
-
-  .work-sample-main.landscape .work-detail-image,
-  .work-detail-thumb.game.work-sample-main.landscape .work-detail-image {
-    max-height: min(32vh, 220px);
+    object-position: center;
+    background: transparent;
   }
 
   .work-sample-thumbs {
@@ -1264,13 +1279,17 @@ body {
   .work-sample-thumb {
     flex: 0 0 48px;
     width: 48px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .work-sample-thumb.landscape {
+    aspect-ratio: 1 / 1;
   }
 
   .work-sample-note {
     display: none;
   }
 
-  /* Keep buy button close under the sample on first screen */
   .work-detail-main {
     gap: 14px;
   }
