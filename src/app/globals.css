@@ -1221,11 +1221,39 @@ body {
     padding-bottom: 88px;
   }
 
+  /* Thin carousel: keep FANZA CTA in first viewport */
+  .work-sample-gallery {
+    gap: 8px;
+  }
+
+  .work-sample-main .work-detail-image {
+    max-height: min(38vh, 280px);
+  }
+
+  .work-sample-main.landscape .work-detail-image,
+  .work-detail-thumb.game.work-sample-main.landscape .work-detail-image {
+    max-height: min(32vh, 220px);
+  }
+
   .work-sample-thumbs {
-    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
     gap: 6px;
-    max-height: 120px;
-    overflow-y: auto;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+
+  .work-sample-thumb {
+    flex: 0 0 48px;
+    width: 48px;
+  }
+
+  .work-sample-note {
+    display: none;
   }
 
   .work-fanza-sticky {

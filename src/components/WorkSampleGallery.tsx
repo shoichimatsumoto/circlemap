@@ -152,7 +152,7 @@ export function WorkSampleGallery({
             ))}
           </div>
           <p className="work-sample-note">
-            FANZA提供のサンプル画像です。左右の矢印・スワイプ・下のサムネイルで切り替えできます。
+            サンプル画像（スワイプ／矢印／サムネで切替）
           </p>
         </>
       ) : null}
