@@ -1221,34 +1221,43 @@ body {
     padding-bottom: 88px;
   }
 
-  /* Thin carousel: keep FANZA CTA in first viewport */
+  /* Title + buy CTA first, then compact samples */
+  .work-detail-main {
+    gap: 16px;
+  }
+
+  .work-detail-info {
+    order: -1;
+  }
+
+  .work-detail-actions {
+    margin-top: 2px;
+  }
+
+  /* Thin carousel: full-width crop, no side letterboxing */
   .work-sample-gallery {
     gap: 8px;
   }
 
   .work-sample-main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    max-height: min(38vh, 280px);
+    width: 100%;
+    height: min(36vh, 260px);
+    max-height: min(36vh, 260px);
+    overflow: hidden;
     background: #111;
   }
 
   .work-sample-main .work-detail-image {
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: min(38vh, 280px);
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+    object-position: top center;
   }
 
   .work-sample-main.landscape {
-    max-height: min(32vh, 220px);
-  }
-
-  .work-sample-main.landscape .work-detail-image,
-  .work-detail-thumb.game.work-sample-main.landscape .work-detail-image {
-    max-height: min(32vh, 220px);
+    height: min(30vh, 200px);
+    max-height: min(30vh, 200px);
   }
 
   .work-sample-thumbs {
