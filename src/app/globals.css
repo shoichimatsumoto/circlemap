@@ -1221,49 +1221,38 @@ body {
     padding-bottom: 88px;
   }
 
-  /* Title + buy CTA first, then compact samples */
-  .work-detail-main {
-    gap: 16px;
-  }
-
-  .work-detail-info {
-    order: -1;
-  }
-
-  .work-detail-actions {
-    margin-top: 2px;
-  }
-
-  /* Thin carousel: full-width crop, no side letterboxing */
+  /* Compact sample: shrink-wrap + center (no side black bars / no heavy crop) */
   .work-sample-gallery {
     gap: 8px;
+    align-items: center;
   }
 
   .work-sample-main {
-    width: 100%;
-    height: min(36vh, 260px);
-    max-height: min(36vh, 260px);
-    overflow: hidden;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
     background: #111;
   }
 
   .work-sample-main .work-detail-image {
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    object-fit: cover;
-    object-position: top center;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(40vh, 280px);
+    object-fit: contain;
   }
 
-  .work-sample-main.landscape {
-    height: min(30vh, 200px);
-    max-height: min(30vh, 200px);
+  .work-sample-main.landscape .work-detail-image,
+  .work-detail-thumb.game.work-sample-main.landscape .work-detail-image {
+    max-height: min(32vh, 220px);
   }
 
   .work-sample-thumbs {
     display: flex;
     flex-wrap: nowrap;
     gap: 6px;
+    width: 100%;
     max-height: none;
     overflow-x: auto;
     overflow-y: hidden;
@@ -1279,6 +1268,25 @@ body {
 
   .work-sample-note {
     display: none;
+  }
+
+  /* Keep buy button close under the sample on first screen */
+  .work-detail-main {
+    gap: 14px;
+  }
+
+  .work-detail-info h1 {
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+  }
+
+  .work-detail-meta {
+    margin-bottom: 10px;
+  }
+
+  .affiliate-note {
+    font-size: 0.7rem;
+    margin-bottom: 10px;
   }
 
   .work-fanza-sticky {
