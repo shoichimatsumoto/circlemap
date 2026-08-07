@@ -71,15 +71,6 @@ export function WorkCard({
           <p className="yt-card-stats">
             {formatPrice(work.price)} · {work.date}
           </p>
-          {work.tags.length > 0 ? (
-            <p className="yt-card-tags">
-              {work.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="yt-card-tag">
-                  #{tag}
-                </span>
-              ))}
-            </p>
-          ) : null}
         </div>
       </div>
     </Link>
