@@ -1233,20 +1233,27 @@ body {
   }
 
   /*
-   * Fixed sample stage for all media / aspect ratios:
-   * cover(4:3), manga pages, tall voice samples, mixed CG, games.
-   * Image is always contain-centered inside the same slot.
+   * Sample stage: full width, soft height cap, never spill sideways.
+   * Title + buy stay above (grid areas). Thumbs scroll inside, not the page.
    */
+  .work-detail-main,
+  .work-sample-gallery {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .work-sample-gallery {
     gap: 8px;
+    overflow-x: clip;
   }
 
   .work-sample-main,
   .work-sample-main.landscape,
   .work-detail-thumb.game.work-sample-main.landscape {
     width: 100%;
-    height: min(32vh, 200px);
-    max-height: min(32vh, 200px);
+    max-width: 100%;
+    height: min(40vh, 280px);
+    max-height: min(40vh, 280px);
     min-height: 0;
     aspect-ratio: auto;
     display: grid;
@@ -1257,8 +1264,8 @@ body {
 
   .work-sample-main.landscape,
   .work-detail-thumb.game.work-sample-main.landscape {
-    height: min(28vh, 180px);
-    max-height: min(28vh, 180px);
+    height: min(34vh, 240px);
+    max-height: min(34vh, 240px);
   }
 
   .work-sample-main .work-detail-image,
@@ -1279,9 +1286,12 @@ body {
     flex-wrap: nowrap;
     gap: 6px;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     max-height: none;
     overflow-x: auto;
     overflow-y: hidden;
+    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     padding-bottom: 2px;
@@ -1307,6 +1317,15 @@ body {
 
   .work-detail-info .affiliate-note {
     margin-bottom: 0;
+  }
+
+  .work-detail-actions {
+    flex-wrap: wrap;
+  }
+
+  .work-detail-actions .btn-fanza {
+    flex: 1 1 auto;
+    min-width: min(100%, 180px);
   }
 
   .work-detail-info h1 {
