@@ -44,20 +44,6 @@ export default async function HomePage() {
 
         <section className="feed-section">
           <div className="feed-section-head">
-            <h2>人気作品</h2>
-            <span className="feed-section-sub">FANZA人気順</span>
-          </div>
-          <InfiniteWorkGrid
-            initialWorks={popularWorks}
-            feedType="popular"
-            hasMore={popularHasMore}
-            pageSize={HOME_PAGE_SIZE}
-            keyPrefix="popular-"
-          />
-        </section>
-
-        <section className="feed-section">
-          <div className="feed-section-head">
             <h2>新着作品</h2>
             <Link href="/media/manga" className="link-more">
               もっと見る →
@@ -69,6 +55,20 @@ export default async function HomePage() {
             hasMore={latestHasMore}
             pageSize={HOME_PAGE_SIZE}
             keyPrefix="latest-"
+          />
+        </section>
+
+        <section className="feed-section">
+          <div className="feed-section-head">
+            <h2>人気作品</h2>
+            <span className="feed-section-sub">FANZA人気順</span>
+          </div>
+          <InfiniteWorkGrid
+            initialWorks={popularWorks}
+            feedType="popular"
+            hasMore={popularHasMore}
+            pageSize={HOME_PAGE_SIZE}
+            keyPrefix="popular-"
           />
         </section>
 
