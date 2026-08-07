@@ -1328,6 +1328,10 @@ body {
     min-width: min(100%, 180px);
   }
 
+  .work-favorite-btn {
+    display: none;
+  }
+
   .work-detail-info h1 {
     font-size: 1.15rem;
     margin-bottom: 6px;

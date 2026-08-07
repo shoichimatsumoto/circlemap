@@ -86,7 +86,7 @@ export function WorkPageClient({
                   FANZAで購入する
                 </button>
               )}
-              <button className="btn btn-secondary" type="button">
+              <button className="btn btn-secondary work-favorite-btn" type="button">
                 ★ お気に入り
               </button>
             </div>
