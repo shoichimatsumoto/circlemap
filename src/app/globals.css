@@ -1245,8 +1245,8 @@ body {
   .work-sample-main.landscape,
   .work-detail-thumb.game.work-sample-main.landscape {
     width: 100%;
-    height: min(40vh, 280px);
-    max-height: min(40vh, 280px);
+    height: min(32vh, 200px);
+    max-height: min(32vh, 200px);
     min-height: 0;
     aspect-ratio: auto;
     display: grid;
@@ -1257,8 +1257,8 @@ body {
 
   .work-sample-main.landscape,
   .work-detail-thumb.game.work-sample-main.landscape {
-    height: min(34vh, 240px);
-    max-height: min(34vh, 240px);
+    height: min(28vh, 180px);
+    max-height: min(28vh, 180px);
   }
 
   .work-sample-main .work-detail-image,
