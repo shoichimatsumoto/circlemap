@@ -31,6 +31,10 @@ IMG_FLUID_ALT = re.compile(
     r'<img[^>]+src="([^"]+)"[^>]+class="img-fluid"',
     re.I,
 )
+GASOURCE_JPEG = re.compile(
+    r"//do-gasource\.eroterest\.net/images/video/[^\"']+\.jpeg",
+    re.I,
+)
 
 
 def fetch_eroterest_thumb(eroterest_page: int) -> tuple[str, bytes, str]:
@@ -38,12 +42,16 @@ def fetch_eroterest_thumb(eroterest_page: int) -> tuple[str, bytes, str]:
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=20) as resp:
         html = resp.read().decode("utf-8", "ignore")
-    m = IMG_FLUID.search(html) or IMG_FLUID_ALT.search(html)
-    if not m:
-        raise RuntimeError(f"サムネ img-fluid が見つかりません: page={eroterest_page}")
-    img_url = m.group(1)
-    if img_url.startswith("//"):
-        img_url = "https:" + img_url
+    gm = GASOURCE_JPEG.search(html)
+    if gm:
+        img_url = "https:" + gm.group(0)
+    else:
+        m = IMG_FLUID.search(html) or IMG_FLUID_ALT.search(html)
+        if not m:
+            raise RuntimeError(f"サムネが見つかりません: page={eroterest_page}")
+        img_url = m.group(1)
+        if img_url.startswith("//"):
+            img_url = "https:" + img_url
     img_req = urllib.request.Request(
         img_url,
         headers={
