@@ -33,6 +33,9 @@ export default function PrivacyPage() {
               <li>
                 Vercel Web Analytics によるページ閲覧状況（Cookieを使用しない解析）
               </li>
+              <li>
+                Google Analytics 4（GA4）によるアクセス解析（ページ閲覧、滞在、参照元など。Cookieを使用する場合があります）
+              </li>
               <li>アフィリエイトリンク経由のCookie</li>
             </ul>
           </section>
@@ -51,14 +54,23 @@ export default function PrivacyPage() {
             <p>
               当サイトはDMMアフィリエイトプログラムに参加しており、FANZAへのリンクを通じて商品情報を表示します。
               購入時の個人情報はFANZA（DMM）のプライバシーポリシーに従って処理されます。
-              アクセス解析には Vercel Inc. の Web Analytics を利用しています。
+              アクセス解析には Vercel Inc. の Web Analytics、および Google LLC の Google Analytics 4 を利用しています。
+              Google の取り扱いについては
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Google プライバシーポリシー
+              </a>
+              をご確認ください。
             </p>
           </section>
 
           <section>
             <h2>4. Cookieについて</h2>
             <p>
-              当サイトおよびアフィリエイトリンクでは、Cookieが使用される場合があります。
+              当サイト、Google Analytics、およびアフィリエイトリンクでは、Cookieが使用される場合があります。
               ブラウザの設定によりCookieを無効にすることができます。
             </p>
           </section>
@@ -72,7 +84,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <p className="static-updated">最終更新日：2026年6月23日</p>
+          <p className="static-updated">最終更新日：2026年8月7日</p>
         </article>
       </main>
     </PageShell>

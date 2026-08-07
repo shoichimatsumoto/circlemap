@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import "./globals.css";
 import { DevBanner } from "@/components/DevBanner";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { JsonLd } from "@/components/JsonLd";
 import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
@@ -85,6 +86,7 @@ export default function RootLayout({
         {children}
         <DevBanner />
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
