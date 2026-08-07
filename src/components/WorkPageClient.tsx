@@ -61,15 +61,6 @@ export function WorkPageClient({
     <>
       <article className="work-detail">
         <div className="work-detail-main">
-          <WorkSampleGallery
-            key={work.id}
-            workId={work.id}
-            title={work.title}
-            thumbnailUrl={work.thumbnailUrl}
-            sampleImages={work.sampleImages}
-            mediaType={work.mediaType}
-          />
-
           <div className="work-detail-info">
             <p className="work-detail-type">
               {MEDIA_NAMES[work.mediaType]}作品 · {work.circleName}
@@ -103,7 +94,18 @@ export function WorkPageClient({
             <p className="affiliate-note">
               ※ 購入はFANZAで完結。CircleMap経由の購入でアフィリエイト報酬が発生します。
             </p>
+          </div>
 
+          <WorkSampleGallery
+            key={work.id}
+            workId={work.id}
+            title={work.title}
+            thumbnailUrl={work.thumbnailUrl}
+            sampleImages={work.sampleImages}
+            mediaType={work.mediaType}
+          />
+
+          <div className="work-detail-extra">
             <div className="tag-row">
               {work.tags.map((tag) => (
                 <Link
