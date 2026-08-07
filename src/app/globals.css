@@ -213,6 +213,89 @@ body {
   color: #0f0f0f;
 }
 
+/* Home shortcuts (ZOZO-like media entry) */
+.home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 18px;
+}
+
+.home-shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text);
+  min-width: 0;
+}
+
+.home-shortcut-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.home-shortcut-manga .home-shortcut-icon {
+  background: rgba(61, 214, 140, 0.16);
+  border-color: rgba(61, 214, 140, 0.35);
+}
+
+.home-shortcut-cg .home-shortcut-icon {
+  background: rgba(251, 191, 36, 0.16);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.home-shortcut-voice .home-shortcut-icon {
+  background: rgba(96, 165, 250, 0.16);
+  border-color: rgba(96, 165, 250, 0.35);
+}
+
+.home-shortcut-game .home-shortcut-icon {
+  background: rgba(244, 114, 182, 0.16);
+  border-color: rgba(244, 114, 182, 0.35);
+}
+
+.home-shortcut-circles .home-shortcut-icon {
+  background: var(--accent-soft);
+  border-color: rgba(255, 78, 106, 0.35);
+  color: var(--accent2);
+}
+
+.home-shortcut-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media (min-width: 641px) {
+  .home-shortcuts {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-category-chips {
+    display: none;
+  }
+
+  .home-shortcut-icon {
+    width: 52px;
+    height: 52px;
+  }
+}
+
 /* Feed sections */
 .feed-section {
   margin-bottom: 32px;

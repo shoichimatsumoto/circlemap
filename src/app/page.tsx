@@ -1,5 +1,6 @@
 import { CategoryChips } from "@/components/CategoryChips";
 import { DataModeBanner } from "@/components/DataModeBanner";
+import { HomeShortcuts } from "@/components/HomeShortcuts";
 import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
 import { SeoDiscoveryLinks } from "@/components/SeoDiscoveryLinks";
@@ -39,7 +40,10 @@ export default async function HomePage() {
     <PageShell active="home">
       <DataModeBanner source={source} />
       <div className="feed-wrap">
-        <CategoryChips activeHref="/" />
+        <HomeShortcuts />
+        <div className="home-category-chips">
+          <CategoryChips activeHref="/" />
+        </div>
 
         <section className="feed-section">
           <div className="feed-section-head">
