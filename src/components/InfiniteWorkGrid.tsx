@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { WorkCard } from "@/components/WorkCard";
 import type { MediaType, Work } from "@/lib/types";
 
@@ -14,6 +15,10 @@ type Props = {
   mediaType?: MediaType;
   query?: string;
   keyPrefix?: string;
+  /** false で無限スクロールを止め、初期件数だけ表示（ホーム向け） */
+  infinite?: boolean;
+  moreHref?: string;
+  moreLabel?: string;
 };
 
 export function InfiniteWorkGrid({
@@ -24,19 +29,22 @@ export function InfiniteWorkGrid({
   mediaType,
   query,
   keyPrefix = "",
+  infinite = true,
+  moreHref,
+  moreLabel = "もっと見る →",
 }: Props) {
   const [works, setWorks] = useState(initialWorks);
-  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [hasMore, setHasMore] = useState(infinite ? initialHasMore : false);
   const [loading, setLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setWorks(initialWorks);
-    setHasMore(initialHasMore);
-  }, [initialWorks, initialHasMore, feedType, mediaType, query]);
+    setHasMore(infinite ? initialHasMore : false);
+  }, [initialWorks, initialHasMore, feedType, mediaType, query, infinite]);
 
   const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
+    if (!infinite || loading || !hasMore) return;
 
     setLoading(true);
     try {
@@ -67,9 +75,19 @@ export function InfiniteWorkGrid({
     } finally {
       setLoading(false);
     }
-  }, [feedType, hasMore, loading, mediaType, pageSize, query, works.length]);
+  }, [
+    feedType,
+    hasMore,
+    infinite,
+    loading,
+    mediaType,
+    pageSize,
+    query,
+    works.length,
+  ]);
 
   useEffect(() => {
+    if (!infinite) return;
     const el = sentinelRef.current;
     if (!el || !hasMore) return;
 
@@ -84,7 +102,7 @@ export function InfiniteWorkGrid({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasMore, loadMore]);
+  }, [hasMore, infinite, loadMore]);
 
   return (
     <>
@@ -93,7 +111,14 @@ export function InfiniteWorkGrid({
           <WorkCard key={`${keyPrefix}${work.id}`} work={work} />
         ))}
       </div>
-      {hasMore ? (
+      {!infinite && moreHref ? (
+        <p className="feed-section-more">
+          <Link href={moreHref} className="link-more">
+            {moreLabel}
+          </Link>
+        </p>
+      ) : null}
+      {infinite && hasMore ? (
         <div ref={sentinelRef} className="infinite-sentinel" aria-hidden>
           {loading ? (
             <p className="infinite-loading">読み込み中…</p>
@@ -101,7 +126,7 @@ export function InfiniteWorkGrid({
             <p className="infinite-loading infinite-loading-idle">スクロールで続きを表示</p>
           )}
         </div>
-      ) : works.length > 0 ? (
+      ) : infinite && works.length > 0 ? (
         <p className="infinite-end">すべて表示しました</p>
       ) : null}
     </>

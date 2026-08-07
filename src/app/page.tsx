@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { CategoryChips } from "@/components/CategoryChips";
 import { DataModeBanner } from "@/components/DataModeBanner";
 import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
@@ -45,9 +44,6 @@ export default async function HomePage() {
         <section className="feed-section">
           <div className="feed-section-head">
             <h2>新着作品</h2>
-            <Link href="/media/manga" className="link-more">
-              もっと見る →
-            </Link>
           </div>
           <InfiniteWorkGrid
             initialWorks={latestWorks}
@@ -55,6 +51,9 @@ export default async function HomePage() {
             hasMore={latestHasMore}
             pageSize={HOME_PAGE_SIZE}
             keyPrefix="latest-"
+            infinite={false}
+            moreHref="/media/manga"
+            moreLabel="新着をもっと見る →"
           />
         </section>
 
@@ -69,6 +68,7 @@ export default async function HomePage() {
             hasMore={popularHasMore}
             pageSize={HOME_PAGE_SIZE}
             keyPrefix="popular-"
+            infinite={false}
           />
         </section>
 
