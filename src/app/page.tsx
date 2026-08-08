@@ -57,14 +57,14 @@ export default async function HomePage() {
             keyPrefix="latest-"
             infinite={false}
             moreHref="/media/manga"
-            moreLabel="新着をもっと見る →"
+            moreLabel="漫画の新着一覧へ"
           />
         </section>
 
         <section className="feed-section">
           <div className="feed-section-head">
             <h2>人気作品</h2>
-            <span className="feed-section-sub">FANZA人気順</span>
+            <span className="feed-section-sub">FANZA人気順 · スクロールで続き</span>
           </div>
           <InfiniteWorkGrid
             initialWorks={popularWorks}
@@ -72,7 +72,7 @@ export default async function HomePage() {
             hasMore={popularHasMore}
             pageSize={HOME_PAGE_SIZE}
             keyPrefix="popular-"
-            infinite={false}
+            infinite
           />
         </section>
 

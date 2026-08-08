@@ -12,6 +12,7 @@ import {
   MEDIA_NAMES,
   type Work,
 } from "@/lib/types";
+import { isUsefulWorkDescription } from "@/lib/dmm-transform";
 
 type Props = {
   work: Work;
@@ -150,10 +151,10 @@ export function WorkPageClient({
           </div>
         </div>
 
-        {work.description && (
+        {isUsefulWorkDescription(work.description) && (
           <section className="work-description">
-            <h2>作品情報</h2>
-            <p>{work.description}</p>
+            <h2>作品コメント</h2>
+            <p className="work-comment">{work.description}</p>
             <dl className="info-list">
               <dt>サークル</dt>
               <dd>

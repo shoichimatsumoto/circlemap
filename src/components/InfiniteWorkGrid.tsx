@@ -113,8 +113,9 @@ export function InfiniteWorkGrid({
       </div>
       {!infinite && moreHref ? (
         <p className="feed-section-more">
-          <Link href={moreHref} className="link-more">
+          <Link href={moreHref} className="feed-more-btn">
             {moreLabel}
+            <span aria-hidden> →</span>
           </Link>
         </p>
       ) : null}

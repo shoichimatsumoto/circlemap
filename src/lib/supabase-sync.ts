@@ -38,13 +38,13 @@ function workText(work: Work): string {
 }
 
 function isVoiceLike(work: Work): boolean {
-  return isVoiceLikeText(workText(work), work.description ?? "");
+  return isVoiceLikeText(workText(work), "");
 }
 
 function isGameLike(work: Work): boolean {
   return (
     work.mediaType === "game" ||
-    isGameLikeText(workText(work), work.description ?? "")
+    isGameLikeText(workText(work), "")
   );
 }
 

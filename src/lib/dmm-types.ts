@@ -40,6 +40,8 @@ export type DmmItem = {
     list_price?: string;
   };
   date?: string;
+  comment?: string;
+  volume?: string;
   iteminfo?: {
     genre?: DmmGenre[];
     series?: DmmNamedId[];

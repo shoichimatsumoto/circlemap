@@ -512,8 +512,30 @@ body {
 }
 
 .feed-section-more {
-  margin: 8px 0 0;
-  text-align: right;
+  margin: 16px 0 8px;
+  text-align: center;
+}
+
+.feed-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: min(100%, 280px);
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.feed-more-btn:hover {
+  background: var(--surface);
+  border-color: var(--accent2);
+  color: var(--accent2);
 }
 
 .yt-channel-grid,
@@ -1502,6 +1524,12 @@ body {
   font-size: 0.9rem;
   margin-bottom: 20px;
   line-height: 1.7;
+}
+
+.work-description .work-comment {
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .info-list {

@@ -113,6 +113,31 @@ export function extractSampleImages(item: DmmItem): string[] {
   return [...new Set(images)];
 }
 
+/** FANZA 作品コメント（HTML混在あり）。なければ undefined */
+export function cleanDmmComment(comment?: string): string | undefined {
+  if (!comment?.trim()) return undefined;
+  const text = comment
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\u00a0/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+  return text.length >= 12 ? text : undefined;
+}
+
+/** 旧データで category_name が入っているだけの description を除外 */
+export function isUsefulWorkDescription(text?: string): boolean {
+  if (!text?.trim()) return false;
+  const t = text.trim();
+  if (t.length < 20) return false;
+  if (/^同人(\s*[（(].*[）)])?$/.test(t)) return false;
+  if (/^(デジタル本|PCゲーム|同人誌)/.test(t) && t.length < 40) return false;
+  return true;
+}
+
 export function dmmItemToWork(item: DmmItem): Work {
   const maker = item.iteminfo?.maker?.[0];
   const circleName = maker?.name ?? "不明なサークル";
@@ -123,6 +148,8 @@ export function dmmItemToWork(item: DmmItem): Work {
     item.imageURL?.small
   );
   const sampleImages = extractSampleImages(item);
+  const pages = Number(item.volume);
+  const description = cleanDmmComment(item.comment);
 
   return {
     id: item.content_id,
@@ -137,7 +164,8 @@ export function dmmItemToWork(item: DmmItem): Work {
       resolveAffiliateUrl(item.affiliateURL) ?? buildAffiliateUrl(item.URL),
     thumbnailUrl,
     sampleImages: sampleImages.length > 0 ? sampleImages : undefined,
-    description: item.category_name,
+    description,
+    pages: Number.isFinite(pages) && pages > 0 ? pages : undefined,
   };
 }
 
