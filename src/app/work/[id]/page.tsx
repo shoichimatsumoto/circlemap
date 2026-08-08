@@ -66,12 +66,14 @@ export default async function WorkPage({ params }: Props) {
           <span>/</span>
           <span className="breadcrumb-current">{work.title}</span>
         </nav>
-        <DoujinLogArticleBanner workId={work.id} circleId={work.circleId} />
         <WorkPageClient
           work={work}
           relatedWorks={relatedWorks}
           relatedByTagWorks={relatedByTagWorks}
           relatedByTagLabels={relatedByTagLabels}
+          doujinLogBanner={
+            <DoujinLogArticleBanner workId={work.id} circleId={work.circleId} />
+          }
         />
       </div>
     </PageShell>

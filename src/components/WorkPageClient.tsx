@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { track } from "@vercel/analytics/react";
 import { WorkCard } from "@/components/WorkCard";
@@ -18,6 +18,8 @@ type Props = {
   relatedWorks: Work[];
   relatedByTagWorks?: Work[];
   relatedByTagLabels?: string[];
+  /** 購入CTAより下に出す（同人ログなど） */
+  doujinLogBanner?: ReactNode;
 };
 
 type FanzaSource = "work_page" | "work_page_sticky";
@@ -27,6 +29,7 @@ export function WorkPageClient({
   relatedWorks,
   relatedByTagWorks = [],
   relatedByTagLabels = [],
+  doujinLogBanner,
 }: Props) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -162,6 +165,8 @@ export function WorkPageClient({
           </section>
         )}
       </article>
+
+      {doujinLogBanner}
 
       {relatedWorks.length > 0 && (
         <section className="work-section">
