@@ -179,12 +179,15 @@ async function fetchAiCatalogWorks(): Promise<Work[]> {
   const all: Work[] = [];
   const fetches = [fetchDoujinAiItems, fetchDoujinAiItemsAlt] as const;
 
-  // 3ページ×2キーワード程度に抑える
+  // ジャンル（keyword ID）絞り込み済みなので、取得分は媒体 AI として確定する
   for (const fetch of fetches) {
-    for (const offset of [1, 101, 201]) {
+    for (const offset of [1, 101, 201, 301, 401]) {
       try {
         const json = await fetch(100, offset);
-        const page = parseResponse(json).filter((w) => w.mediaType === "ai");
+        const page = parseResponse(json).map((w) => ({
+          ...w,
+          mediaType: "ai" as const,
+        }));
         all.push(...page);
       } catch {
         // 続行

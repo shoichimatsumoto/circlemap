@@ -169,26 +169,36 @@ export async function fetchDoujinGameItems(hits = 20, offset = 1) {
   });
 }
 
-/** AI生成・一部AI をキーワードで追加取得（一覧・DMMフォールバック用） */
+/**
+ * FANZA 同人の AI 系キーワード ID（GenreSearch / list URL の article=keyword）
+ * - 160232: 新規(AI)サークル（主在庫）
+ * - 160132: AI生成（件数が少ないが公式タグ）
+ */
+export const AI_KEYWORD_NEW_CIRCLE = "160232";
+export const AI_KEYWORD_AI_SEISEI = "160132";
+
+/** 新規(AI)サークルをジャンル絞り込みで取得（一覧・DMMフォールバック用） */
 export async function fetchDoujinAiItems(hits = 20, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
     service: "doujin",
     floor: "digital_doujin",
-    keyword: "AI生成",
+    article: "keyword",
+    article_id: AI_KEYWORD_NEW_CIRCLE,
     hits: Math.min(hits * 4, 100),
     offset,
     sort: "date",
   });
 }
 
-/** 一部AI 追加キーワード（同期用） */
+/** AI生成タグをジャンル絞り込みで追加取得（同期用） */
 export async function fetchDoujinAiItemsAlt(hits = 100, offset = 1) {
   return searchDmmItems({
     site: "FANZA",
     service: "doujin",
     floor: "digital_doujin",
-    keyword: "一部AI",
+    article: "keyword",
+    article_id: AI_KEYWORD_AI_SEISEI,
     hits: Math.min(hits, 100),
     offset,
     sort: "date",

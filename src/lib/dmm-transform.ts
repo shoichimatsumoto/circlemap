@@ -35,7 +35,16 @@ export function isVoiceLikeText(
 
 /** タグ・カテゴリ・タイトルから AI生成／一部AI 作品か判定（AI補助のみは除外） */
 export function isAiLikeText(text: string, genreNames: string[] = []): boolean {
-  if (genreNames.some((g) => g === "AI" || g === "AI生成" || g === "一部AI" || g === "AI一部利用")) {
+  if (
+    genreNames.some(
+      (g) =>
+        g === "AI" ||
+        g === "AI生成" ||
+        g === "一部AI" ||
+        g === "AI一部利用" ||
+        g === "新規(AI)サークル"
+    )
+  ) {
     return true;
   }
   if (/AI生成|一部AI|AI一部利用|【AI生成】|【一部AI】|【AI】/i.test(text)) {
