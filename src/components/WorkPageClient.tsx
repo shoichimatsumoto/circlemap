@@ -23,7 +23,10 @@ type Props = {
   doujinLogBanner?: ReactNode;
 };
 
-type FanzaSource = "work_page" | "work_page_sticky";
+type FanzaSource =
+  | "work_page"
+  | "work_page_after_sample"
+  | "work_page_sticky";
 
 export function WorkPageClient({
   work,
@@ -73,6 +76,7 @@ export function WorkPageClient({
             <p className="work-detail-meta">
               {formatWorkMeta(work)} · {work.date} 発売
             </p>
+            <p className="work-detail-price">{formatPrice(work.price)}（税込）</p>
 
             <div className="work-detail-actions">
               {work.affiliateUrl ? (
@@ -96,7 +100,7 @@ export function WorkPageClient({
             </div>
 
             <p className="affiliate-note">
-              ※ 購入はFANZAで完結。CircleMap経由の購入でアフィリエイト報酬が発生します。
+              ※ 購入はFANZAで完結します
             </p>
           </div>
 
@@ -110,6 +114,20 @@ export function WorkPageClient({
           />
 
           <div className="work-detail-extra">
+            {work.affiliateUrl && (
+              <div className="work-after-sample-cta">
+                <a
+                  href={work.affiliateUrl}
+                  className="btn btn-fanza btn-lg work-after-sample-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackFanzaClick("work_page_after_sample")}
+                >
+                  サンプルを見たら FANZAで購入する
+                </a>
+              </div>
+            )}
+
             <div className="tag-row">
               {work.tags.map((tag) => (
                 <Link
@@ -230,7 +248,7 @@ export function WorkPageClient({
               rel="noopener noreferrer"
               onClick={() => trackFanzaClick("work_page_sticky")}
             >
-              FANZAで購入
+              FANZAで購入する
             </a>
           </div>
         </div>

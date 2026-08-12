@@ -1272,7 +1272,26 @@ body {
 
 .work-detail-meta {
   color: var(--muted);
-  margin-bottom: 14px;
+  margin-bottom: 8px;
+}
+
+.work-detail-price {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.work-after-sample-cta {
+  margin: 0 0 16px;
+}
+
+.work-after-sample-btn {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .sample-player {
@@ -1339,7 +1358,7 @@ body {
 
 @media (max-width: 640px) {
   .work-detail {
-    padding-bottom: 88px;
+    padding-bottom: 96px;
   }
 
   /*
@@ -1448,7 +1467,21 @@ body {
   }
 
   .work-detail-meta {
-    margin-bottom: 10px;
+    margin-bottom: 6px;
+  }
+
+  .work-detail-price {
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+  }
+
+  .work-after-sample-cta {
+    margin: 4px 0 14px;
+  }
+
+  .work-after-sample-btn {
+    padding: 14px 16px;
+    font-size: 1rem;
   }
 
   .affiliate-note {
@@ -1464,7 +1497,7 @@ body {
     bottom: 0;
     z-index: 40;
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-    background: rgba(12, 12, 16, 0.94);
+    background: rgba(12, 12, 16, 0.96);
     border-top: 1px solid var(--border);
     backdrop-filter: blur(10px);
   }
@@ -1472,13 +1505,13 @@ body {
   .work-fanza-sticky-inner {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     max-width: 720px;
     margin: 0 auto;
   }
 
   .work-fanza-sticky-meta {
-    flex: 1;
+    flex: 0 1 30%;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -1492,18 +1525,20 @@ body {
   }
 
   .work-fanza-sticky-title {
-    font-size: 0.72rem;
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none;
   }
 
   .work-fanza-sticky-btn {
-    flex-shrink: 0;
-    padding: 12px 16px;
-    font-size: 0.95rem;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 14px 12px;
+    font-size: 1rem;
     border-radius: 10px;
+    text-align: center;
+    text-decoration: none;
   }
 }
 
