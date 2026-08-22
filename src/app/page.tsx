@@ -5,6 +5,7 @@ import { InfiniteWorkGrid } from "@/components/InfiniteWorkGrid";
 import { PageShell } from "@/components/PageShell";
 import { SeoDiscoveryLinks } from "@/components/SeoDiscoveryLinks";
 import { getLatestWorks, getPopularWorks } from "@/lib/data";
+import { SITE_NAME } from "@/lib/site";
 import type { DataSource } from "@/lib/types";
 import type { Metadata } from "next";
 
@@ -13,9 +14,11 @@ export const dynamic = "force-dynamic";
 const HOME_PAGE_SIZE = 12;
 
 export const metadata: Metadata = {
-  title: "ホーム",
+  title: {
+    absolute: `${SITE_NAME} — FANZA同人をサークル軸で探す`,
+  },
   description:
-    "FANZA同人の人気作品・新着作品をサークル軸で探せるCircleMapのトップページ。",
+    "FANZA同人の人気作品・新着作品をサークル軸で探せるCircleMapのトップページ。漫画・CG・音声・ゲーム・AIを横断できます。",
   alternates: { canonical: "/" },
 };
 

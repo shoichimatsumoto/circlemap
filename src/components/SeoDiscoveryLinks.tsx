@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getDiscoverableCircles, getPopularWorks } from "@/lib/data";
 import { MEDIA_NAMES } from "@/lib/types";
 
-const LINK_LIMIT = 48;
+/** doorway感を抑えるため、フッター誘導は少数に絞る */
+const LINK_LIMIT = 8;
 
 export async function SeoDiscoveryLinks() {
   const [{ circles }, { works }] = await Promise.all([

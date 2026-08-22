@@ -450,15 +450,14 @@ export async function getCirclePage(circleId = "demo"): Promise<{
   works: Work[];
   featured: Work;
   source: DataSource;
-}> {
-  try {
-    const resolvedId =
-      circleId === "demo" || circleId === DEMO_CIRCLE.id ? null : circleId;
+} | null> {
+  const isDemo = circleId === "demo" || circleId === DEMO_CIRCLE.id;
 
-    if (resolvedId) {
+  try {
+    if (!isDemo) {
       const [circle, works] = await Promise.all([
-        dbGetCircle(resolvedId),
-        dbGetCircleWorks(resolvedId),
+        dbGetCircle(circleId),
+        dbGetCircleWorks(circleId),
       ]);
 
       if (circle && works.length > 0) {
@@ -487,7 +486,7 @@ export async function getCirclePage(circleId = "demo"): Promise<{
     console.error("[CircleMap] Supabase circle fetch failed:", error);
   }
 
-  if (circleId === "demo" || circleId === DEMO_CIRCLE.id) {
+  if (isDemo) {
     if (!hasDmmCredentials()) {
       return {
         circle: DEMO_CIRCLE,
@@ -498,40 +497,45 @@ export async function getCirclePage(circleId = "demo"): Promise<{
     }
   }
 
-  if (hasDmmCredentials()) {
+  // 実在 maker ID のみ DMM から取得。見つからなければ null（別サークルへのすり替禁止）
+  if (!isDemo && hasDmmCredentials() && /^\d+$/.test(circleId)) {
     try {
-      if (/^\d+$/.test(circleId)) {
-        const [makerItems, gameItems] = await Promise.allSettled([
-          fetchItemsByMaker(circleId, 40),
-          fetchDoujinGameItems(40, 1),
-        ]);
+      const [makerItems, gameItems] = await Promise.allSettled([
+        fetchItemsByMaker(circleId, 40),
+        fetchDoujinGameItems(40, 1),
+      ]);
 
-        const allWorks = dedupeWorks(
-          sortByDateDesc([
-            ...(makerItems.status === "fulfilled"
-              ? parseResponse(makerItems.value)
-              : []),
-            ...(gameItems.status === "fulfilled"
-              ? parseResponse(gameItems.value).filter(
-                  (w) => w.circleId === circleId
-                )
-              : []),
-          ])
-        );
+      const allWorks = dedupeWorks(
+        sortByDateDesc([
+          ...(makerItems.status === "fulfilled"
+            ? parseResponse(makerItems.value)
+            : []),
+          ...(gameItems.status === "fulfilled"
+            ? parseResponse(gameItems.value).filter(
+                (w) => w.circleId === circleId
+              )
+            : []),
+        ])
+      );
 
-        if (allWorks.length > 0) {
-          const circle = buildCircleFromWorks(circleId, allWorks);
-          if (circle) {
-            return {
-              circle,
-              works: allWorks,
-              featured: allWorks[0],
-              source: "dmm",
-            };
-          }
+      if (allWorks.length > 0) {
+        const circle = buildCircleFromWorks(circleId, allWorks);
+        if (circle) {
+          return {
+            circle,
+            works: allWorks,
+            featured: allWorks[0],
+            source: "dmm",
+          };
         }
       }
+    } catch (error) {
+      console.error("[CircleMap] DMM circle fetch failed:", error);
+    }
+  }
 
+  if (isDemo && hasDmmCredentials()) {
+    try {
       const results = await Promise.allSettled([
         fetchDoujinMangaItems(40, 1),
         fetchDoujinVoiceItems(40, 1),
@@ -547,46 +551,40 @@ export async function getCirclePage(circleId = "demo"): Promise<{
         )
       );
 
-      if (allWorks.length === 0) {
-        throw new Error("No works from DMM API");
-      }
-
-      const grouped = new Map<string, Work[]>();
-      for (const work of allWorks) {
-        const list = grouped.get(work.circleId) ?? [];
-        list.push(work);
-        grouped.set(work.circleId, list);
-      }
-
-      const targetWorks =
-        grouped.get(circleId) ??
-        [...grouped.entries()].sort((a, b) => b[1].length - a[1].length)[0]?.[1] ??
-        [];
-
-      const resolvedCircleId = targetWorks[0]?.circleId ?? circleId;
-      const circle =
-        buildCircleFromWorks(resolvedCircleId, targetWorks) ??
-        buildCircleFromWorks("demo", targetWorks);
-
-      if (circle && targetWorks.length > 0) {
-        return {
-          circle,
-          works: targetWorks,
-          featured: targetWorks[0],
-          source: "dmm",
-        };
+      if (allWorks.length > 0) {
+        const grouped = new Map<string, Work[]>();
+        for (const work of allWorks) {
+          const list = grouped.get(work.circleId) ?? [];
+          list.push(work);
+          grouped.set(work.circleId, list);
+        }
+        const targetWorks =
+          [...grouped.entries()].sort((a, b) => b[1].length - a[1].length)[0]?.[1] ??
+          [];
+        const resolvedCircleId = targetWorks[0]?.circleId ?? circleId;
+        const circle = buildCircleFromWorks(resolvedCircleId, targetWorks);
+        if (circle && targetWorks.length > 0) {
+          return {
+            circle,
+            works: targetWorks,
+            featured: targetWorks[0],
+            source: "dmm",
+          };
+        }
       }
     } catch (error) {
-      console.error("[CircleMap] DMM circle fetch failed, using mock:", error);
+      console.error("[CircleMap] DMM demo circle fetch failed:", error);
     }
+
+    return {
+      circle: DEMO_CIRCLE,
+      works: DEMO_WORKS,
+      featured: FEATURED_WORK,
+      source: "mock",
+    };
   }
 
-  return {
-    circle: DEMO_CIRCLE,
-    works: DEMO_WORKS,
-    featured: FEATURED_WORK,
-    source: "mock",
-  };
+  return null;
 }
 
 export async function getDataMode(): Promise<{

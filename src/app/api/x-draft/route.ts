@@ -59,17 +59,27 @@ export async function GET(request: Request) {
     ]);
 
     let draft;
-    let engageCircle: Awaited<ReturnType<typeof getCirclePage>>["circle"] | undefined;
+    let engageCircle:
+      | NonNullable<Awaited<ReturnType<typeof getCirclePage>>>["circle"]
+      | undefined;
     let engageWorks: Awaited<ReturnType<typeof getPopularWorks>>["works"] | undefined;
 
     if (type === "circle") {
       const { circles } = await getDiscoverableCircles(1, "popular");
       const circle = circles[0];
       if (circle) {
-        const { works: circleWorks } = await getCirclePage(circle.id);
-        draft = buildXPost("circle", { circle, circleWorks });
-        engageCircle = circle;
-        engageWorks = circleWorks;
+        const page = await getCirclePage(circle.id);
+        if (page) {
+          draft = buildXPost("circle", {
+            circle: page.circle,
+            circleWorks: page.works,
+          });
+          engageCircle = page.circle;
+          engageWorks = page.works;
+        } else {
+          draft = buildXPost("popular", { popular });
+          engageWorks = popular;
+        }
       } else {
         draft = buildXPost("popular", { popular });
         engageWorks = popular;
@@ -81,10 +91,18 @@ export async function GET(request: Request) {
       const { circles } = await getDiscoverableCircles(40, "popular");
       const buzzCircle = pickBuzzCircle(circles);
       if (buzzCircle) {
-        const { works: circleWorks } = await getCirclePage(buzzCircle.id);
-        draft = buildXPost("buzz", { circle: buzzCircle, circleWorks });
-        engageCircle = buzzCircle;
-        engageWorks = circleWorks;
+        const page = await getCirclePage(buzzCircle.id);
+        if (page) {
+          draft = buildXPost("buzz", {
+            circle: page.circle,
+            circleWorks: page.works,
+          });
+          engageCircle = page.circle;
+          engageWorks = page.works;
+        } else {
+          draft = buildXPost("popular", { popular });
+          engageWorks = popular;
+        }
       } else {
         draft = buildXPost("popular", { popular });
         engageWorks = popular;

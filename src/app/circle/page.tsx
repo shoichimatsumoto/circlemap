@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { CircleJsonLd } from "@/components/CircleJsonLd";
 import { CirclePageClient } from "@/components/CirclePageClient";
 import { DoujinLogArticleBanner } from "@/components/DoujinLogArticleBanner";
@@ -31,15 +32,25 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     };
   }
 
-  const { circle } = await getCirclePage(id);
+  const result = await getCirclePage(id);
+  if (!result) {
+    return {
+      title: "サークルが見つかりません",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const { circle } = result;
   const title = buildCircleSeoTitle(circle);
   const description = buildCircleSeoDescription(circle);
-  const pageUrl = `${getSiteUrl()}/circle?id=${encodeURIComponent(id)}`;
+  const pageUrl = `${getSiteUrl()}/circle?id=${encodeURIComponent(circle.id)}`;
 
   return {
     title,
     description,
-    alternates: { canonical: `/circle?id=${encodeURIComponent(id)}` },
+    alternates: {
+      canonical: `/circle?id=${encodeURIComponent(circle.id)}`,
+    },
     openGraph: {
       title,
       description,
@@ -90,7 +101,12 @@ export default async function CirclePage({ searchParams }: Props) {
     );
   }
 
-  const { circle, works, featured, source } = await getCirclePage(id);
+  const result = await getCirclePage(id);
+  if (!result) {
+    notFound();
+  }
+
+  const { circle, works, featured, source } = result;
 
   return (
     <PageShell active="circle">

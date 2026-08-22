@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "キーワードでFANZA同人作品を検索。サークル名・作品タイトルから横断検索できます。",
   alternates: { canonical: "/search" },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: true },
 };
 
 type Props = { searchParams: Promise<{ q?: string }> };
