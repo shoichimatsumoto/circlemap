@@ -74,7 +74,7 @@ export async function fetchFanzaWorkComment(
         Cookie: "age_check_done=1",
       },
       signal: AbortSignal.timeout(10_000),
-      next: { revalidate: 86400 },
+      cache: "no-store",
     });
 
     if (!res.ok) return undefined;
