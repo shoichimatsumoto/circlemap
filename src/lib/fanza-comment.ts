@@ -95,17 +95,21 @@ export async function fetchFanzaWorkComment(
 export async function dbSaveWorkDescription(
   workId: string,
   description: string
-): Promise<boolean> {
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = createSupabaseServiceClient();
-  if (!supabase) return false;
+  if (!supabase) {
+    return { ok: false, error: "service_role_missing" };
+  }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("works")
     .update({
       description,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", workId);
+    .eq("id", workId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     console.error(
@@ -113,9 +117,12 @@ export async function dbSaveWorkDescription(
       workId,
       error.message
     );
-    return false;
+    return { ok: false, error: error.message };
   }
-  return true;
+  if (!data) {
+    return { ok: false, error: "work_not_found" };
+  }
+  return { ok: true };
 }
 
 /**
