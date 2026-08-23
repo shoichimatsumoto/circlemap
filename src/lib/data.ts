@@ -16,7 +16,9 @@ import {
   dedupeWorks,
   dmmItemsToWorks,
   filterWorksByMedia,
+  isUsefulWorkDescription,
 } from "@/lib/dmm-transform";
+import { resolveWorkDescription } from "@/lib/fanza-comment";
 import {
   DEMO_CIRCLE,
   DEMO_WORKS,
@@ -42,6 +44,7 @@ import {
   RELATED_BY_TAG_FETCH,
 } from "@/lib/related-by-tag";
 import type { Circle, DataSource, MediaType, Work } from "@/lib/types";
+import { cache } from "react";
 
 function parseResponse(json: unknown): Work[] {
   const data = json as DmmItemListResponse;
@@ -55,15 +58,30 @@ function sortByDateDesc(works: Work[]): Work[] {
 
 async function enrichWorkFromDmm(work: Work, id: string): Promise<Work> {
   if (!hasDmmCredentials()) {
-    return work;
+    if (isUsefulWorkDescription(work.description)) return work;
+    const description = await resolveWorkDescription({
+      workId: id,
+      dbDescription: work.description,
+    });
+    return description ? { ...work, description } : work;
   }
 
   try {
     const json = await fetchItemByContentId(id);
     const dmmWork = parseResponse(json)[0];
     if (!dmmWork) {
-      return work;
+      const description = await resolveWorkDescription({
+        workId: id,
+        dbDescription: work.description,
+      });
+      return description ? { ...work, description } : work;
     }
+
+    const description = await resolveWorkDescription({
+      workId: id,
+      dbDescription: work.description,
+      apiDescription: dmmWork.description,
+    });
 
     return {
       ...work,
@@ -74,10 +92,14 @@ async function enrichWorkFromDmm(work: Work, id: string): Promise<Work> {
       affiliateUrl: work.affiliateUrl ?? dmmWork.affiliateUrl,
       price: work.price || dmmWork.price,
       tags: work.tags.length > 0 ? work.tags : dmmWork.tags,
-      description: work.description ?? dmmWork.description,
+      description,
     };
   } catch {
-    return work;
+    const description = await resolveWorkDescription({
+      workId: id,
+      dbDescription: work.description,
+    });
+    return description ? { ...work, description } : work;
   }
 }
 
@@ -331,7 +353,7 @@ export async function searchWorks(
   return { ...paginate(works, limit), works, source: "mock" };
 }
 
-export async function getWork(id: string): Promise<{
+export const getWork = cache(async function getWork(id: string): Promise<{
   work: Work | null;
   relatedWorks: Work[];
   relatedByTagWorks: Work[];
@@ -373,12 +395,21 @@ export async function getWork(id: string): Promise<{
       const work = works[0] ?? null;
 
       if (work) {
+        const description = await resolveWorkDescription({
+          workId: id,
+          apiDescription: work.description,
+          persist: false,
+        });
+        const enrichedWork = description
+          ? { ...work, description }
+          : work;
+
         let related: Work[] = [];
 
-        if (/^\d+$/.test(work.circleId)) {
+        if (/^\d+$/.test(enrichedWork.circleId)) {
           try {
             const [makerItems, gameItems] = await Promise.allSettled([
-              fetchItemsByMaker(work.circleId, 12),
+              fetchItemsByMaker(enrichedWork.circleId, 12),
               fetchDoujinGameItems(12, 1),
             ]);
 
@@ -389,21 +420,21 @@ export async function getWork(id: string): Promise<{
             const gameWorks =
               gameItems.status === "fulfilled"
                 ? parseResponse(gameItems.value).filter(
-                    (w) => w.circleId === work.circleId
+                    (w) => w.circleId === enrichedWork.circleId
                   )
                 : [];
 
             related = dedupeWorks(
               sortByDateDesc([...makerWorks, ...gameWorks])
-            ).filter((w) => w.id !== work.id);
+            ).filter((w) => w.id !== enrichedWork.id);
           } catch {
             related = [];
           }
         }
 
-        const systemTags = pickSystemTags(work.tags);
+        const systemTags = pickSystemTags(enrichedWork.tags);
         return {
-          work,
+          work: enrichedWork,
           relatedWorks: related.slice(0, 6),
           relatedByTagWorks: [],
           relatedByTagLabels: systemTags,
@@ -443,7 +474,7 @@ export async function getWork(id: string): Promise<{
     relatedByTagLabels: [],
     source: "mock",
   };
-}
+});
 
 export async function getCirclePage(circleId = "demo"): Promise<{
   circle: Circle;

@@ -20,6 +20,12 @@ export function buildWorkSeoTitle(work: Work): string {
 
 /** 作品ページの description（検索向け・160字前後） */
 export function buildWorkSeoDescription(work: Work): string {
+  // 独自の作品コメントがあれば優先（薄い定型文より質が高い）
+  if (work.description && work.description.trim().length >= 40) {
+    const compact = work.description.replace(/\s+/g, " ").trim();
+    return compact.slice(0, 160);
+  }
+
   const media = MEDIA_NAMES[work.mediaType];
   const chunks: string[] = [
     `${work.circleName}の${media}「${work.title}」をCircleMapで紹介`,
