@@ -283,7 +283,8 @@ export async function dbGetCircle(circleId: string): Promise<Circle | null> {
     .eq("id", circleId)
     .maybeSingle();
 
-  if (error || !data) return null;
+  if (error) throw new Error("Circle database lookup failed", { cause: error });
+  if (!data) return null;
   return rowToCircle(data as CircleRow);
 }
 
@@ -297,7 +298,8 @@ export async function dbGetCircleWorks(circleId: string): Promise<Work[]> {
     .eq("circle_id", circleId)
     .order("date", { ascending: false });
 
-  if (error || !data) return [];
+  if (error) throw new Error("Circle works lookup failed", { cause: error });
+  if (!data) return [];
   return (data as WorkRow[]).map(rowToWork);
 }
 

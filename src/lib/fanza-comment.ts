@@ -125,27 +125,15 @@ export async function dbSaveWorkDescription(
   return { ok: true };
 }
 
-/**
- * API/DBに無いときFANZA詳細から補完し、有用ならDBへ保存する。
- */
+/** 閲覧リクエストでは保存済み/APIコメントだけを使う。外部取得はバックフィルで行う。 */
 export async function resolveWorkDescription(options: {
   workId: string;
   dbDescription?: string;
   apiDescription?: string;
   persist?: boolean;
 }): Promise<string | undefined> {
-  const { workId, dbDescription, apiDescription, persist = true } = options;
-
+  const { dbDescription, apiDescription } = options;
   if (isUsefulWorkDescription(dbDescription)) return dbDescription!.trim();
   if (isUsefulWorkDescription(apiDescription)) return apiDescription!.trim();
-
-  const scraped = await fetchFanzaWorkComment(workId);
-  if (!scraped) {
-    return dbDescription?.trim() || apiDescription?.trim() || undefined;
-  }
-
-  if (persist) {
-    await dbSaveWorkDescription(workId, scraped);
-  }
-  return scraped;
+  return dbDescription?.trim() || apiDescription?.trim() || undefined;
 }

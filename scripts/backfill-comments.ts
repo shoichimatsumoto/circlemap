@@ -55,6 +55,7 @@ async function main() {
 
   let ok = 0;
   let skip = 0;
+  let failed = 0;
   for (const id of ids) {
     const comment = await fetchFanzaWorkComment(id);
     if (!comment) {
@@ -69,10 +70,11 @@ async function main() {
       }`
     );
     if (saved.ok) ok++;
-    else skip++;
+    else failed++;
     await new Promise((r) => setTimeout(r, 800));
   }
-  console.log(`done ok=${ok} skip=${skip}`);
+  console.log(`done ok=${ok} skip=${skip} failed=${failed}`);
+  if (failed > 0) process.exitCode = 1;
 }
 
 main().catch((error) => {

@@ -482,6 +482,7 @@ export async function getCirclePage(circleId = "demo"): Promise<{
   featured: Work;
   source: DataSource;
 } | null> {
+  let lookupFailed = false;
   const isDemo = circleId === "demo" || circleId === DEMO_CIRCLE.id;
 
   try {
@@ -514,6 +515,7 @@ export async function getCirclePage(circleId = "demo"): Promise<{
       }
     }
   } catch (error) {
+    lookupFailed = true;
     console.error("[CircleMap] Supabase circle fetch failed:", error);
   }
 
@@ -535,6 +537,18 @@ export async function getCirclePage(circleId = "demo"): Promise<{
         fetchItemsByMaker(circleId, 40),
         fetchDoujinGameItems(40, 1),
       ]);
+
+      for (const result of [makerItems, gameItems]) {
+        if (result.status === "rejected") {
+          lookupFailed = true;
+        } else {
+          const response = result.value as DmmItemListResponse;
+          if (Number(response?.result?.status) !== 200 ||
+              !Array.isArray(response?.result?.items)) {
+            throw new Error("Invalid DMM circle response");
+          }
+        }
+      }
 
       const allWorks = dedupeWorks(
         sortByDateDesc([
@@ -561,6 +575,7 @@ export async function getCirclePage(circleId = "demo"): Promise<{
         }
       }
     } catch (error) {
+      lookupFailed = true;
       console.error("[CircleMap] DMM circle fetch failed:", error);
     }
   }
@@ -615,6 +630,9 @@ export async function getCirclePage(circleId = "demo"): Promise<{
     };
   }
 
+  if (lookupFailed) {
+    throw new Error("Circle data temporarily unavailable");
+  }
   return null;
 }
 

@@ -12,8 +12,7 @@ export const dynamic = "force-dynamic";
 function isAuthorized(request: Request): boolean {
   const syncSecret = process.env.SYNC_SECRET;
   if (!syncSecret) return false;
-  const url = new URL(request.url);
-  return url.searchParams.get("secret") === syncSecret;
+  return request.headers.get("authorization") === `Bearer ${syncSecret}`;
 }
 
 /** 作品コメント補完の診断・手動バックフィル */
