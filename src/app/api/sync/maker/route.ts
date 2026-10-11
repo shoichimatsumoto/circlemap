@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { runSyncAndAssignNewManga } from "@/lib/new-manga-seo-ab-register";
 import { checkSyncAuth, checkSyncAuthValue } from "@/lib/sync-auth";
 import { syncMakerToSupabase } from "@/lib/supabase-sync";
 
@@ -14,7 +15,9 @@ async function runSync(makerId: string) {
   }
 
   try {
-    const result = await syncMakerToSupabase(makerId);
+    const result = await runSyncAndAssignNewManga(() =>
+      syncMakerToSupabase(makerId)
+    );
     return NextResponse.json({
       ok: true,
       message: `${result.circleName} の同期完了`,
