@@ -14,38 +14,23 @@ function mediaBreakdown(circle: Circle): string {
 
 /** 作品ページの title（layout の template で | CircleMap が付く） */
 export function buildWorkSeoTitle(work: Work): string {
-  // FANZA直と並んだとき「サークルまとめ」だと分かるようにする
-  return `${work.title}｜${work.circleName}の作品まとめ（${MEDIA_NAMES[work.mediaType]}）`;
+  // キーワード詰め込みせず、分析・関連の独自性を示す
+  return `${work.title}｜サークル情報・関連作品・価格比較`;
 }
 
-/** 作品ページの description（検索向け・160字前後） */
+/** 作品ページの description（検索向け・160字前後）。FANZA説明の転載はしない */
 export function buildWorkSeoDescription(work: Work): string {
-  // 独自の作品コメントがあれば優先（薄い定型文より質が高い）
-  if (work.description && work.description.trim().length >= 40) {
-    const compact = work.description.replace(/\s+/g, " ").trim();
-    return compact.slice(0, 160);
-  }
-
   const media = MEDIA_NAMES[work.mediaType];
-  const chunks: string[] = [
-    `${work.circleName}の${media}「${work.title}」をCircleMapで紹介`,
-    "FANZAでは別フロアに散らばる同サークルの漫画・CG・音声・ゲーム・AIを1ページで横断できます",
-  ];
-
-  if (work.price > 0) {
-    chunks.push(`${formatPrice(work.price)}（税込）`);
-  }
-  if (work.date && work.date !== "—") {
-    chunks.push(`${work.date}発売`);
-  }
-
   const tags = work.tags
     .filter((t) => !["男性向け", "成人向け", "専売", "同人"].includes(t))
     .slice(0, 3);
-  if (tags.length > 0) {
-    chunks.push(tags.join("、"));
-  }
-
+  const chunks: string[] = [
+    `「${work.title}」の作品情報、価格、サークル「${work.circleName}」内での位置、関連作品、主要ジャンルなどをCircleMap独自データから紹介`,
+  ];
+  chunks.push(`${media}`);
+  if (work.price > 0) chunks.push(`${formatPrice(work.price)}（税込）`);
+  if (work.date && work.date !== "—") chunks.push(`${work.date}発売`);
+  if (tags.length > 0) chunks.push(tags.join("、"));
   return chunks.join("。").slice(0, 160);
 }
 

@@ -43,8 +43,30 @@ import {
   pickSystemTags,
   RELATED_BY_TAG_FETCH,
 } from "@/lib/related-by-tag";
+import { getNewMangaSeoAbGroup } from "@/lib/new-manga-seo-ab-group";
+import type { NewMangaSeoAbGroup } from "@/lib/new-manga-seo-ab";
+import { shouldShowAnalysisSection } from "@/lib/new-manga-seo-ab-seo";
+import { shouldShowWorkAnalysis } from "@/lib/seo-pilot";
+import {
+  buildWorkAnalysisFromCircleWorks,
+  getWorkAnalysis,
+  type WorkAnalysis,
+} from "@/lib/work-analysis";
 import type { Circle, DataSource, MediaType, Work } from "@/lib/types";
 import { cache } from "react";
+
+async function readAbGroup(workId: string): Promise<NewMangaSeoAbGroup | null> {
+  try {
+    return await getNewMangaSeoAbGroup(workId);
+  } catch (error) {
+    console.error(
+      "[new-manga-seo-ab] グループ取得に失敗したため通常表示にします",
+      workId,
+      error
+    );
+    return null;
+  }
+}
 
 function parseResponse(json: unknown): Work[] {
   const data = json as DmmItemListResponse;
@@ -358,6 +380,8 @@ export const getWork = cache(async function getWork(id: string): Promise<{
   relatedWorks: Work[];
   relatedByTagWorks: Work[];
   relatedByTagLabels: string[];
+  analysis: WorkAnalysis | null;
+  abGroup: NewMangaSeoAbGroup | null;
   source: DataSource;
 }> {
   try {
@@ -365,7 +389,8 @@ export const getWork = cache(async function getWork(id: string): Promise<{
     if (work) {
       const enriched = await enrichWorkFromDmm(work, id);
       const systemTags = pickSystemTags(enriched.tags);
-      const [relatedWorks, relatedRaw] = await Promise.all([
+      const legacyPilot = shouldShowWorkAnalysis(enriched.id);
+      const [relatedWorks, relatedRaw, abGroup, legacyAnalysis] = await Promise.all([
         dbGetRelatedWorks(enriched.circleId, enriched.id, 6),
         systemTags.length > 0
           ? dbGetRelatedByTags(
@@ -375,12 +400,19 @@ export const getWork = cache(async function getWork(id: string): Promise<{
               RELATED_BY_TAG_FETCH
             )
           : Promise.resolve([]),
+        readAbGroup(enriched.id),
+        legacyPilot ? getWorkAnalysis(enriched) : Promise.resolve(null),
       ]);
+      const analysis =
+        legacyAnalysis ??
+        (abGroup === "A" ? await getWorkAnalysis(enriched) : null);
       return {
         work: enriched,
         relatedWorks,
         relatedByTagWorks: finalizeRelatedByTagWorks(relatedRaw),
         relatedByTagLabels: systemTags,
+        analysis,
+        abGroup,
         source: "supabase",
       };
     }
@@ -433,11 +465,27 @@ export const getWork = cache(async function getWork(id: string): Promise<{
         }
 
         const systemTags = pickSystemTags(enrichedWork.tags);
+        const abGroup = await readAbGroup(enrichedWork.id);
+        const legacyPilot = shouldShowWorkAnalysis(enrichedWork.id);
+        const analysis = legacyPilot
+          ? buildWorkAnalysisFromCircleWorks(enrichedWork, [
+              enrichedWork,
+              ...related,
+            ])
+          : abGroup === "A"
+            ? (await getWorkAnalysis(enrichedWork)) ??
+              buildWorkAnalysisFromCircleWorks(enrichedWork, [
+                enrichedWork,
+                ...related,
+              ])
+            : null;
         return {
           work: enrichedWork,
           relatedWorks: related.slice(0, 6),
           relatedByTagWorks: [],
           relatedByTagLabels: systemTags,
+          analysis,
+          abGroup,
           source: "dmm",
         };
       }
@@ -456,6 +504,16 @@ export const getWork = cache(async function getWork(id: string): Promise<{
         w.thumbnailUrl &&
         systemTags.some((t) => w.tags.includes(t))
     );
+    const circlePeers = DEMO_WORKS.filter(
+      (w) => w.circleId === mockWork.circleId
+    );
+    const abGroup = await readAbGroup(mockWork.id);
+    const analysis = shouldShowAnalysisSection(
+      abGroup,
+      shouldShowWorkAnalysis(mockWork.id)
+    )
+      ? buildWorkAnalysisFromCircleWorks(mockWork, circlePeers)
+      : null;
     return {
       work: mockWork,
       relatedWorks: DEMO_WORKS.filter(
@@ -463,6 +521,8 @@ export const getWork = cache(async function getWork(id: string): Promise<{
       ).slice(0, 3),
       relatedByTagWorks: finalizeRelatedByTagWorks(relatedByTagRaw),
       relatedByTagLabels: systemTags,
+      analysis,
+      abGroup,
       source: "mock",
     };
   }
@@ -472,6 +532,8 @@ export const getWork = cache(async function getWork(id: string): Promise<{
     relatedWorks: [],
     relatedByTagWorks: [],
     relatedByTagLabels: [],
+    analysis: null,
+    abGroup: null,
     source: "mock",
   };
 });

@@ -8,7 +8,8 @@ import { PageShell } from "@/components/PageShell";
 import { WorkJsonLd } from "@/components/WorkJsonLd";
 import { WorkPageClient } from "@/components/WorkPageClient";
 import { getWork } from "@/lib/data";
-import { buildWorkSeoDescription, buildWorkSeoTitle } from "@/lib/seo";
+import { resolveWorkPageSeo } from "@/lib/new-manga-seo-ab-seo";
+import { shouldShowWorkAnalysis } from "@/lib/seo-pilot";
 import { getSiteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -17,14 +18,18 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const { work } = await getWork(id);
+  const { work, analysis, abGroup } = await getWork(id);
 
   if (!work) {
     return { title: "作品が見つかりません" };
   }
 
-  const title = buildWorkSeoTitle(work);
-  const description = buildWorkSeoDescription(work);
+  const { title, description } = resolveWorkPageSeo(
+    work,
+    abGroup,
+    analysis,
+    shouldShowWorkAnalysis(work.id)
+  );
   const pageUrl = `${getSiteUrl()}/work/${work.id}`;
 
   return {
@@ -49,14 +54,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function WorkPage({ params }: Props) {
   const { id } = await params;
-  const { work, relatedWorks, relatedByTagWorks, relatedByTagLabels, source } =
-    await getWork(id);
+  const {
+    work,
+    relatedWorks,
+    relatedByTagWorks,
+    relatedByTagLabels,
+    analysis,
+    abGroup,
+    source,
+  } = await getWork(id);
 
   if (!work) notFound();
 
+  const seo = resolveWorkPageSeo(
+    work,
+    abGroup,
+    analysis,
+    shouldShowWorkAnalysis(work.id)
+  );
+
   return (
     <PageShell active="work">
-      <WorkJsonLd work={work} />
+      <WorkJsonLd
+        work={work}
+        description={seo.enhanced ? seo.description : undefined}
+      />
       <DataModeBanner source={source} />
       <div className="feed-wrap">
         <nav className="breadcrumb">
@@ -71,6 +93,7 @@ export default async function WorkPage({ params }: Props) {
           relatedWorks={relatedWorks}
           relatedByTagWorks={relatedByTagWorks}
           relatedByTagLabels={relatedByTagLabels}
+          analysis={analysis}
           doujinLogBanner={
             <DoujinLogArticleBanner workId={work.id} circleId={work.circleId} />
           }

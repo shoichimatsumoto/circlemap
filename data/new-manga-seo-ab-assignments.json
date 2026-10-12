@@ -1,0 +1,327 @@
+{
+  "experiment": "new-manga-seo-ab",
+  "note": "A/B設計の参照。order 1〜60、奇数A・偶数B。本番の割当状態（workId / assignedAt）の正本は Supabase の new_manga_seo_ab_assignments。このファイルは本番実行では書き換えない。",
+  "experimentStartedAt": "2026-10-11T23:41:14+09:00",
+  "eligibility": {
+    "mediaType": "manga",
+    "registeredAfter": "2026-10-11T23:41:14+09:00",
+    "excludeExisting": true,
+    "limit": 60
+  },
+  "rule": {
+    "by": "registrationOrder",
+    "sequence": [
+      "A",
+      "B"
+    ],
+    "startGroup": "A",
+    "size": 60
+  },
+  "counts": {
+    "A": 30,
+    "B": 30,
+    "assignedWorkIds": 0
+  },
+  "assignments": [
+    {
+      "workId": null,
+      "group": "A",
+      "order": 1
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 2
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 3
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 4
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 5
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 6
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 7
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 8
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 9
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 10
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 11
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 12
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 13
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 14
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 15
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 16
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 17
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 18
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 19
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 20
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 21
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 22
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 23
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 24
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 25
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 26
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 27
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 28
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 29
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 30
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 31
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 32
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 33
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 34
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 35
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 36
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 37
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 38
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 39
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 40
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 41
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 42
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 43
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 44
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 45
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 46
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 47
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 48
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 49
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 50
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 51
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 52
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 53
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 54
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 55
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 56
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 57
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 58
+    },
+    {
+      "workId": null,
+      "group": "A",
+      "order": 59
+    },
+    {
+      "workId": null,
+      "group": "B",
+      "order": 60
+    }
+  ]
+}

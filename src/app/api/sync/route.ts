@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { runSyncAndAssignNewManga } from "@/lib/new-manga-seo-ab-register";
 import { checkSyncAuth } from "@/lib/sync-auth";
 import { syncDmmToSupabase } from "@/lib/supabase-sync";
 
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await syncDmmToSupabase();
+    const result = await runSyncAndAssignNewManga(() => syncDmmToSupabase());
     return NextResponse.json({
       ok: true,
       message: "同期完了",

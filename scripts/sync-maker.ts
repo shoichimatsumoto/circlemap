@@ -7,6 +7,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { runSyncAndAssignNewManga } from "../src/lib/new-manga-seo-ab-register";
 import { syncMakerToSupabase } from "../src/lib/supabase-sync";
 
 const ROOT = path.join(import.meta.dirname, "..");
@@ -39,7 +40,7 @@ if (!makerId || !/^\d+$/.test(makerId)) {
 
 console.log(`\n📡 maker ${makerId} を DMM → Supabase に同期中...\n`);
 
-syncMakerToSupabase(makerId)
+runSyncAndAssignNewManga(() => syncMakerToSupabase(makerId))
   .then((result) => {
     console.log("✅ 同期完了");
     console.log(`   サークル: ${result.circleName}`);
