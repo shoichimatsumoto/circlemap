@@ -1,0 +1,4 @@
+{
+  "note": "開発・ローカル確認用。本番（NODE_ENV=production かつ SEO_ANALYSIS_ALLOW_DEV≠1）では使わない。",
+  "workIds": ["d_761881"]
+}

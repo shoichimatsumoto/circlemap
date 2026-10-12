@@ -3,9 +3,11 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { track } from "@vercel/analytics/react";
+import { WorkAnalysisSection } from "@/components/WorkAnalysisSection";
 import { WorkCard } from "@/components/WorkCard";
 import { WorkSampleGallery } from "@/components/WorkSampleGallery";
 import { relatedByTagHeading } from "@/lib/related-by-tag";
+import type { WorkAnalysis } from "@/lib/work-analysis";
 import {
   formatPrice,
   formatWorkMeta,
@@ -19,6 +21,7 @@ type Props = {
   relatedWorks: Work[];
   relatedByTagWorks?: Work[];
   relatedByTagLabels?: string[];
+  analysis?: WorkAnalysis | null;
   /** 購入CTAより下に出す（同人ログなど） */
   doujinLogBanner?: ReactNode;
 };
@@ -33,6 +36,7 @@ export function WorkPageClient({
   relatedWorks,
   relatedByTagWorks = [],
   relatedByTagLabels = [],
+  analysis = null,
   doujinLogBanner,
 }: Props) {
   const [playing, setPlaying] = useState(false);
@@ -168,22 +172,9 @@ export function WorkPageClient({
             )}
           </div>
         </div>
-
-        {isUsefulWorkDescription(work.description) && (
-          <section className="work-description">
-            <h2>作品コメント</h2>
-            <p className="work-comment">{work.description}</p>
-            <dl className="info-list">
-              <dt>サークル</dt>
-              <dd>
-                <Link href={`/circle?id=${work.circleId}`}>{work.circleName}</Link>
-              </dd>
-              <dt>価格</dt>
-              <dd>{formatPrice(work.price)}（税込）</dd>
-            </dl>
-          </section>
-        )}
       </article>
+
+      {analysis && <WorkAnalysisSection analysis={analysis} />}
 
       {doujinLogBanner}
 
@@ -229,6 +220,25 @@ export function WorkPageClient({
               <WorkCard key={w.id} work={w} />
             ))}
           </div>
+        </section>
+      )}
+
+      {/* FANZA由来コメントは補足。CircleMap分析・関連より下位 */}
+      {isUsefulWorkDescription(work.description) && (
+        <section className="work-description work-description-supplement">
+          <h2>作品公式コメント</h2>
+          <p className="work-description-note">
+            FANZAに掲載されている紹介文です。CircleMapの独自分析ではありません。
+          </p>
+          <p className="work-comment">{work.description}</p>
+          <dl className="info-list">
+            <dt>サークル</dt>
+            <dd>
+              <Link href={`/circle?id=${work.circleId}`}>{work.circleName}</Link>
+            </dd>
+            <dt>価格</dt>
+            <dd>{formatPrice(work.price)}（税込）</dd>
+          </dl>
         </section>
       )}
 
