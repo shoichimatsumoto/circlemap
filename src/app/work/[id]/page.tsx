@@ -11,6 +11,7 @@ import { getWork } from "@/lib/data";
 import { resolveWorkPageSeo } from "@/lib/new-manga-seo-ab-seo";
 import { shouldShowWorkAnalysis } from "@/lib/seo-pilot";
 import { getSiteUrl } from "@/lib/site";
+import { buildWorkShareMetadata } from "@/lib/work-share";
 
 export const dynamic = "force-dynamic";
 
@@ -31,24 +32,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     shouldShowWorkAnalysis(work.id)
   );
   const pageUrl = `${getSiteUrl()}/work/${work.id}`;
+  const share = buildWorkShareMetadata(work, pageUrl);
 
   return {
     title,
     description,
     alternates: { canonical: `/work/${work.id}` },
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      url: pageUrl,
-      images: work.thumbnailUrl ? [{ url: work.thumbnailUrl }] : undefined,
-    },
-    twitter: {
-      card: work.thumbnailUrl ? "summary_large_image" : "summary",
-      title,
-      description,
-      images: work.thumbnailUrl ? [work.thumbnailUrl] : undefined,
-    },
+    openGraph: share.openGraph,
+    twitter: share.twitter,
   };
 }
 
